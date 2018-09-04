@@ -1,28 +1,88 @@
-<mvc:View controllerName="com.minesnf.ui5client.controller.View1" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc"
-	displayBlock="true" xmlns="sap.m">
+<mvc:View 
+	controllerName="com.minesnf.ui5client.controller.View1" 
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:l="sap.ui.layout"
+	xmlns="sap.m"
+	displayBlock="true">
 	<App id="idAppControl">
-		<pages>
-			<Page title="{i18n>title}" >
-				<subHeader>
-					<Toolbar>
-						<Input id="input" value="{/msg}" />
-						<Button text="{i18n>sendMsg}" press="sendMsg" />
-					</Toolbar>
-				</subHeader>
-				<content>
-					<List items="{ path:'/evts', sorter:{path:'ts',descending:true} }">
-						<ObjectListItem title="{func}">
-							<attributes>
-								<ObjectAttribute text="{dst}" />
-								<ObjectAttribute text="{contextId}" />
-								<ObjectAttribute text="{usr}" />
-								<ObjectAttribute text="{partyId}" />
-								<ObjectAttribute text="{argTxt}" />
+		<pages>	
+			<Carousel class="sapUiContentPadding" height="100%">
+				<pages>
+
+					<l:VerticalLayout width="100%" height="100%"> 
+						<FlexBox height="600px" alignItems="Center" justifyContent="Center">
+							<items>
+								<l:VerticalLayout width="100%" height="100%"> 
+									<Button width="100%" text="Small" type="Emphasized" press="startRank">
+										<customData> <core:CustomData key="boardSize" value="s" /> </customData>
+									</Button>
+									<Button width="100%" text="Medium" type="Reject" press="startRank">
+										<customData> <core:CustomData key="boardSize" value="m" /> </customData>
+									</Button>
+									<Button width="100%" text="Big" type="Accept" press="startRank">
+										<customData> <core:CustomData key="boardSize" value="b" /> </customData>
+									</Button>
+								</l:VerticalLayout>
+							</items>
+						</FlexBox>
+					</l:VerticalLayout>
+									
+					<l:VerticalLayout width="100%"> 
+						<Toolbar>
+							<Input id="input" value="{/msg}" />
+							<Button text="{i18n>sendMsg}" press="sendMsg" />
+						</Toolbar>
+						<List items="{ path:'/evts', sorter:{path:'ts',descending:true} }">
+							<ObjectListItem title="{func}">
+								<attributes>
+									<ObjectAttribute text="{dst}" />
+									<ObjectAttribute text="{contextId}" />
+									<ObjectAttribute text="{usr}" />
+									<ObjectAttribute text="{partyId}" />
+									<ObjectAttribute text="{argTxt}" />
+									</attributes>
+							</ObjectListItem>
+						</List>
+					</l:VerticalLayout>
+
+					<l:VerticalLayout width="100%"> 
+						<Toolbar>
+							<ToolbarSpacer />
+							<Title text="{i18n>userTitle}" />
+							<ToolbarSpacer />
+						</Toolbar>					
+						<List items="{ path:'/players'}">
+							<ObjectListItem title="{name}">
+								<attributes>
+									<ObjectAttribute text="{i18n>userLevel}: {level}" />
+									<ObjectAttribute text="{i18n>userState}: {state}" />
+									</attributes>
+							</ObjectListItem>
+						</List>
+					</l:VerticalLayout>
+
+					<l:VerticalLayout width="100%">
+						<Toolbar>
+							<ToolbarSpacer />
+							<Title text="{i18n>partyTitle}" />
+							<ToolbarSpacer />
+						</Toolbar>						
+						<List items="{ path:'/parties'}">
+							<ObjectListItem title="{name}">
+								<attributes>
+									<ObjectAttribute text="{i18n>partyLeader}: {leader}" />
+									<ObjectAttribute text="{i18n>partyMode}: {mode}" />
+									<ObjectAttribute text="{i18n>partyMaxPlayers}: {maxPlayers}" />
+									<ObjectAttribute text="{i18n>partyLevels}: {minLevel} - {maxLevel}" />
 								</attributes>
-						</ObjectListItem>
-					</List>
-				</content>
-			</Page>
+							</ObjectListItem>
+						</List>
+					</l:VerticalLayout>
+					
+				</pages>
+			</Carousel>
 		</pages>
 	</App>
 </mvc:View>
