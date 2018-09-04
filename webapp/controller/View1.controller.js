@@ -12,6 +12,7 @@ sap.ui.define([
 			var mdl=new JSONModel({evts:{},msg:''});
 			this.getView().setModel(mdl);
 			var self=this;
+			if (!window.now) window.now = nowInitialize("http://minesnf.com", {});
 			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
 			window.setTimeout(function(){ self.processCommand=window.now.processCommand; },500);
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
