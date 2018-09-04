@@ -28,7 +28,8 @@
 							</items>
 						</FlexBox>
 					</l:VerticalLayout>
-									
+
+					<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">				
 					<l:VerticalLayout width="100%"> 
 						<Toolbar>
 							<Input id="input" value="{/msg}" />
@@ -46,6 +47,7 @@
 							</ObjectListItem>
 						</List>
 					</l:VerticalLayout>
+					</ScrollContainer>
 
 					<l:VerticalLayout width="100%"> 
 						<Toolbar>
@@ -80,7 +82,7 @@
 							</ObjectListItem>
 						</List>
 					</l:VerticalLayout>
-					
+
 				</pages>
 			</Carousel>
 		</pages>
