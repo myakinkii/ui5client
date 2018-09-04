@@ -1,0 +1,28 @@
+<mvc:View controllerName="com.minesnf.ui5client.controller.View1" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc"
+	displayBlock="true" xmlns="sap.m">
+	<App id="idAppControl">
+		<pages>
+			<Page title="{i18n>title}" >
+				<subHeader>
+					<Toolbar>
+						<Input id="input" value="{/msg}" />
+						<Button text="{i18n>sendMsg}" press="sendMsg" />
+					</Toolbar>
+				</subHeader>
+				<content>
+					<List items="{ path:'/evts', sorter:{path:'ts',descending:true} }">
+						<ObjectListItem title="{func}">
+							<attributes>
+								<ObjectAttribute text="{dst}" />
+								<ObjectAttribute text="{contextId}" />
+								<ObjectAttribute text="{usr}" />
+								<ObjectAttribute text="{partyId}" />
+								<ObjectAttribute text="{argTxt}" />
+								</attributes>
+						</ObjectListItem>
+					</List>
+				</content>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>
