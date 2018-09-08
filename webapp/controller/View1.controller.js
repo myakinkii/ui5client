@@ -2,9 +2,9 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
-	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button",
+	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
 	"sap/m/MessageToast"
-], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,MessageToast) {
+], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,ToggleButton,MessageToast) {
 	"use strict";
 
 	var CELL_SIZE=24;
@@ -12,6 +12,7 @@ sap.ui.define([
 	sap.ui.core.Control.extend("MyCell", {
 		metadata : {
 			properties : {
+				"altKeyMode":"boolean",
 				"row":"int",
 				"col":"int",
 				"val" : "string",
@@ -49,6 +50,10 @@ sap.ui.define([
 
 		onclick : function(evt) {
 			this.fireOpenCell();
+		},
+
+		onmouseover : function(e) {
+			if ( this.getAltKeyMode() && !e.altKey) this.fireOpenCell();
 		}
 	});
 
@@ -95,7 +100,7 @@ sap.ui.define([
 		},
 		
 		onInit:function(){
-			var mdl=new JSONModel({evts:{},msg:'',auth:{}});
+			var mdl=new JSONModel({evts:{},msg:'',auth:{},altKeyMode:false});
 			this.getView().setModel(mdl);
 			var self=this;
 			if (!window.now) window.now = nowInitialize("http://minesnf.com", {});
@@ -184,7 +189,7 @@ sap.ui.define([
 			var rows=e.arg.r;
 			var width=50+(CELL_SIZE+4)*cols+'px';
 			var title=e.arg.boardId+" ("+cols+"x"+rows+")";
-			var mdlData={};
+			var mdlData={altKeyMode:false};
 			var cells=[],coord;
 			for (var r=1;r<=rows;r++) {
 				for (var c=1;c<=cols;c++) {
@@ -192,6 +197,7 @@ sap.ui.define([
 					// mdlData[coord]=c;
 					mdlData[coord]="";
 					cells.push(new MyCell({
+						altKeyMode:"{/altKeyMode}",
 						row:r, col:c, 
 						val:"{board>/"+coord+"}",
 						openCell:function(e){ 
@@ -216,7 +222,12 @@ sap.ui.define([
 							]}) ]
 						})
 					],
-					beginButton: new Button({
+					beginButton: new ToggleButton({
+						visible:"{device>/system/desktop}",
+						text: '{i18n>altKeyMode}',
+						pressed:"{/altKeyMode}"
+					}),
+					endButton: new Button({
 						text: '{i18n>genericClose}',
 						press: [this.quitGame,this]
 					}),
