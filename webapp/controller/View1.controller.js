@@ -204,7 +204,7 @@ sap.ui.define([
 			}
 			if (!this.pressDialog) {
 				this.pressDialog = new Dialog({
-					title: title,
+					title: title+", {i18n>bestTime}:{/bestTime}s",
 					contentWidth:"100%",
 					content: [
 						new FlexBox({ width:"100%", alignItems:"Center", justifyContent:"Center",
@@ -218,7 +218,7 @@ sap.ui.define([
 					],
 					beginButton: new Button({
 						text: '{i18n>genericClose}',
-						press: function () { self.pressDialog.close(); self.processCommand("/quit"); }
+						press: [this.quitGame,this]
 					}),
 					afterClose:function(e){ 
 						e.getSource().destroy(); 
@@ -229,8 +229,13 @@ sap.ui.define([
 			}
 			var boardMdl=new JSONModel(mdlData);
 			this.pressDialog.setModel(boardMdl,"board");
-			this.pressDialog.setTitle(title);
 			this.pressDialog.open();
+		},
+
+		quitGame:function(){
+			this.getView().getModel().setProperty('/bestTime','');
+			this.pressDialog.close(); 
+			this.processCommand("/quit");
 		},
 
 		onCellValues:function(e){
@@ -251,11 +256,12 @@ sap.ui.define([
 		onShowResultRank:function(e){
 			var msgs=[
 				'time:'+ e.arg.time+'s',
-				'wins/loss ration:'+e.arg.winPercentage,
+				'wins/loss ratio:'+e.arg.winPercentage,
 				'won:'+e.arg.won,
 				'streak:'+e.arg.streak
 			]
 			this.showToast(msgs.join('\n'));
+			this.getView().getModel().setProperty('/bestTime',e.arg.bestTime);
 		}
 
 	});
