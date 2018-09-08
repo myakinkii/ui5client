@@ -2,8 +2,9 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
-	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button"
-], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button) {
+	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button",
+	"sap/m/MessageToast"
+], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,MessageToast) {
 	"use strict";
 
 	var CELL_SIZE=24;
@@ -83,6 +84,15 @@ sap.ui.define([
 	});	
 
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
+
+		showToast: function(text, time) {
+			MessageToast.show(text, {
+				autoClose: true,
+				width: '50%',
+				duration: time || 1000,
+				at: sap.ui.core.Popup.Dock.CenterCenter
+			});
+		},
 		
 		onInit:function(){
 			var mdl=new JSONModel({evts:{},msg:'',auth:{}});
@@ -109,12 +119,16 @@ sap.ui.define([
 			e.argTxt=JSON.stringify(e.arg); 
 			mdl.setProperty('/evts/'+e.ts,e);
 			if (this['on'+e.func]) this['on'+e.func](e);
-			console.log(e);
+			// console.log(e);
 		},
 
 		onAuthorize:function(e){
 			this.getView().getModel().setProperty('/auth',e.arg);
-			console.log(e.arg.profile);
+		},
+
+		onAuthFail:function(e){
+			var msg=e.arg;
+			this.showToast(msg);
 		},
 
 		onReauth:function(){
@@ -150,20 +164,17 @@ sap.ui.define([
 		},
 
 		onUpdateParties:function(e){
-			console.log("parties",e.arg);
 			this.getView().getModel().setProperty('/parties',e.arg);
 		},
 
 		onUpdatePlayers:function(e){
 			var players=[];
 			for (var p in e.arg) { e.arg[p].name=p; players.push(e.arg[p]); }
-			console.log("players",players);
 			this.getView().getModel().setProperty('/players',players);
 		},
 
 		startRank:function(e){
 			var boardSize=e.getSource().data().boardSize;
-			console.log(boardSize);
 			this.processCommand('/create rank '+boardSize);
 		},
 
@@ -232,10 +243,19 @@ sap.ui.define([
 		onOpenLog:function(e){
 			if (this.pressDialog){
 				var mdl=this.pressDialog.getModel("board");
-				console.log(e)
 				for (var i in e.arg) for (var c in e.arg[i].cellsOpened) 
 					mdl.setProperty("/"+c,e.arg[i].cellsOpened[c]);
 			}
+		},
+
+		onShowResultRank:function(e){
+			var msgs=[
+				'time:'+ e.arg.time+'s',
+				'wins/loss ration:'+e.arg.winPercentage,
+				'won:'+e.arg.won,
+				'streak:'+e.arg.streak
+			]
+			this.showToast(msgs.join('\n'));
 		}
 
 	});

@@ -4,9 +4,7 @@
 	xmlns:core="sap.ui.core">
 	<Dialog title="{i18n>authDialogTitle}" >
         <content>
-            <Panel headerText="{i18n>authForm}" 
-                expandable="true" expanded="true" 
-                visible="{= ${/auth/type}==='temp' }">
+            <Panel expandable="true" expanded="true" visible="{= ${/auth/type}==='temp' }">
             <headerToolbar>
                 <Toolbar>
                     <Title text="{i18n>authForm}" />
@@ -22,23 +20,18 @@
                 </f:SimpleForm>
             </Panel>
             <Panel headerText="{i18n>authProfile}" expandable="true" expanded="true">
-
-
-    <List headerText="{i18n>authStats}">
-		<items>
-            <ObjectListItem title="{i18n>authScore}" number="{/auth/profile/score}" />
-			<ObjectListItem title="{i18n>authRank}" number="{/auth/profile/rankTotal}" >
-				<attributes>
-					<ObjectAttribute text="{i18n>authRankSmall}: {/auth/profile/rank/small}s" />
-					<ObjectAttribute text="{i18n>authRankMedium}: {/auth/profile/rank/medium}s" />
-                    <ObjectAttribute text="{i18n>authRankBig}: {/auth/profile/rank/big}s" />
-				</attributes>
-			</ObjectListItem>
-		</items>
-	</List>
-
-
-
+                <List headerText="{i18n>authStats}">
+                    <items>
+                        <ObjectListItem title="{i18n>authScore}" number="{/auth/profile/score}" />
+                        <ObjectListItem title="{i18n>authRank}" number="{/auth/profile/rankTotal}" >
+                            <attributes>
+                                <ObjectAttribute text="{i18n>authRankSmall}: {/auth/profile/rank/small}s" />
+                                <ObjectAttribute text="{i18n>authRankMedium}: {/auth/profile/rank/medium}s" />
+                                <ObjectAttribute text="{i18n>authRankBig}: {/auth/profile/rank/big}s" />
+                            </attributes>
+                        </ObjectListItem>
+                    </items>
+                </List>
             </Panel>
         </content>
         <endButton>
