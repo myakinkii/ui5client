@@ -85,15 +85,15 @@ sap.ui.define([
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
 		
 		onInit:function(){
-			var mdl=new JSONModel({evts:{},msg:''});
+			var mdl=new JSONModel({evts:{},msg:'',auth:{}});
 			this.getView().setModel(mdl);
 			var self=this;
 			if (!window.now) window.now = nowInitialize("http://minesnf.com", {});
 			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
 			window.setTimeout(function(){ self.processCommand=window.now.processCommand; },500);
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
-				if(e.which == 13){ self.sendMsg.call(self);
-			}});
+				if(e.which == 13) self.sendMsg.call(self);
+			});
 		},
 		
 		sendMsg:function(e){
@@ -110,6 +110,43 @@ sap.ui.define([
 			mdl.setProperty('/evts/'+e.ts,e);
 			if (this['on'+e.func]) this['on'+e.func](e);
 			console.log(e);
+		},
+
+		onAuthorize:function(e){
+			this.getView().getModel().setProperty('/auth',e.arg);
+			console.log(e.arg.profile);
+		},
+
+		onReauth:function(){
+			window.location.reload(true);
+		},
+
+		showAuthDlg:function(){
+			if (!this.authDlg) {
+				this.authDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.authDlg", this );
+				this.getView().addDependent(this.authDlg);
+			}
+			var authFn=function(e){ 
+				if(e.which == 13) this.authUser(); 
+			}.bind(this);
+			sap.ui.getCore().byId("authUser").attachBrowserEvent('keypress', authFn);
+			sap.ui.getCore().byId("authPwd").attachBrowserEvent('keypress', authFn);
+			var authMdl=new JSONModel({user:'',pwd:''});
+			this.authDlg.setModel(authMdl,"auth");
+			this.authDlg.open();
+		},
+
+		authUser:function(){
+			var auth=this.authDlg.getModel("auth").getData()
+			this.processCommand('/login '+auth.user+' '+auth.pwd);
+		},
+
+		logOff:function(){
+			this.processCommand('/logoff');
+		},
+
+		closeAuthDlg:function(){
+			this.authDlg.close();
 		},
 
 		onUpdateParties:function(e){
