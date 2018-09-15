@@ -28,23 +28,81 @@
 			<Carousel class="sapUiContentPadding" height="100%">
 				<pages>
 
-					<l:VerticalLayout width="100%" height="100%"> 
-						<FlexBox height="600px" alignItems="Center" justifyContent="Center">
+					<!-- <l:VerticalLayout width="100%" height="100%">  -->
+						<FlexBox justifyContent="Center">
 							<items>
 								<l:VerticalLayout width="100%" height="100%"> 
-									<Button width="100%" text="{i18n>startRankSmall}" type="Emphasized" press="startRank">
+									<SegmentedButton selectedKey="{/quickMode}">
+									<items>
+										<SegmentedButtonItem text="{i18n>modeRank}" key="rank"/>
+										<SegmentedButtonItem text="{i18n>modeCoop}" key="coop"/>
+										<SegmentedButtonItem text="{i18n>modeVersus}" key="versus"/>
+									</items>
+									</SegmentedButton>
+									
+									<Button width="100%" text="{i18n>sizeSmall}" type="Emphasized" press="startParty">
 										<customData> <core:CustomData key="boardSize" value="s" /> </customData>
 									</Button>
-									<Button width="100%" text="{i18n>startRankMedium}" type="Reject" press="startRank">
+									<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/s}>0 }" 
+										items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'s'} ] }">
+										<StandardListItem 
+											type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+											press="pressParty"
+											title="{name}^{leader}"
+											description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+									</List>
+									<List visible="{= ${/quickMode}==='versus' &amp;&amp; ${/partiesCount/s}>0 }" 
+										items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'s'} ] }">
+										<StandardListItem 
+											type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+											press="pressParty"
+											title="{name}^{leader}"
+											description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+									</List>		
+
+									<Button width="100%" text="{i18n>sizeMedium}" type="Reject" press="startParty">
 										<customData> <core:CustomData key="boardSize" value="m" /> </customData>
 									</Button>
-									<Button width="100%" text="{i18n>startRankBig}" type="Accept" press="startRank">
+									<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/m}>0 }" 
+										items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
+										<StandardListItem 
+											type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+											press="pressParty"
+											title="{name}^{leader}"
+											description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+									</List>
+									<List visible="{= ${/quickMode}==='versus' &amp;&amp; ${/partiesCount/m}>0 }" 
+										items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
+										<StandardListItem 
+											type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+											press="pressParty"
+											title="{name}^{leader}"
+											description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+									</List>
+
+									<Button width="100%" text="{i18n>sizeBig}" type="Accept" press="startParty">
 										<customData> <core:CustomData key="boardSize" value="b" /> </customData>
 									</Button>
+									<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/b}>0 }" 
+										items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
+										<StandardListItem 
+											type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+											press="pressParty"
+											title="{name}^{leader}"
+											description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+									</List>
+									<List visible="{= ${/quickMode}==='versus' &amp;&amp; ${/partiesCount/b}>0 }" 
+										items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
+										<StandardListItem 
+											type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+											press="pressParty"
+											title="{name}^{leader}"
+											description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+									</List>
 								</l:VerticalLayout>
 							</items>
 						</FlexBox>
-					</l:VerticalLayout>
+					<!-- </l:VerticalLayout> -->
 
 					<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">				
 					<l:VerticalLayout width="100%"> 

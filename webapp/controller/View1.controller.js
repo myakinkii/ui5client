@@ -90,35 +90,14 @@ sap.ui.define([
 
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
 
-		geti18n: function(prop, arr) {
-			if (!this._i18nbndl) this._i18nbndl = this.getOwnerComponent().getModel("i18n").getResourceBundle();
-			return this._i18nbndl.getText(prop, arr);
-		},
-
-		showToast: function(text, time) {
-			MessageToast.show(text, {
-				autoClose: true,
-				width: '50%',
-				duration: time || 1000,
-				at: sap.ui.core.Popup.Dock.CenterCenter
-			});
-		},
-
-		setBusy: function(msg) {
-			if (!this._busyDialog) this._busyDialog = new BusyDialog({
-				title: this.geti18n('genericBusyTitle')
-			});
-			this._busyDialog.setText(msg || this.geti18n('genericBusyText'));
-			this._busyDialog.open();
-		},
-
-		clearBusy: function(msg, time) {
-			if (this._busyDialog) this._busyDialog.close();
-			if (msg) this.showToast(msg, time || 500);
-		},
-		
 		onInit:function(){
-			this.getView().setModel(new JSONModel({evts:{},msg:'',auth:{},altKeyMode:false}));
+			this.getView().setModel(new JSONModel({
+				quickMode:"rank",
+				evts:{},
+				msg:'',
+				auth:{},
+				altKeyMode:false
+			}));
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 				if(e.which == 13) self.sendMsg.call(self);
 			});
@@ -193,12 +172,19 @@ sap.ui.define([
 			this.processCommand('/logoff');
 		},
 
-		closeAuthDlg:function(){
-			this.authDlg.close();
+		closeDlg:function(e){
+			e.getSource().getParent().close();
 		},
 
 		onUpdateParties:function(e){
-			this.getView().getModel().setProperty('/parties',e.arg);
+			var parties=e.arg;
+			var partiesCount={s:0,m:0,b:0};
+			for (var p in parties) {
+				partiesCount[parties[p].bSize]++;
+				for (var u in parties[p].users) parties[p].users[u]={user:u};
+			}
+			this.getView().getModel().setProperty('/partiesCount',partiesCount);
+			this.getView().getModel().setProperty('/parties',parties);
 		},
 
 		onUpdatePlayers:function(e){
@@ -207,9 +193,39 @@ sap.ui.define([
 			this.getView().getModel().setProperty('/players',players);
 		},
 
-		startRank:function(e){
+		pressParty:function(e){
+			var ctx=e.getSource().getBindingContext();
+			var party=ctx.getObject();
+			var me=this.getView().getModel().getProperty('/auth/user');
+			if (me==party.leader) {
+				if (!this.partyDlg) {
+					this.partyDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.partyDlg", this );
+					this.getView().addDependent(this.partyDlg);
+				}
+				sap.ui.getCore().byId("partyUsersList").getBinding("items").filter([new sap.ui.model.Filter({
+					path:"user",
+					test:function(user){return user.toLowerCase()!=me;}
+				})]);
+				this.partyDlg.bindElement(ctx.getPath());
+				this.partyDlg.open();
+			} else this.processCommand('/join '+party.id);
+		},
+
+		startParty:function(e){
 			var boardSize=e.getSource().data().boardSize;
-			this.processCommand('/create rank '+boardSize);
+			var mode=this.getView().getModel().getProperty('/quickMode');
+			this.processCommand('/create '+mode+' '+boardSize+' 4');
+		},
+
+		kickUser:function(e){
+			var user=e.getParameter("listItem").getBindingContext().getProperty("user");
+			this.processCommand('/kick '+user);
+		},
+
+		dismissParty:function(){
+			this.partyDlg.close();
+			var partyId=this.partyDlg.getBindingContext().getProperty("id");
+			this.processCommand('/dismiss '+partyId);
 		},
 
 		onStartGame: function (e) {
@@ -272,6 +288,11 @@ sap.ui.define([
 			this.pressDialog.open();
 		},
 
+		onEndGame:function(){
+			this.getView().getModel().setProperty('/bestTime','');
+			this.pressDialog.close();
+		},
+
 		quitGame:function(){
 			this.getView().getModel().setProperty('/bestTime','');
 			this.pressDialog.close(); 
@@ -302,6 +323,35 @@ sap.ui.define([
 			]
 			this.showToast(msgs.join('\n'));
 			this.getView().getModel().setProperty('/bestTime',e.arg.bestTime);
+		},
+
+// generic funcs
+
+		geti18n: function(prop, arr) {
+			if (!this._i18nbndl) this._i18nbndl = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+			return this._i18nbndl.getText(prop, arr);
+		},
+
+		showToast: function(text, time) {
+			MessageToast.show(text, {
+				autoClose: true,
+				width: '50%',
+				duration: time || 1000,
+				at: sap.ui.core.Popup.Dock.CenterCenter
+			});
+		},
+
+		setBusy: function(msg) {
+			if (!this._busyDialog) this._busyDialog = new BusyDialog({
+				title: this.geti18n('genericBusyTitle')
+			});
+			this._busyDialog.setText(msg || this.geti18n('genericBusyText'));
+			this._busyDialog.open();
+		},
+
+		clearBusy: function(msg, time) {
+			if (this._busyDialog) this._busyDialog.close();
+			if (msg) this.showToast(msg, time || 500);
 		}
 
 	});

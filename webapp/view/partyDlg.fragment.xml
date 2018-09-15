@@ -1,0 +1,20 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+	xmlns:core="sap.ui.core">
+	<Dialog title="{i18n>partyDialogTitle}: {name}" >
+        <content>
+            <Panel expandable="false" expanded="true">
+                <List id="partyUsersList" mode="Delete" delete="kickUser" items="{ path:'users'}">
+                    <StandardListItem title="{user}" />
+                </List>
+            </Panel>
+        </content>
+        <beginButton>
+            <Button text="{i18n>partyDismiss}" press="dismissParty" />
+        </beginButton>        
+        <endButton>
+            <Button text="{i18n>genericCancel}" press="closeDlg" />
+        </endButton>
+	</Dialog>
+</core:FragmentDefinition>

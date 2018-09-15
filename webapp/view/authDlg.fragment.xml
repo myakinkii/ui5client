@@ -2,7 +2,7 @@
 	xmlns="sap.m"
     xmlns:f="sap.ui.layout.form"
 	xmlns:core="sap.ui.core">
-	<Dialog title="{i18n>authDialogTitle}: {/auth/user}" >
+    <Dialog title="{i18n>authDialogTitle}: {/auth/user}" >
         <content>
             <Panel expandable="true" expanded="true" visible="{= ${/auth/type}==='temp' }">
             <headerToolbar>
@@ -35,7 +35,7 @@
             </Panel>
         </content>
         <endButton>
-            <Button text="{i18n>genericClose}" press="closeAuthDlg" />
+            <Button text="{i18n>genericClose}" press="closeDlg" />
         </endButton>
 	</Dialog>
 </core:FragmentDefinition>
