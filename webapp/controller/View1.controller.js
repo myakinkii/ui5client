@@ -126,17 +126,14 @@ sap.ui.define([
 		},
 
 		initNow:function(){
-			this.setBusy(this.geti18n("initClient"));
 			var self=this;
-			if (!window.now) window.now = nowInitialize("http://minesnf.com", {});
+			this.setBusy(this.geti18n("initClient"));
+			if (!window.now) window.now = nowInitialize("http://minesnf.com");
 			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
-			var wait=window.setInterval(function(){ 
-				if (window.now.processCommand) {
-					self.clearBusy();
-					window.clearInterval(wait);
-					self.processCommand=window.now.processCommand; 
-				}
-			},100);
+			window.now.ready(function(){
+				self.clearBusy();
+				self.processCommand=window.now.processCommand; 
+			});
 		},
 		
 		sendMsg:function(e){
