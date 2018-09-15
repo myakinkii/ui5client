@@ -3,8 +3,9 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
 	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
-	"sap/m/BusyDialog","sap/m/MessageToast"
-], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,MessageToast) {
+	"sap/m/BusyDialog","sap/m/MessageToast",
+	'sap/ui/core/theming/Parameters'
+], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,MessageToast,Parameters) {
 	"use strict";
 
 	var CELL_SIZE=24;
@@ -29,9 +30,9 @@ sap.ui.define([
 			oRm.addStyle("width", oControl.getSize());
 			oRm.addStyle("height", oControl.getSize());
 			oRm.addStyle("text-align","center");
-			if (oControl.getVal()=='')  oRm.addStyle("background-color", oControl.calcColor("0"));
+			var color=oControl.getVal()==''?oControl.getParent().getBoxColor():'#fff';
+			oRm.addStyle("border", "1px solid " + color);
 			oRm.writeStyles();
-			oRm.addClass("myCell");
 			oRm.writeClasses();
 			oRm.write(">");
 
@@ -60,7 +61,7 @@ sap.ui.define([
 	sap.ui.core.Control.extend("MyBoard", {
 		metadata : {
 			properties : {
-				"boxColor" : "string",
+				"boxColor" :  {type: "sap.ui.core.CSSColor", defaultValue: Parameters.get("sapUiBrand")},
 				"rows":"int",
 				"cols":"int",
 			},
@@ -77,7 +78,7 @@ sap.ui.define([
 			oControl.getContent().forEach(function(child){
 				oRm.write("<div");
 				oRm.addStyle("display", "inline-block");
-				oRm.addStyle("border", "1px solid " + oControl.getBoxColor());
+				// oRm.addStyle("border", "1px solid " + oControl.getBoxColor());
 				oRm.addStyle("margin", "1px");
 				oRm.writeStyles();
 				oRm.write(">");
@@ -85,7 +86,7 @@ sap.ui.define([
 				oRm.write("</div>");
 			});
 			oRm.write("</div>");
-		}
+		}	
 	});	
 
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
@@ -255,13 +256,13 @@ sap.ui.define([
 			}
 			if (!this.pressDialog) {
 				this.pressDialog = new Dialog({
-					title: title+", {i18n>bestTime}:{/bestTime}s",
+					title: title+", {i18n>gameBestTime}:{/bestTime}s",
 					contentWidth:"100%",
 					content: [
 						new FlexBox({ width:"100%", alignItems:"Center", justifyContent:"Center",
 							items:[ new Panel({width:width, content:[
 								new MyBoard({ 
-									rows:rows, cols:cols, boxColor: "#000", 
+									rows:rows, cols:cols,
 									content:cells 
 								}) 
 							]}) ]
