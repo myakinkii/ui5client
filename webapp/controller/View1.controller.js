@@ -214,7 +214,7 @@ sap.ui.define([
 		startParty:function(e){
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
-			this.processCommand('/create '+mode+' '+boardSize+' 4');
+			this.processCommand('/create '+mode+' '+boardSize);
 		},
 
 		kickUser:function(e){
