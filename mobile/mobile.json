@@ -1,0 +1,17 @@
+{
+	"smp": {
+		"appid": "com.minesnf.ui5client",
+		"features": {
+			"logon": false,
+			"odata": false,
+			"device": false,
+			"network": false
+		},
+		"context": {
+			"serverHost": "hcpms-p1941320494trial.hanatrial.ondemand.com",
+			"https": true,
+			"serverPort": "443",
+			"custom": {}
+		}
+	}
+}
