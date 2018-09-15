@@ -3,8 +3,8 @@ sap.ui.define([
 	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
 	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
-	"sap/m/MessageToast"
-], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,ToggleButton,MessageToast) {
+	"sap/m/BusyDialog","sap/m/MessageToast"
+], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,MessageToast) {
 	"use strict";
 
 	var CELL_SIZE=24;
@@ -90,6 +90,11 @@ sap.ui.define([
 
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
 
+		geti18n: function(prop, arr) {
+			if (!this._i18nbndl) this._i18nbndl = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+			return this._i18nbndl.getText(prop, arr);
+		},
+
 		showToast: function(text, time) {
 			MessageToast.show(text, {
 				autoClose: true,
@@ -98,17 +103,40 @@ sap.ui.define([
 				at: sap.ui.core.Popup.Dock.CenterCenter
 			});
 		},
+
+		setBusy: function(msg) {
+			if (!this._busyDialog) this._busyDialog = new BusyDialog({
+				title: this.geti18n('genericBusyTitle')
+			});
+			this._busyDialog.setText(msg || this.geti18n('genericBusyText'));
+			this._busyDialog.open();
+		},
+
+		clearBusy: function(msg, time) {
+			if (this._busyDialog) this._busyDialog.close();
+			if (msg) this.showToast(msg, time || 500);
+		},
 		
 		onInit:function(){
-			var mdl=new JSONModel({evts:{},msg:'',auth:{},altKeyMode:false});
-			this.getView().setModel(mdl);
-			var self=this;
-			if (!window.now) window.now = nowInitialize("http://minesnf.com", {});
-			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
-			window.setTimeout(function(){ self.processCommand=window.now.processCommand; },500);
+			this.getView().setModel(new JSONModel({evts:{},msg:'',auth:{},altKeyMode:false}));
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 				if(e.which == 13) self.sendMsg.call(self);
 			});
+			this.initNow();
+		},
+
+		initNow:function(){
+			this.setBusy(this.geti18n("initClient"));
+			var self=this;
+			if (!window.now) window.now = nowInitialize("http://minesnf.com", {});
+			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
+			var wait=window.setInterval(function(){ 
+				if (window.now.processCommand) {
+					self.clearBusy();
+					window.clearInterval(wait);
+					self.processCommand=window.now.processCommand; 
+				}
+			},100);
 		},
 		
 		sendMsg:function(e){
