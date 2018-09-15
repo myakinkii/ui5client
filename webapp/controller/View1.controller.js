@@ -128,7 +128,11 @@ sap.ui.define([
 		initNow:function(){
 			var self=this;
 			this.setBusy(this.geti18n("initClient"));
-			if (!window.now) window.now = nowInitialize("http://minesnf.com");
+			if (!window.now) {
+				var srv="http://minesnf.com";
+				$.ajax({ type: "GET", url: srv, async: false }); // just to init session
+				window.now = nowInitialize(srv);
+			}
 			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
 			window.now.ready(function(){
 				self.clearBusy();
