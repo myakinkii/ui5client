@@ -106,7 +106,11 @@ sap.ui.define([
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 				if(e.which == 13) self.sendMsg.call(self);
 			});
-			if (!this.ideTestMode) this.initNow();
+			if (this.ideTestMode) {
+				this.onAuthorize({});
+				this.onUpdateParties({});
+				this.processCommand=function(s){console.log(s);};
+			} else this.initNow();
 		},
 
 		initNow:function(){
@@ -141,7 +145,12 @@ sap.ui.define([
 		},
 
 		onAuthorize:function(e){
-			this.getView().getModel().setProperty('/auth',e.arg);
+			var mockUser={
+				"user":"user1","type":"temp",
+				"profile":{"level":0,"score":0,"rankTotal":0,"muted":{},"rank":{},"coop":{},"versus":{}}
+			};
+			var user=e.arg||mockUser;
+			this.getView().getModel().setProperty('/auth',user);
 		},
 
 		onAuthFail:function(e){
@@ -182,11 +191,40 @@ sap.ui.define([
 		},
 
 		onUpdateParties:function(e){
-			var parties=e.arg;
-			var partiesCount={s:0,m:0,b:0};
-			for (var p in parties) {
-				partiesCount[parties[p].bSize]++;
-				for (var u in parties[p].users) parties[p].users[u]={user:u};
+			var mockParties={
+				"10":{
+					"id":10,"name":"coop10","mode":"coop","bSize":"s","leader":"user1",
+					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
+				},
+				"11":{
+					"id":10,"name":"coop11","mode":"coop","bSize":"s","leader":"user1",
+					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
+				},
+				"12":{
+					"id":10,"name":"coop12","mode":"coop","bSize":"s","leader":"user1",
+					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
+				},
+				"13":{
+					"id":10,"name":"coop13","mode":"coop","bSize":"s","leader":"user1",
+					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
+				},
+				"14":{
+					"id":10,"name":"coop14","mode":"coop","bSize":"s","leader":"user1",
+					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
+				},
+				
+			};
+			var parties=e.arg||mockParties;
+			var partiesCount={
+				s:{rank:0,coop:0,versus:0},
+				m:{rank:0,coop:0,versus:0},
+				b:{rank:0,coop:0,versus:0}
+			};
+			var i,p,u;
+			for (i in parties) {
+				p=parties[i];
+				partiesCount[p.bSize][p.mode]++;
+				for (u in p.users) p.users[u]={user:u};
 			}
 			this.getView().getModel().setProperty('/partiesCount',partiesCount);
 			this.getView().getModel().setProperty('/parties',parties);
@@ -219,7 +257,20 @@ sap.ui.define([
 		startParty:function(e){
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
-			this.processCommand('/create '+mode+' '+boardSize);
+			if (this.ideTestMode && mode=='rank') {
+				var mockGames={
+					s:{"boardId":"rank1","r":8,"c":8},
+					m:{"boardId":"rank1","r":16,"c":16},
+					b:{"boardId":"rank1","r":16,"c":30}
+				};
+				this.onStartGame({arg:mockGames[boardSize]});
+				var mockCells={
+					"rank1_5_4":0,"rank1_4_3":2,"rank1_5_3":1,"rank1_6_3":0,"rank1_5_2":1,"rank1_6_2":0,"rank1_5_1":1,"rank1_6_1":0,
+					"rank1_7_1":0,"rank1_8_1":0,"rank1_7_2":0,"rank1_8_2":0,"rank1_7_3":0,"rank1_8_3":0,"rank1_7_4":0,"rank1_6_4":0,
+					"rank1_5_5":1,"rank1_6_5":1,"rank1_7_5":1,"rank1_8_4":0,"rank1_8_5":1,"rank1_4_4":1,"rank1_4_5":3
+				};
+				this.onCellValues({arg:mockCells});
+			} else this.processCommand('/create '+mode+' '+boardSize);
 		},
 
 		kickUser:function(e){
@@ -237,7 +288,7 @@ sap.ui.define([
 			var self = this;
 			var cols=e.arg.c;
 			var rows=e.arg.r;
-			var width=50+(CELL_SIZE+4)*cols+'px';
+			var width=(CELL_SIZE+4)*(cols+2)+'px'; // dunno how to calculate that stuff correctly
 			var title=e.arg.boardId+" ("+cols+"x"+rows+")";
 			var mdlData={altKeyMode:false};
 			var cells=[],coord;
@@ -246,11 +297,11 @@ sap.ui.define([
 					coord=e.arg.boardId+"_"+c+"_"+r;
 					// mdlData[coord]=c;
 					mdlData[coord]="";
-					cells.push(new MyCell({
+					cells.push( new MyCell({
 						altKeyMode:"{/altKeyMode}",
 						row:r, col:c, 
 						val:"{board>/"+coord+"}",
-						openCell:function(e){ 
+						openCell:function(e){
 							var row=e.getSource().getRow();
 							var col=e.getSource().getCol();
 							self.processCommand("/check "+col+" "+row);
@@ -258,19 +309,12 @@ sap.ui.define([
 					}));
 				}
 			}
-			if (!this.pressDialog) {
-				this.pressDialog = new Dialog({
-					title: title+", {i18n>gameBestTime}:{/bestTime}s",
-					contentWidth:"100%",
-					content: [
-						new FlexBox({ width:"100%", alignItems:"Center", justifyContent:"Center",
-							items:[ new Panel({width:width, content:[
-								new MyBoard({ 
-									rows:rows, cols:cols,
-									content:cells 
-								}) 
-							]}) ]
-						})
+			if (!this.gameDialog) {
+				this.gameDialog = new Dialog({
+					showHeader:false,
+					_title: title+", {i18n>gameBestTime}:{/bestTime}s",
+					content: [ 
+						new Panel({ width:width, content:[ new MyBoard({ rows:rows, cols:cols, content:cells }) ]}) 
 					],
 					beginButton: new ToggleButton({
 						visible:"{device>/system/desktop}",
@@ -283,37 +327,37 @@ sap.ui.define([
 					}),
 					afterClose:function(e){ 
 						e.getSource().destroy(); 
-						self.pressDialog=null;
+						self.gameDialog=null;
 					}
 				});
-				this.getView().addDependent(this.pressDialog);
+				this.getView().addDependent(this.gameDialog);
 			}
 			var boardMdl=new JSONModel(mdlData);
-			this.pressDialog.setModel(boardMdl,"board");
-			this.pressDialog.open();
+			this.gameDialog.setModel(boardMdl,"board");
+			this.gameDialog.open();
 		},
 
 		onEndGame:function(){
 			this.getView().getModel().setProperty('/bestTime','');
-			this.pressDialog.close();
+			this.gameDialog.close();
 		},
 
 		quitGame:function(){
 			this.getView().getModel().setProperty('/bestTime','');
-			this.pressDialog.close(); 
+			this.gameDialog.close(); 
 			this.processCommand("/quit");
 		},
 
 		onCellValues:function(e){
-			if (this.pressDialog){
-				var mdl=this.pressDialog.getModel("board");
+			if (this.gameDialog){
+				var mdl=this.gameDialog.getModel("board");
 				for (var i in e.arg) mdl.setProperty("/"+i,e.arg[i]);
 			}
 		},
 
 		onOpenLog:function(e){
-			if (this.pressDialog){
-				var mdl=this.pressDialog.getModel("board");
+			if (this.gameDialog){
+				var mdl=this.gameDialog.getModel("board");
 				for (var i in e.arg) for (var c in e.arg[i].cellsOpened) 
 					mdl.setProperty("/"+c,e.arg[i].cellsOpened[c]);
 			}
