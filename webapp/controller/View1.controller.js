@@ -92,17 +92,21 @@ sap.ui.define([
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
 
 		onInit:function(){
+			this.ideTestMode=false;
+			var initData=this.getOwnerComponent().getComponentData();
+			if (initData && initData.ideTestMode) this.ideTestMode=true;
 			this.getView().setModel(new JSONModel({
 				quickMode:"rank",
 				evts:{},
 				msg:'',
 				auth:{},
-				altKeyMode:false
+				altKeyMode:false,
+				ideTestMode:this.ideTestMode
 			}));
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 				if(e.which == 13) self.sendMsg.call(self);
 			});
-			this.initNow();
+			if (!this.ideTestMode) this.initNow();
 		},
 
 		initNow:function(){
