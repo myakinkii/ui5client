@@ -2,10 +2,16 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
+	"com/minesnf/ui5client/lib/Rank",
 	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
 	"sap/m/BusyDialog","sap/m/MessageToast",
 	'sap/ui/core/theming/Parameters'
-], function (Controller,JSONModel,now,Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,MessageToast,Parameters) {
+], function (
+	Controller,JSONModel,
+	now,
+	RankGame,
+	Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,
+	MessageToast,Parameters) {
 	"use strict";
 
 	var CELL_SIZE=24;
@@ -92,7 +98,7 @@ sap.ui.define([
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
 
 		onInit:function(){
-			this.ideTestMode=false;
+			this.ideTestMode=true;
 			var initData=this.getOwnerComponent().getComponentData();
 			if (initData && initData.ideTestMode) this.ideTestMode=true;
 			this.getView().setModel(new JSONModel({
@@ -107,9 +113,27 @@ sap.ui.define([
 				if(e.which == 13) self.sendMsg.call(self);
 			});
 			if (this.ideTestMode) {
+				var self=this;
+				sap.ui.getCore().getEventBus().subscribe(
+					"message",
+					function(channel,evtId,evtData){
+						self.processEvent.call(self,evtData); 
+					}
+				);
 				this.onAuthorize({});
 				this.onUpdateParties({});
-				this.processCommand=function(s){console.log(s);};
+				var me=this.getView().getModel().getProperty('/auth/user');
+				this.processCommand=function(s){
+					var cmd=s.split(" ");
+					if (this.localGame){
+						if (cmd[0]=="/check")
+							this.localGame.dispatchEvent({
+								user:me,
+								command:"checkCell",
+								pars:[cmd[1],cmd[2]]
+							});
+					}
+				};
 			} else this.initNow();
 		},
 
@@ -255,21 +279,46 @@ sap.ui.define([
 		},
 
 		startParty:function(e){
+			var me=this.getView().getModel().getProperty('/auth/user');
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
 			if (this.ideTestMode && mode=='rank') {
+				var pars={
+					multiThread:false,
+					id:"id666",
+					name:"id666",
+					board:{},
+					mode:mode,
+					minPlayers:1,
+					users:{},
+					profiles:{}
+				};
+				pars.users[me]={name:me,id:me};
+				pars.leader=me;
+				pars.profiles[me]={s:{},m:{},b:{}};
+				
 				var mockGames={
-					s:{"boardId":"rank1","r":8,"c":8},
-					m:{"boardId":"rank1","r":16,"c":16},
-					b:{"boardId":"rank1","r":16,"c":30}
+					s:{"boardId":"rank1","r":8,"c":8,b:10},
+					m:{"boardId":"rank1","r":16,"c":16,b:40},
+					b:{"boardId":"rank1","r":16,"c":30,b:99}
 				};
-				this.onStartGame({arg:mockGames[boardSize]});
-				var mockCells={
-					"rank1_5_4":0,"rank1_4_3":2,"rank1_5_3":1,"rank1_6_3":0,"rank1_5_2":1,"rank1_6_2":0,"rank1_5_1":1,"rank1_6_1":0,
-					"rank1_7_1":0,"rank1_8_1":0,"rank1_7_2":0,"rank1_8_2":0,"rank1_7_3":0,"rank1_8_3":0,"rank1_7_4":0,"rank1_6_4":0,
-					"rank1_5_5":1,"rank1_6_5":1,"rank1_7_5":1,"rank1_8_4":0,"rank1_8_5":1,"rank1_4_4":1,"rank1_4_5":3
-				};
-				this.onCellValues({arg:mockCells});
+				
+				pars.board=mockGames[boardSize];
+				pars.board.bSize=boardSize;
+				this.localGame=new RankGame(pars);
+				this.localGame.dispatchEvent({
+					user:null,
+					command:"startBoard",
+					pars:null
+				});
+
+				// this.onStartGame({arg:mockGames[boardSize]});
+				// var mockCells={
+				// 	"rank1_5_4":0,"rank1_4_3":2,"rank1_5_3":1,"rank1_6_3":0,"rank1_5_2":1,"rank1_6_2":0,"rank1_5_1":1,"rank1_6_1":0,
+				// 	"rank1_7_1":0,"rank1_8_1":0,"rank1_7_2":0,"rank1_8_2":0,"rank1_7_3":0,"rank1_8_3":0,"rank1_7_4":0,"rank1_6_4":0,
+				// 	"rank1_5_5":1,"rank1_6_5":1,"rank1_7_5":1,"rank1_8_4":0,"rank1_8_5":1,"rank1_4_4":1,"rank1_4_5":3
+				// };
+				// this.onCellValues({arg:mockCells});
 			} else this.processCommand('/create '+mode+' '+boardSize);
 		},
 
