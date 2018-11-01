@@ -2,14 +2,14 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
-	"com/minesnf/ui5client/lib/Rank",
+	"com/minesnf/ui5client/model/localGame",
 	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
 	"sap/m/BusyDialog","sap/m/MessageToast",
 	'sap/ui/core/theming/Parameters'
 ], function (
 	Controller,JSONModel,
 	now,
-	RankGame,
+	LocalGame,
 	Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,
 	MessageToast,Parameters) {
 	"use strict";
@@ -20,6 +20,7 @@ sap.ui.define([
 		metadata : {
 			properties : {
 				"altKeyMode":"boolean",
+				"checked":{type: "boolean", defaultValue: false},
 				"row":"int",
 				"col":"int",
 				"val" : "string",
@@ -98,7 +99,7 @@ sap.ui.define([
 	return Controller.extend("com.minesnf.ui5client.controller.View1", {
 
 		onInit:function(){
-			this.ideTestMode=true;
+			this.ideTestMode=false;
 			var initData=this.getOwnerComponent().getComponentData();
 			if (initData && initData.ideTestMode) this.ideTestMode=true;
 			this.getView().setModel(new JSONModel({
@@ -283,42 +284,41 @@ sap.ui.define([
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
 			if (this.ideTestMode && mode=='rank') {
-				var pars={
-					multiThread:false,
-					id:"id666",
-					name:"id666",
-					board:{},
-					mode:mode,
-					minPlayers:1,
-					users:{},
-					profiles:{}
-				};
-				pars.users[me]={name:me,id:me};
-				pars.leader=me;
-				pars.profiles[me]={s:{},m:{},b:{}};
-				
 				var mockGames={
 					s:{"boardId":"rank1","r":8,"c":8,b:10},
 					m:{"boardId":"rank1","r":16,"c":16,b:40},
 					b:{"boardId":"rank1","r":16,"c":30,b:99}
 				};
-				
+				var pars={
+					multiThread:false,
+					id:mockGames[boardSize].boardId,
+					name:mockGames[boardSize].boardId,
+					board:{},
+					mode:mode,
+					minPlayers:1,
+					users:{},
+					profiles:{},
+					leader:me
+				};
+				pars.users[me]={name:me,id:me};
+				pars.profiles[me]={s:{},m:{},b:{}};
 				pars.board=mockGames[boardSize];
 				pars.board.bSize=boardSize;
-				this.localGame=new RankGame(pars);
+				this.localGame=new LocalGame(pars);
+				this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
+					sap.ui.getCore().getEventBus().publish('message', {
+						dst: dst,
+						dstId: dstId,
+						contextId: contextId,
+						func: func,
+						arg: arg
+					});
+				};
 				this.localGame.dispatchEvent({
 					user:null,
 					command:"startBoard",
 					pars:null
 				});
-
-				// this.onStartGame({arg:mockGames[boardSize]});
-				// var mockCells={
-				// 	"rank1_5_4":0,"rank1_4_3":2,"rank1_5_3":1,"rank1_6_3":0,"rank1_5_2":1,"rank1_6_2":0,"rank1_5_1":1,"rank1_6_1":0,
-				// 	"rank1_7_1":0,"rank1_8_1":0,"rank1_7_2":0,"rank1_8_2":0,"rank1_7_3":0,"rank1_8_3":0,"rank1_7_4":0,"rank1_6_4":0,
-				// 	"rank1_5_5":1,"rank1_6_5":1,"rank1_7_5":1,"rank1_8_4":0,"rank1_8_5":1,"rank1_4_4":1,"rank1_4_5":3
-				// };
-				// this.onCellValues({arg:mockCells});
 			} else this.processCommand('/create '+mode+' '+boardSize);
 		},
 
@@ -331,6 +331,29 @@ sap.ui.define([
 			this.partyDlg.close();
 			var partyId=this.partyDlg.getBindingContext().getProperty("id");
 			this.processCommand('/dismiss '+partyId);
+		},
+		
+		attachMove:function(element,cbFn){
+			// element.attachBrowserEvent('touchstart', function(e){
+			// 	var elem=$(e.target).control();
+			// 	if (cbFn && elem && elem[0]) cbFn(elem[0]);
+			// 	e.preventDefault();
+			// });
+			element.attachBrowserEvent('touchmove', function(e){
+				var touch,x,y;
+				if (!e) e = event;
+				if(e.touches && e.touches.length == 1) {
+					touch = e.touches[0];
+					x=touch.pageX;
+					y=touch.pageY;
+				}
+				var elem;
+				if (x&&y) elem=$(document.elementFromPoint(x,y)).control();
+				if (cbFn && elem && elem[0]) {
+					if (elem[0].getMetadata().getName()=='MyCell') cbFn(elem[0]);
+				}
+				e.preventDefault();
+			});
 		},
 
 		onStartGame: function (e) {
@@ -346,7 +369,7 @@ sap.ui.define([
 					coord=e.arg.boardId+"_"+c+"_"+r;
 					// mdlData[coord]=c;
 					mdlData[coord]="";
-					cells.push( new MyCell({
+					var cell=new MyCell({
 						altKeyMode:"{/altKeyMode}",
 						row:r, col:c, 
 						val:"{board>/"+coord+"}",
@@ -355,16 +378,25 @@ sap.ui.define([
 							var col=e.getSource().getCol();
 							self.processCommand("/check "+col+" "+row);
 						 }
-					}));
+					});
+					cells.push(cell);
 				}
 			}
 			if (!this.gameDialog) {
+				var board=new MyBoard({ rows:rows, cols:cols, content:cells });
+				var panel=new Panel({ width:width, content:[ board ]});
+				this.attachMove(board,function(elem){
+					if (!elem.getChecked()){
+						elem.setChecked(true);
+						var row=elem.getRow();
+						var col=elem.getCol();
+						// console.log("check",col,row);
+						self.processCommand("/check "+col+" "+row);
+					}
+				});
 				this.gameDialog = new Dialog({
 					showHeader:false,
-					_title: title+", {i18n>gameBestTime}:{/bestTime}s",
-					content: [ 
-						new Panel({ width:width, content:[ new MyBoard({ rows:rows, cols:cols, content:cells }) ]}) 
-					],
+					content: [ panel ],
 					beginButton: new ToggleButton({
 						visible:"{device>/system/desktop}",
 						text: '{i18n>altKeyMode}',
