@@ -204,7 +204,8 @@ sap.ui.define([
 			var me=this.getView().getModel().getProperty('/auth/user');
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
-			if (this.ideTestMode && mode=='rank') {
+			var localGame=this.getView().getModel().getProperty('/localGame');
+			if (localGame) {
 				var mockGames={
 					s:{"boardId":"rank1","r":8,"c":8,b:10},
 					m:{"boardId":"rank1","r":16,"c":16,b:40},
