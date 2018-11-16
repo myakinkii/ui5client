@@ -1,0 +1,24 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core">
+	<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
+		<l:VerticalLayout width="100%">
+			<Toolbar>
+				<ToolbarSpacer />
+				<Title text="{i18n>partyTitle}" />
+				<ToolbarSpacer />
+			</Toolbar>						
+			<List items="{ path:'/parties'}">
+				<ObjectListItem title="{name}">
+					<attributes>
+						<ObjectAttribute text="{i18n>partyLeader}: {leader}" />
+						<ObjectAttribute text="{i18n>partyMode}: {mode}" />
+						<ObjectAttribute text="{i18n>partyMaxPlayers}: {maxPlayers}" />
+						<ObjectAttribute text="{i18n>partyLevels}: {minLevel} - {maxLevel}" />
+					</attributes>
+				</ObjectListItem>
+			</List>
+		</l:VerticalLayout>		
+	</ScrollContainer>	
+</core:FragmentDefinition>	

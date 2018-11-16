@@ -9,6 +9,7 @@ sap.ui.define([], function () {
 	}
 
 	Board.prototype.init = function (Xinit, Yinit, r) {
+		var maxDigit=0,curVal;
 		this.board = [];
 		this.mines = {};
 		this.checked = {};
@@ -26,12 +27,15 @@ sap.ui.define([], function () {
 			else {
 				this.mines[this.tabId + '_' + x + '_' + y] = -8;
 				for (var n1 = -1; n1 < 2; n1++)
-					for (var n2 = -1; n2 < 2; n2++)
-						this.board[y + n1][x + n2]++;
+					for (var n2 = -1; n2 < 2; n2++){
+						curVal=++this.board[y + n1][x + n2];
+						if (curVal<9 && curVal>maxDigit) maxDigit=curVal;
+					}
 				this.board[y][x] = 9;
 				steps--;
 			}
 		}
+		return {board:this.board,maxDigit:maxDigit};
 	};
 
 	Board.prototype.checkCell = function (x, y, user) {
@@ -336,6 +340,8 @@ sap.ui.define([], function () {
 		}
 		this.resetBoard(re);
 	};
+	
+	RankGame.Board=Board;
 
 	return RankGame;
 

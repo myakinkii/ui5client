@@ -1,104 +1,23 @@
 sap.ui.define([
-	"sap/ui/core/mvc/Controller",
-	"sap/ui/model/json/JSONModel",
 	"libs/nowjs/now",
+	"com/minesnf/ui5client/controller/BaseController",
+	"com/minesnf/ui5client/controls/Board",
+	"com/minesnf/ui5client/controls/Cell",
 	"com/minesnf/ui5client/model/localGame",
-	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
-	"sap/m/BusyDialog","sap/m/MessageToast",
-	'sap/ui/core/theming/Parameters'
+	"sap/ui/model/json/JSONModel",
+	"sap/m/Dialog","sap/m/FlexBox","sap/m/Panel","sap/m/Button","sap/m/ToggleButton"
 ], function (
-	Controller,JSONModel,
-	now,
-	LocalGame,
-	Dialog,FlexBox,Panel,Button,ToggleButton,BusyDialog,
-	MessageToast,Parameters) {
+	now,BaseController,Board,Cell,LocalGame,
+	JSONModel,
+	Dialog,FlexBox,Panel,Button,ToggleButton) {
 	"use strict";
 
 	var CELL_SIZE=24;
 
-	sap.ui.core.Control.extend("MyCell", {
-		metadata : {
-			properties : {
-				"altKeyMode":"boolean",
-				"checked":{type: "boolean", defaultValue: false},
-				"row":"int",
-				"col":"int",
-				"val" : "string",
-				"size" : {type: "sap.ui.core.CSSSize", defaultValue: CELL_SIZE+"px"}
-			},
-			events: {
-				"openCell" : {}
-			}
-		},
-		renderer : function(oRm, oControl) {
-
-			oRm.write("<div"); 
-			oRm.writeControlData(oControl);
-			oRm.addStyle("width", oControl.getSize());
-			oRm.addStyle("height", oControl.getSize());
-			oRm.addStyle("text-align","center");
-			var color=oControl.getVal()==''?oControl.getParent().getBoxColor():'#fff';
-			oRm.addStyle("border", "1px solid " + color);
-			oRm.writeStyles();
-			oRm.writeClasses();
-			oRm.write(">");
-
-			var val=oControl.getVal();
-			var color=oControl.calcColor(val);
-			oRm.write('<span style="vertical-align:middle;display:inline-block;color:'+color+'">');
-			oRm.writeEscaped(val=='0'?'':val=="-8"?'*':val);
-			oRm.write("</span>");
-
-			oRm.write("</div>");
-		},
-
-		calcColor:function(val){
-			return ['#aaa','#00f','#390','#f00','#309','#930','#099','#939','#000'][val];
-		},
-
-		onclick : function(evt) {
-			this.fireOpenCell();
-		},
-
-		onmouseover : function(e) {
-			if ( this.getAltKeyMode() && !e.altKey) this.fireOpenCell();
-		}
-	});
-
-	sap.ui.core.Control.extend("MyBoard", {
-		metadata : {
-			properties : {
-				"boxColor" :  {type: "sap.ui.core.CSSColor", defaultValue: Parameters.get("sapUiBrand")},
-				"rows":"int",
-				"cols":"int",
-			},
-			aggregations: { 
-				content: {singularName: "content"}
-			}
-		},
-		renderer : function(oRm, oControl) {
-			oRm.write("<div");
-			oRm.writeControlData(oControl);
-			oRm.writeClasses();
-			oRm.write(">");
-
-			oControl.getContent().forEach(function(child){
-				oRm.write("<div");
-				oRm.addStyle("display", "inline-block");
-				// oRm.addStyle("border", "1px solid " + oControl.getBoxColor());
-				oRm.addStyle("margin", "1px");
-				oRm.writeStyles();
-				oRm.write(">");
-				oRm.renderControl(child);
-				oRm.write("</div>");
-			});
-			oRm.write("</div>");
-		}	
-	});	
-
-	return Controller.extend("com.minesnf.ui5client.controller.View1", {
+	return BaseController.extend("com.minesnf.ui5client.controller.Main", {
 
 		onInit:function(){
+			var self=this;
 			this.ideTestMode=false;
 			var initData=this.getOwnerComponent().getComponentData();
 			if (initData && initData.ideTestMode) this.ideTestMode=true;
@@ -108,36 +27,37 @@ sap.ui.define([
 				msg:'',
 				auth:{},
 				altKeyMode:false,
+				localGame:true,
 				ideTestMode:this.ideTestMode
 			}));
 			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 				if(e.which == 13) self.sendMsg.call(self);
 			});
+			sap.ui.getCore().getEventBus().subscribe(
+				"message",
+				function(channel,evtId,evtData){
+					self.processEvent.call(self,evtData); 
+				}
+			);			
 			if (this.ideTestMode) {
-				var self=this;
-				sap.ui.getCore().getEventBus().subscribe(
-					"message",
-					function(channel,evtId,evtData){
-						self.processEvent.call(self,evtData); 
-					}
-				);
 				this.onAuthorize({});
 				this.onUpdateParties({});
-				var me=this.getView().getModel().getProperty('/auth/user');
-				this.processCommand=function(s){
-					var cmd=s.split(" ");
-					if (this.localGame){
-						if (cmd[0]=="/check")
-							this.localGame.dispatchEvent({
-								user:me,
-								command:"checkCell",
-								pars:[cmd[1],cmd[2]]
-							});
-					}
-				};
 			} else this.initNow();
 		},
-
+		
+		processCommand:function(s){
+			if (this.localGame){
+				var me=this.getView().getModel().getProperty('/auth/user');
+				var cmd=s.split(" ");
+				if (cmd[0]=="/check")
+					this.localGame.dispatchEvent({
+						user:me,
+						command:"checkCell",
+						pars:[cmd[1],cmd[2]]
+					});
+			} else if (this.nowReady) window.now.processCommand(s); 
+		},
+		
 		initNow:function(){
 			var self=this;
 			this.setBusy(this.geti18n("initClient"));
@@ -149,7 +69,8 @@ sap.ui.define([
 			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
 			window.now.ready(function(){
 				self.clearBusy();
-				self.processCommand=window.now.processCommand; 
+				self.nowReady=true;
+				// self.processCommand=window.now.processCommand; 
 			});
 		},
 		
@@ -289,6 +210,8 @@ sap.ui.define([
 					m:{"boardId":"rank1","r":16,"c":16,b:40},
 					b:{"boardId":"rank1","r":16,"c":30,b:99}
 				};
+				// this.runTest2(mockGames[boardSize]); return;
+				// this.runTest(mockGames[boardSize],8,8); return;
 				var pars={
 					multiThread:false,
 					id:mockGames[boardSize].boardId,
@@ -321,6 +244,43 @@ sap.ui.define([
 				});
 			} else this.processCommand('/create '+mode+' '+boardSize);
 		},
+		
+		runTest:function(board,x,y){
+			var times=10000;
+			var res={};
+			var i,max,now=Date.now();
+			for (i=0;i<times;i++){
+				max=this.runBoard(board,x,y).maxDigit;
+				if (!res[max]) res[max]=1;
+				else res[max]++;
+			}
+			console.log(Date.now()-now,res);
+		},
+		
+		runTest2:function(board){
+			var times=10000;
+			var res={};
+			var i,b,now=Date.now();
+			for (i=0;i<times;i++){
+				// b=this.runBoard(board,board.c/2,board.r/2).board;
+				b=this.runBoard(board,1,1).board;
+				b.forEach(function(row,indY){
+					if (indY==0 || indY==b.length-1) return;
+					row.forEach(function(val,indX){
+						if (indX==0 || indX==row.length-1) return;
+						if (val==0 || val>8) return;
+						if (!res[val]) res[val]=1;
+						else res[val]++;
+					});
+				});
+			}
+			for (i in res) res[i]/=times;
+			console.log(Date.now()-now,res);
+		},		
+		
+		runBoard:function(board,x,y){
+			return LocalGame.Board.prototype.init.call({bombs:board.b,sizeX:board.c,sizeY:board.r},x,y,2);
+		},		
 
 		kickUser:function(e){
 			var user=e.getParameter("listItem").getBindingContext().getProperty("user");
@@ -350,7 +310,7 @@ sap.ui.define([
 				var elem;
 				if (x&&y) elem=$(document.elementFromPoint(x,y)).control();
 				if (cbFn && elem && elem[0]) {
-					if (elem[0].getMetadata().getName()=='MyCell') cbFn(elem[0]);
+					if (elem[0].getMetadata().getName()=='com.minesnf.ui5client.controls.Cell') cbFn(elem[0]);
 				}
 				e.preventDefault();
 			});
@@ -369,7 +329,7 @@ sap.ui.define([
 					coord=e.arg.boardId+"_"+c+"_"+r;
 					// mdlData[coord]=c;
 					mdlData[coord]="";
-					var cell=new MyCell({
+					var cell=new Cell({
 						altKeyMode:"{/altKeyMode}",
 						row:r, col:c, 
 						val:"{board>/"+coord+"}",
@@ -383,7 +343,7 @@ sap.ui.define([
 				}
 			}
 			if (!this.gameDialog) {
-				var board=new MyBoard({ rows:rows, cols:cols, content:cells });
+				var board=new Board({ rows:rows, cols:cols, content:cells });
 				var panel=new Panel({ width:width, content:[ board ]});
 				this.attachMove(board,function(elem){
 					if (!elem.getChecked()){
@@ -454,35 +414,6 @@ sap.ui.define([
 			this.showToast(msgs.join('\n'));
 			this.getView().getModel().setProperty('/bestTime',e.arg.bestTime);
 		},
-
-// generic funcs
-
-		geti18n: function(prop, arr) {
-			if (!this._i18nbndl) this._i18nbndl = this.getOwnerComponent().getModel("i18n").getResourceBundle();
-			return this._i18nbndl.getText(prop, arr);
-		},
-
-		showToast: function(text, time) {
-			MessageToast.show(text, {
-				autoClose: true,
-				width: '50%',
-				duration: time || 1000,
-				at: sap.ui.core.Popup.Dock.CenterCenter
-			});
-		},
-
-		setBusy: function(msg) {
-			if (!this._busyDialog) this._busyDialog = new BusyDialog({
-				title: this.geti18n('genericBusyTitle')
-			});
-			this._busyDialog.setText(msg || this.geti18n('genericBusyText'));
-			this._busyDialog.open();
-		},
-
-		clearBusy: function(msg, time) {
-			if (this._busyDialog) this._busyDialog.close();
-			if (msg) this.showToast(msg, time || 500);
-		}
 
 	});
 });

@@ -1,0 +1,26 @@
+<mvc:View 
+	controllerName="com.minesnf.ui5client.controller.Main" 
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:l="sap.ui.layout"
+	xmlns:u="sap.ui.unified"
+	xmlns="sap.m"
+	displayBlock="true">
+	<u:Shell>
+		<u:headEndItems>
+			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="logOff" />
+		</u:headEndItems>
+		<u:user>
+			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="showAuthDlg" />
+		</u:user>
+		<Carousel class="sapUiContentPadding" height="100%">
+			<pages>
+				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" />
+				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselChat" type="XML" />
+				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselParties" type="XML" />
+				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselUsers" type="XML" />
+			</pages>
+		</Carousel>
+	</u:Shell>
+</mvc:View>

@@ -39,7 +39,7 @@
 
 	"sap.ui5": {
 		"rootView": {
-			"viewName": "com.minesnf.ui5client.view.View1",
+			"viewName": "com.minesnf.ui5client.view.Main",
 			"type": "XML"
 		},
 		"dependencies": {
@@ -78,16 +78,16 @@
 				"clearControlAggregation": false
 			},
 			"routes": [{
-				"name": "RouteView1",
-				"pattern": "RouteView1",
-				"target": ["TargetView1"]
+				"name": "main",
+				"pattern": "",
+				"target": ["main"]
 			}],
 			"targets": {
-				"TargetView1": {
+				"main": {
 					"viewType": "XML",
 					"transition": "slide",
 					"clearControlAggregation": false,
-					"viewName": "View1"
+					"viewName": "Main"
 				}
 			}
 		}
