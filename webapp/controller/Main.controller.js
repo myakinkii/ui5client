@@ -46,7 +46,8 @@ sap.ui.define([
 		},
 		
 		processCommand:function(s){
-			if (this.localGame){
+			var localGame=this.getView().getModel().getProperty('/localGame');
+			if (localGame){
 				var me=this.getView().getModel().getProperty('/auth/user');
 				var cmd=s.split(" ");
 				if (cmd[0]=="/check")
