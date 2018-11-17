@@ -15,8 +15,8 @@ sap.ui.define([
 			MessageToast.show(text, {
 				autoClose: true,
 				width: '50%',
-				duration: time || 1000,
-				at: sap.ui.core.Popup.Dock.CenterCenter
+				// at: sap.ui.core.Popup.Dock.CenterCenter,
+				duration: time || 1000
 			});
 		},
 

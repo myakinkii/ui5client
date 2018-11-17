@@ -125,9 +125,9 @@ sap.ui.define([
 		onShowResultRank:function(e){
 			var msgs=[
 				'time:'+ e.arg.time+'s',
-				'wins/loss ratio:'+e.arg.winPercentage,
-				'won:'+e.arg.won,
-				'streak:'+e.arg.streak
+				// 'wins/loss ratio:'+e.arg.winPercentage,
+				// 'won:'+e.arg.won,
+				// 'streak:'+e.arg.streak
 			]
 			this.showToast(msgs.join('\n'));
 			this.getView().getModel().setProperty('/bestTime',e.arg.bestTime);
