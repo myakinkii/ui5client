@@ -58,15 +58,10 @@ sap.ui.define([
 		
 		processCommand:function(s){
 			var localGame=this.getView().getModel().getProperty('/localGame');
-			if (localGame){
-				var me=this.getView().getModel().getProperty('/auth/user');
-				var cmd=s.split(" ");
-				if (cmd[0]=="/check")
-					this.localGame.dispatchEvent({
-						user:me,
-						command:"checkCell",
-						pars:[cmd[1],cmd[2]]
-					});
+			var cmd=s.split(" ");
+			var me=this.getView().getModel().getProperty('/auth/user');
+			if (localGame && cmd[0]=="/check"){
+				this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},
 
