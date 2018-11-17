@@ -2,17 +2,18 @@ sap.ui.define([
 	"libs/nowjs/now",
 	"com/minesnf/ui5client/controller/BaseController",
 	"com/minesnf/ui5client/controller/GameMixin",
+	"com/minesnf/ui5client/controller/InventoryMixin",
 	"com/minesnf/ui5client/controller/UserMixin",
 	"com/minesnf/ui5client/controller/PartyMixin",
 	"sap/ui/model/json/JSONModel"
-], function (now, BaseController, GameMixin, UserMixin, PartyMixin, JSONModel) {
+], function (now, BaseController, GameMixin, InventoryMixin, UserMixin, PartyMixin, JSONModel) {
 	"use strict";
 
 	return BaseController.extend("com.minesnf.ui5client.controller.Main", {
 
 		onInit:function(){
 			// just patch controller with some stuff I ripped out of it due to lots of badly written code in controller
-			jQuery.extend(this, GameMixin.prototype, UserMixin.prototype, PartyMixin.prototype);
+			jQuery.extend(this, GameMixin.prototype, InventoryMixin.prototype, UserMixin.prototype, PartyMixin.prototype);
 			var self=this;
 			this.ideTestMode=false;
 			var initData=this.getOwnerComponent().getComponentData();
@@ -26,9 +27,9 @@ sap.ui.define([
 				localGame:true,
 				ideTestMode:this.ideTestMode
 			}));
-			this.getView().byId("input").attachBrowserEvent('keypress', function(e){
-				if(e.which == 13) self.sendMsg.call(self);
-			});
+			// this.getView().byId("input").attachBrowserEvent('keypress', function(e){
+			// 	if(e.which == 13) self.sendMsg.call(self);
+			// });
 			sap.ui.getCore().getEventBus().subscribe(
 				"message",
 				function(channel,evtId,evtData){
@@ -39,6 +40,8 @@ sap.ui.define([
 				this.onAuthorize({});
 				this.onUpdateParties({});
 			} else this.initNow();
+			
+			this.initInventory();
 		},
 		
 		initNow:function(){
@@ -73,12 +76,12 @@ sap.ui.define([
 			if (this['on'+e.func]) this['on'+e.func](e);
 		},
 		
-		sendMsg:function(e){
-			var mdl=this.getView().getModel();
-			var msg=mdl.getProperty('/msg');
-			this.processCommand(msg);
-			mdl.setProperty('/msg','');
-		},
+		// sendMsg:function(e){
+		// 	var mdl=this.getView().getModel();
+		// 	var msg=mdl.getProperty('/msg');
+		// 	this.processCommand(msg);
+		// 	mdl.setProperty('/msg','');
+		// },
 		
 		closeDlg:function(e){ e.getSource().getParent().close(); },
 		
@@ -92,7 +95,8 @@ sap.ui.define([
 		handleStartParty:function(e){ this.startParty(e); },
 		handleKickUser:function(e){ this.kickUser(e); },
 		handleDismissParty:function(){ this.dismissParty(); },
-		handleQuitGame:function(){ this.quitGame(); }
+		handleQuitGame:function(){ this.quitGame(); },
+		handleFuseDigit:function(e){ this.fuseDigit(e); },
 
 	});
 });

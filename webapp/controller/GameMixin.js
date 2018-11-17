@@ -110,7 +110,16 @@ sap.ui.define([
 		onCellValues:function(e){
 			if (this.gameDialog){
 				var mdl=this.gameDialog.getModel("board");
-				for (var i in e.arg) mdl.setProperty("/"+i,e.arg[i]);
+				if (!this.digitPocket) this.digitPocket={};
+				var i,n;
+				for (i in e.arg) {
+					n=e.arg[i];
+					if(n>0) {
+						if (!this.digitPocket[n]) this.digitPocket[n]=0;
+						this.digitPocket[n]++;
+					}
+					mdl.setProperty("/"+i,n);
+				}
 			}
 		},
 
@@ -123,6 +132,8 @@ sap.ui.define([
 		},
 
 		onShowResultRank:function(e){
+			if ( this.localGame && e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			this.digitPocket=null;
 			var msgs=[
 				'time:'+ e.arg.time+'s',
 				// 'wins/loss ratio:'+e.arg.winPercentage,

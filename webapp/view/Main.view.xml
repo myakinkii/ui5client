@@ -17,9 +17,10 @@
 		<Carousel class="sapUiContentPadding" height="100%">
 			<pages>
 				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" />
-				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselChat" type="XML" />
-				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselParties" type="XML" />
-				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselUsers" type="XML" />
+				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />
+				<!--<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselChat" type="XML" />-->
+				<!--<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselParties" type="XML" />-->
+				<!--<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselUsers" type="XML" />-->
 			</pages>
 		</Carousel>
 	</u:Shell>
