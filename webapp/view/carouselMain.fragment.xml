@@ -19,7 +19,7 @@
 						</Panel>
 						
 						<Panel>
-						<Button width="100%" text="{i18n>sizeSmall}" type="Emphasized" press="startParty">
+						<Button width="100%" text="{i18n>sizeSmall}" type="Emphasized" press="handleStartParty">
 							<customData> <core:CustomData key="boardSize" value="s" /> </customData>
 						</Button>
 						<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/s/coop}>0 }" 
@@ -27,7 +27,7 @@
 							<customData> <core:CustomData key="boardSize" value="s" /> </customData>
 							<StandardListItem 
 								type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
-								press="pressParty"
+								press="handlePressParty"
 								title="{name}^{leader}"
 								description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
 						</List>
@@ -35,21 +35,21 @@
 							items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'s'} ] }">
 							<StandardListItem 
 								type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
-								press="pressParty"
+								press="handlePressParty"
 								title="{name}^{leader}"
 								description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
 						</List>
 						</Panel>
 						
 						<Panel>
-						<Button width="100%" text="{i18n>sizeMedium}" type="Emphasized" _type="Reject" press="startParty">
+						<Button width="100%" text="{i18n>sizeMedium}" type="Emphasized" _type="Reject" press="handleStartParty">
 							<customData> <core:CustomData key="boardSize" value="m" /> </customData>
 						</Button>
 						<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/m/coop}>0 }" 
 							items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
 							<StandardListItem 
 								type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
-								press="pressParty"
+								press="handlePressParty"
 								title="{name}^{leader}"
 								description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
 						</List>
@@ -57,21 +57,21 @@
 							items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
 							<StandardListItem 
 								type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
-								press="pressParty"
+								press="handlePressParty"
 								title="{name}^{leader}"
 								description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
 						</List>
 						</Panel>
 						
 						<Panel visible="{= ${device>/system/desktop} || ${device>/system/tablet} }">
-						<Button width="100%" text="{i18n>sizeBig}" type="Emphasized" _type="Accept" press="startParty">
+						<Button width="100%" text="{i18n>sizeBig}" type="Emphasized" _type="Accept" press="handleStartParty">
 							<customData> <core:CustomData key="boardSize" value="b" /> </customData>
 						</Button>
 						<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/b/coop}>0 }" 
 							items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
 							<StandardListItem 
 								type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
-								press="pressParty"
+								press="handlePressParty"
 								title="{name}^{leader}"
 								description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
 						</List>
@@ -79,7 +79,7 @@
 							items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
 							<StandardListItem 
 								type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
-								press="pressParty"
+								press="handlePressParty"
 								title="{name}^{leader}"
 								description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
 						</List>

@@ -9,10 +9,10 @@
 	displayBlock="true">
 	<u:Shell>
 		<u:headEndItems>
-			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="logOff" />
+			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
 		</u:headEndItems>
 		<u:user>
-			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="showAuthDlg" />
+			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
 		</u:user>
 		<Carousel class="sapUiContentPadding" height="100%">
 			<pages>

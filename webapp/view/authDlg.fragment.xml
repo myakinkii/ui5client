@@ -9,7 +9,7 @@
                 <Toolbar>
                     <Title text="{i18n>authForm}" />
                     <ToolbarSpacer/>
-                    <Button text="{i18n>authFormLoginBtn}" press="authUser"/>
+                    <Button text="{i18n>authFormLoginBtn}" press="handleAuthUser"/>
                 </Toolbar>
             </headerToolbar>
                 <f:SimpleForm editable="true" >

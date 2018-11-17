@@ -5,13 +5,13 @@
 	<Dialog title="{i18n>partyDialogTitle}: {name}" >
         <content>
             <Panel expandable="false" expanded="true">
-                <List id="partyUsersList" mode="Delete" delete="kickUser" items="{ path:'users'}">
+                <List id="partyUsersList" mode="Delete" delete="handleKickUser" items="{ path:'users'}">
                     <StandardListItem title="{user}" />
                 </List>
             </Panel>
         </content>
         <beginButton>
-            <Button text="{i18n>partyDismiss}" press="dismissParty" />
+            <Button text="{i18n>partyDismiss}" press="handleDismissParty" />
         </beginButton>        
         <endButton>
             <Button text="{i18n>genericCancel}" press="closeDlg" />
