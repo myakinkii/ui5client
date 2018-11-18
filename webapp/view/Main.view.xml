@@ -8,13 +8,19 @@
 	xmlns="sap.m"
 	displayBlock="true">
 	<u:Shell>
+		<u:headItems>
+			<u:ShellHeadItem icon="sap-icon://decline" press="handleQuitGame" />
+		</u:headItems>	
+		<u:headItems>
+			<u:ShellHeadItem icon="sap-icon://move" toggleEnabled="true" selected="{/altKeyMode}" press="handleAltToggle" />
+		</u:headItems>		
 		<u:headEndItems>
 			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
 		</u:headEndItems>
 		<u:user>
 			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
 		</u:user>
-		<Carousel class="sapUiContentPadding" height="100%">
+		<Carousel class="sapUiContentPadding" height="100%" id="crsl">
 			<pages>
 				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" />
 				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />

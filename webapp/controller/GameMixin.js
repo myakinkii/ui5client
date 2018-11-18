@@ -2,12 +2,12 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"com/minesnf/ui5client/controls/Board",
 	"com/minesnf/ui5client/controls/Cell",
-	"sap/m/Dialog","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
+	"sap/m/ScrollContainer","sap/m/Dialog","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
 	"sap/ui/model/json/JSONModel"
-], function (Controller, Board, Cell, Dialog, Panel, Button, ToggleButton, JSONModel) {
+], function (Controller, Board, Cell, ScrollContainer, Dialog, Panel, Button, ToggleButton, JSONModel) {
 	"use strict";
 	
-	var CELL_SIZE=24;
+	var CELL_SIZE=28;
 	var MEASURE_TS; // to measure renderer performance
 	
 	return Controller.extend("GameMixin",{
@@ -39,7 +39,7 @@ sap.ui.define([
 			var self = this;
 			var cols=e.arg.c;
 			var rows=e.arg.r;
-			var width=(CELL_SIZE+4)*(cols+2)+'px'; // dunno how to calculate that stuff correctly
+			var width=(CELL_SIZE+4)*cols+32+'px'; // panel has 16px margin
 			var title=e.arg.boardId+" ("+cols+"x"+rows+")";
 			var mdlData={altKeyMode:false};
 			var cells=[],coord;
@@ -70,6 +70,7 @@ sap.ui.define([
 			if (!this.gameDialog) {
 				var board=new Board({ rows:rows, cols:cols, content:cells });
 				var panel=new Panel({ width:width, content:[ board ]});
+				/*
 				this.attachMove(board,function(elem){
 					if (!elem.getChecked()){
 						elem.setChecked(true);
@@ -97,10 +98,16 @@ sap.ui.define([
 					}
 				});
 				this.getView().addDependent(this.gameDialog);
+				*/
+				var crsl=this.getView().byId("crsl");
+				this.gameDialog= new ScrollContainer({height:"100%",width:"100%",horizontal:false,vertical:true,content:[panel]});
+				crsl.insertPage(this.gameDialog,1);
+				window.setTimeout(function(){crsl.next();},1000);
+				
 			}
 			var boardMdl=new JSONModel(mdlData);
 			this.gameDialog.setModel(boardMdl,"board");
-			this.gameDialog.open();
+			// this.gameDialog.open();
 		},
 
 		onEndGame:function(){
@@ -110,8 +117,11 @@ sap.ui.define([
 
 		quitGame:function(){
 			this.getView().getModel().setProperty('/bestTime','');
-			this.gameDialog.close(); 
-			this.processCommand("/quit");
+			// this.gameDialog.close();
+			if (this.localGame){
+				this.getView().byId("crsl").removePage(1);
+				this.gameDialog=null;
+			} else this.processCommand("/quit");
 		},
 
 		onCellValues:function(e){

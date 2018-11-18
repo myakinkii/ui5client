@@ -44,6 +44,11 @@ sap.ui.define([
 			this.initInventory();
 		},
 		
+		handleAltToggle:function(e){
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/altKeyMode',!mdl.getProperty('/altKeyMode'));
+		},
+		
 		initNow:function(){
 			var self=this;
 			this.setBusy(this.geti18n("initClient"));

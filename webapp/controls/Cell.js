@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (Control){
 	"use strict";
 	
-	var CELL_SIZE=24;
+	var CELL_SIZE=28;
 		
 	return Control.extend("com.minesnf.ui5client.controls.Cell", {
 		metadata : {
@@ -26,7 +26,9 @@ sap.ui.define([
 			oRm.addStyle("width", oControl.getSize());
 			oRm.addStyle("height", oControl.getSize());
 			oRm.addStyle("text-align","center");
-			var color=oControl.getVal()==''?oControl.getParent().getBoxColor():'#fff';
+			var bgcolor="#fafafa";
+			// var bgcolor="#fff'";
+			var color=oControl.getVal()==''?oControl.getParent().getBoxColor():bgcolor;
 			oRm.addStyle("border", "1px solid " + color);
 			oRm.writeStyles();
 			oRm.writeClasses();
