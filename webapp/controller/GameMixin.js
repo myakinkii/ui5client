@@ -8,6 +8,7 @@ sap.ui.define([
 	"use strict";
 	
 	var CELL_SIZE=24;
+	var MEASURE_TS; // to measure renderer performance
 	
 	return Controller.extend("GameMixin",{
 					
@@ -57,6 +58,12 @@ sap.ui.define([
 							self.processCommand("/check "+col+" "+row);
 						 }
 					});
+					// cell.addEventDelegate({
+					// 	onAfterRendering:function(){
+					// 		var delta=Date.now()-MEASURE_TS;
+					// 		console.log(delta);
+					// 	}
+					// });
 					cells.push(cell);
 				}
 			}
@@ -108,6 +115,7 @@ sap.ui.define([
 		},
 
 		onCellValues:function(e){
+			MEASURE_TS=Date.now();
 			if (this.gameDialog){
 				var mdl=this.gameDialog.getModel("board");
 				if (!this.digitPocket) this.digitPocket={};
