@@ -24,6 +24,7 @@ sap.ui.define([
 				msg:'',
 				auth:{},
 				altKeyMode:false,
+				gameStarted:false,
 				localGame:true,
 				ideTestMode:this.ideTestMode
 			}));

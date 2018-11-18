@@ -2,12 +2,12 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"com/minesnf/ui5client/controls/Board",
 	"com/minesnf/ui5client/controls/Cell",
-	"sap/m/ScrollContainer","sap/m/Dialog","sap/m/Panel","sap/m/Button","sap/m/ToggleButton",
+	"sap/m/FlexBox","sap/m/ScrollContainer","sap/m/Panel",
 	"sap/ui/model/json/JSONModel"
-], function (Controller, Board, Cell, ScrollContainer, Dialog, Panel, Button, ToggleButton, JSONModel) {
+], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel) {
 	"use strict";
 	
-	var CELL_SIZE=28;
+	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
 	var MEASURE_TS; // to measure renderer performance
 	
 	return Controller.extend("GameMixin",{
@@ -41,87 +41,62 @@ sap.ui.define([
 			var rows=e.arg.r;
 			var width=(CELL_SIZE+4)*cols+32+'px'; // panel has 16px margin
 			var title=e.arg.boardId+" ("+cols+"x"+rows+")";
-			var mdlData={altKeyMode:false};
+			var mdlData={};
 			var cells=[],coord;
 			for (var r=1;r<=rows;r++) {
 				for (var c=1;c<=cols;c++) {
 					coord=e.arg.boardId+"_"+c+"_"+r;
-					// mdlData[coord]=c;
 					mdlData[coord]="";
-					var cell=new Cell({
-						altKeyMode:"{/altKeyMode}",
-						row:r, col:c, 
-						val:"{board>/"+coord+"}",
-						openCell:function(e){
-							var row=e.getSource().getRow();
-							var col=e.getSource().getCol();
-							self.processCommand("/check "+col+" "+row);
-						 }
-					});
-					// cell.addEventDelegate({
-					// 	onAfterRendering:function(){
-					// 		var delta=Date.now()-MEASURE_TS;
-					// 		console.log(delta);
-					// 	}
-					// });
-					cells.push(cell);
+					if (!this.gameDialog){
+						var cell=new Cell({
+							altKeyMode:"{/altKeyMode}",
+							row:r, col:c, 
+							val:"{board>/"+coord+"}",
+							openCell:function(e){
+								var row=e.getSource().getRow();
+								var col=e.getSource().getCol();
+								self.processCommand("/check "+col+" "+row);
+							 }
+						});
+						// cell.addEventDelegate({
+						// 	onAfterRendering:function(){
+						// 		var delta=Date.now()-MEASURE_TS;
+						// 		console.log(delta);
+						// 	}
+						// });
+						cells.push(cell);
+					}
 				}
 			}
 			if (!this.gameDialog) {
+				var crsl=this.getView().byId("crsl");
 				var board=new Board({ rows:rows, cols:cols, content:cells });
 				var panel=new Panel({ width:width, content:[ board ]});
-				/*
-				this.attachMove(board,function(elem){
-					if (!elem.getChecked()){
-						elem.setChecked(true);
-						var row=elem.getRow();
-						var col=elem.getCol();
-						// console.log("check",col,row);
-						self.processCommand("/check "+col+" "+row);
-					}
+				this.gameDialog=new ScrollContainer({height:"100%",width:"100%",horizontal:false,vertical:true,
+					content:[ new FlexBox({ width:"100%", justifyContent:"Center", items:[ panel ] }) ]
 				});
-				this.gameDialog = new Dialog({
-					showHeader:false,
-					content: [ panel ],
-					beginButton: new ToggleButton({
-						visible:"{device>/system/desktop}",
-						text: '{i18n>altKeyMode}',
-						pressed:"{/altKeyMode}"
-					}),
-					endButton: new Button({
-						text: '{i18n>genericClose}',
-						press: [this.quitGame,this]
-					}),
-					afterClose:function(e){ 
-						e.getSource().destroy(); 
-						self.gameDialog=null;
-					}
-				});
-				this.getView().addDependent(this.gameDialog);
-				*/
-				var crsl=this.getView().byId("crsl");
-				this.gameDialog= new ScrollContainer({height:"100%",width:"100%",horizontal:false,vertical:true,content:[panel]});
 				crsl.insertPage(this.gameDialog,1);
-				window.setTimeout(function(){crsl.next();},1000);
-				
+				window.setTimeout(function(){crsl.next();},300);
+				this.getView().getModel().setProperty('/gameStarted',true);
 			}
-			var boardMdl=new JSONModel(mdlData);
-			this.gameDialog.setModel(boardMdl,"board");
-			// this.gameDialog.open();
+			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
 
 		onEndGame:function(){
-			this.getView().getModel().setProperty('/bestTime','');
-			this.gameDialog.close();
+			this.closeGame();
 		},
 
 		quitGame:function(){
-			this.getView().getModel().setProperty('/bestTime','');
-			// this.gameDialog.close();
 			if (this.localGame){
-				this.getView().byId("crsl").removePage(1);
-				this.gameDialog=null;
+				this.closeGame();
 			} else this.processCommand("/quit");
+		},
+		
+		closeGame:function(){
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/gameStarted',false);
+			this.getView().byId("crsl").removePage(1);
+			this.gameDialog=null;
 		},
 
 		onCellValues:function(e){
@@ -159,7 +134,6 @@ sap.ui.define([
 				// 'streak:'+e.arg.streak
 			]
 			this.showToast(msgs.join('\n'));
-			this.getView().getModel().setProperty('/bestTime',e.arg.bestTime);
 		}
 	});
 });

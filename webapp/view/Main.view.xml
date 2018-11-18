@@ -9,10 +9,10 @@
 	displayBlock="true">
 	<u:Shell>
 		<u:headItems>
-			<u:ShellHeadItem icon="sap-icon://decline" press="handleQuitGame" />
+			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline" press="handleQuitGame" />
 		</u:headItems>	
 		<u:headItems>
-			<u:ShellHeadItem icon="sap-icon://move" toggleEnabled="true" selected="{/altKeyMode}" press="handleAltToggle" />
+			<u:ShellHeadItem visible="{device>/system/desktop}" icon="sap-icon://move" toggleEnabled="true" selected="{/altKeyMode}" press="handleAltToggle" />
 		</u:headItems>		
 		<u:headEndItems>
 			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
