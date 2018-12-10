@@ -125,7 +125,7 @@ sap.ui.define([
 		},
 
 		onShowResultRank:function(e){
-			if ( this.localGame && e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
 			var msgs=[
 				'time:'+ e.arg.time+'s',
@@ -137,14 +137,14 @@ sap.ui.define([
 		},
 		
 		onShowResultCoop:function(e){
-			if ( this.localGame && e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
 			var msgs=[ 'time:'+ e.arg.time+'s' ];
 			this.showToast(msgs.join('\n'));
 		},		
 		
 		onShowResultLocal:function(e){
-			if ( this.localGame && e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
 			var msgs=['time:'+ e.arg.time+'s'];
 			if (e.arg.livesLost) msgs.push("lives lost: "+e.arg.livesLost);
