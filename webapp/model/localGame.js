@@ -276,7 +276,7 @@ sap.ui.define([], function () {
 			process.exit(0);
 	};
 
-	function RankGame(pars) {
+	function LocalGame(pars) {
 		Game.call(this, pars);
 		this.bestTime = this.profiles[this.partyLeader][this.bSize];
 		this.gamesPlayed = 0;
@@ -286,13 +286,15 @@ sap.ui.define([], function () {
 		this.loseStreak = 0;
 	};
 
-	RankGame.prototype = new Game;
+	LocalGame.prototype = new Game;
 
-	RankGame.prototype.onStartBoard = function () {
+	LocalGame.prototype.onStartBoard = function () {
 		this.resetScore();
+		this.livesLost=0;
+		this.lostCoords={};
 	};
 
-	RankGame.prototype.onResetBoard = function (e) {
+	LocalGame.prototype.onResetBoard = function (e) {
 		this.gamesPlayed++;
 		if (e.win) {
 			this.winStreak++;
@@ -307,23 +309,31 @@ sap.ui.define([], function () {
 		stat.bestTime = this.bestTime;
 		stat.result = e.win ? 'win' : 'fail',
 			stat.gamesPlayed = this.gamesPlayed,
+			stat.livesLost=this.livesLost,
 			stat.won = this.won,
 			stat.lost = this.lost,
 			stat.winPercentage = Math.round(100 * this.won / this.gamesPlayed) + '%',
 			stat.streak = this.winStreak ? this.winStreak : this.loseStreak;
-		this.emitEvent('party', this.id, 'game', 'ShowResultRank', stat);
+		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', stat);
 	};
 
-	RankGame.prototype.onCells = function (re) {
+	LocalGame.prototype.onCells = function (re) {
 		this.openCells(re.cells);
 	};
 
-	RankGame.prototype.onBomb = function (re) {
-		this.openCells(this.board.mines);
-		this.resetBoard(re);
+	LocalGame.prototype.onBomb = function (re) {
+		// this.openCells(this.board.mines);
+		// this.resetBoard(re);
+		var coord=re.coords[0]+"_"+re.coords[1];
+		if (!this.lostCoords[coord]){
+			this.lostCoords[coord]=0;
+			this.livesLost++;
+		}
+		this.lostCoords[coord]++;
+		this.openCells(re.cells);
 	};
 
-	RankGame.prototype.onComplete = function (re) {
+	LocalGame.prototype.onComplete = function (re) {
 		this.openCells(re.cells);
 		this.openCells(this.board.mines);
 		re.win = 1;
@@ -341,8 +351,8 @@ sap.ui.define([], function () {
 		this.resetBoard(re);
 	};
 	
-	RankGame.Board=Board;
+	LocalGame.Board=Board;
 
-	return RankGame;
+	return LocalGame;
 
 });

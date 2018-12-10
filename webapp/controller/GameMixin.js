@@ -132,9 +132,24 @@ sap.ui.define([
 				// 'wins/loss ratio:'+e.arg.winPercentage,
 				// 'won:'+e.arg.won,
 				// 'streak:'+e.arg.streak
-			]
+			];
 			this.showToast(msgs.join('\n'));
-		}
+		},
+		
+		onShowResultCoop:function(e){
+			if ( this.localGame && e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			this.digitPocket=null;
+			var msgs=[ 'time:'+ e.arg.time+'s' ];
+			this.showToast(msgs.join('\n'));
+		},		
+		
+		onShowResultLocal:function(e){
+			if ( this.localGame && e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			this.digitPocket=null;
+			var msgs=['time:'+ e.arg.time+'s'];
+			if (e.arg.livesLost) msgs.push("lives lost: "+e.arg.livesLost);
+			this.showToast(msgs.join(', '));
+		}		
 	});
 });
 	
