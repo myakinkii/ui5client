@@ -8,39 +8,14 @@ sap.ui.define([
 	"use strict";
 	
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
-	var MEASURE_TS; // to measure renderer performance
 	
 	return Controller.extend("GameMixin",{
-					
-		attachMove:function(element,cbFn){
-			// element.attachBrowserEvent('touchstart', function(e){
-			// 	var elem=$(e.target).control();
-			// 	if (cbFn && elem && elem[0]) cbFn(elem[0]);
-			// 	e.preventDefault();
-			// });
-			element.attachBrowserEvent('touchmove', function(e){
-				var touch,x,y;
-				if (!e) e = event;
-				if(e.touches && e.touches.length == 1) {
-					touch = e.touches[0];
-					x=touch.pageX;
-					y=touch.pageY;
-				}
-				var elem;
-				if (x&&y) elem=$(document.elementFromPoint(x,y)).control();
-				if (cbFn && elem && elem[0]) {
-					if (elem[0].getMetadata().getName()=='com.minesnf.ui5client.controls.Cell') cbFn(elem[0]);
-				}
-				e.preventDefault();
-			});
-		},
 
 		onStartGame: function (e) {
 			var self = this;
 			var cols=e.arg.c;
 			var rows=e.arg.r;
 			var width=(CELL_SIZE+4)*cols+32+'px'; // panel has 16px margin
-			var title=e.arg.boardId+" ("+cols+"x"+rows+")";
 			var mdlData={};
 			var cells=[],coord;
 			for (var r=1;r<=rows;r++) {
@@ -52,34 +27,36 @@ sap.ui.define([
 							altKeyMode:"{/altKeyMode}",
 							row:r, col:c, 
 							val:"{board>/"+coord+"}",
-							openCell:function(e){
-								var row=e.getSource().getRow();
-								var col=e.getSource().getCol();
-								self.processCommand("/check "+col+" "+row);
-							 }
+							openCell: function(evt){self.checkCell.call(self,evt.getSource()); }
 						});
-						// cell.addEventDelegate({
-						// 	onAfterRendering:function(){
-						// 		var delta=Date.now()-MEASURE_TS;
-						// 		console.log(delta);
-						// 	}
-						// });
 						cells.push(cell);
 					}
 				}
 			}
 			if (!this.gameDialog) {
-				var crsl=this.getView().byId("crsl");
 				var board=new Board({ rows:rows, cols:cols, content:cells });
+				board.attachMove(function(cellMoved){ self.checkCell.call(self,cellMoved); });
 				var panel=new Panel({ width:width, content:[ board ]});
 				this.gameDialog=new ScrollContainer({height:"100%",width:"100%",horizontal:false,vertical:true,
 					content:[ new FlexBox({ width:"100%", justifyContent:"Center", items:[ panel ] }) ]
 				});
-				crsl.insertPage(this.gameDialog,1);
-				window.setTimeout(function(){crsl.next();},300);
+				var boardPage=this.getView().byId("board");
+				boardPage.destroyContent();
+				boardPage.addContent(this.gameDialog);
+				var navContainer=this.getView().byId("app");
+				navContainer.to(boardPage,"flip");
+				
 				this.getView().getModel().setProperty('/gameStarted',true);
 			}
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
+		},
+		
+		checkCell:function(cell){
+			// if (cell.getChecked()) return;
+			// cell.setChecked(true);
+			// var self=this;
+			// window.setTimeout(function(){ self.processCommand("/check "+cell.getCol()+" "+cell.getRow()); },0);
+			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
 		},
 
 		onEndGame:function(){
@@ -95,12 +72,13 @@ sap.ui.define([
 		closeGame:function(){
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/gameStarted',false);
-			this.getView().byId("crsl").removePage(1);
+			var navContainer=this.getView().byId("app");
+			var gamePage=this.getView().byId("game");
+			navContainer.to(gamePage,"flip");
 			this.gameDialog=null;
 		},
 
 		onCellValues:function(e){
-			MEASURE_TS=Date.now();
 			if (this.gameDialog){
 				var mdl=this.gameDialog.getModel("board");
 				if (!this.digitPocket) this.digitPocket={};
@@ -144,7 +122,7 @@ sap.ui.define([
 		},		
 		
 		onShowResultLocal:function(e){
-			this.mergeResultToInventory(this.digitPocket);
+			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
 			var msgs=['time:'+ e.arg.time+'s'];
 			if (e.arg.livesLost) msgs.push("lives lost: "+e.arg.livesLost);

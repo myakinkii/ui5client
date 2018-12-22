@@ -24,6 +24,7 @@ sap.ui.define([
 				msg:'',
 				auth:{},
 				altKeyMode:false,
+				showPane:false,
 				gameStarted:false,
 				localGame:true,
 				ideTestMode:this.ideTestMode
@@ -49,6 +50,11 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/altKeyMode',!mdl.getProperty('/altKeyMode'));
 		},
+		
+		handleShowPane:function(e){
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/showPane',!mdl.getProperty('/showPane'));
+		},		
 		
 		initNow:function(){
 			var self=this;

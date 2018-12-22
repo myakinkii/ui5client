@@ -32,6 +32,24 @@ sap.ui.define([
 				oRm.write("</div>");
 			});
 			oRm.write("</div>");
-		}	
+		},
+		
+		attachMove:function(cbFn){
+			this.attachBrowserEvent('touchmove', function(e){
+				var touch,x,y;
+				if (!e) e = event;
+				if(e.touches && e.touches.length == 1) {
+					touch = e.touches[0];
+					x=touch.pageX;
+					y=touch.pageY;
+				}
+				var elem;
+				if (x&&y) elem=$(document.elementFromPoint(x,y)).control();
+				if (cbFn && elem && elem[0]) {
+					if (elem[0].getMetadata().getName()=='com.minesnf.ui5client.controls.Cell') cbFn(elem[0]);
+				}
+				e.preventDefault();
+			});
+		},
 	});
 });

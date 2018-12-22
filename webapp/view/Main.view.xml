@@ -7,12 +7,11 @@
 	xmlns:u="sap.ui.unified"
 	xmlns="sap.m"
 	displayBlock="true">
-	<u:Shell>
+	<u:Shell showPane="{/showPane}">
 		<u:headItems>
-			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline" press="handleQuitGame" />
-		</u:headItems>	
-		<u:headItems>
-			<u:ShellHeadItem visible="{device>/system/desktop}" icon="sap-icon://move" toggleEnabled="true" selected="{/altKeyMode}" press="handleAltToggle" />
+			<u:ShellHeadItem icon="sap-icon://menu2" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />
+			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline"  press="handleQuitGame" />
+			<u:ShellHeadItem visible="{device>/system/desktop}" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
 		</u:headItems>		
 		<u:headEndItems>
 			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
@@ -20,14 +19,27 @@
 		<u:user>
 			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
 		</u:user>
-		<Carousel class="sapUiContentPadding" height="100%" id="crsl">
+		<u:paneContent>
+			<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />
+		</u:paneContent>
+		
+		<NavContainer id="app">
 			<pages>
-				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" />
-				<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />
-				<!--<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselChat" type="XML" />-->
-				<!--<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselParties" type="XML" />-->
-				<!--<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselUsers" type="XML" />-->
+				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" /></Page>
+				<Page id="board" showHeader="false" />
+				<!--<Page id="inventory" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" /></Page>-->
 			</pages>
-		</Carousel>
+		</NavContainer>
+		
+		<!--<Carousel class="sapUiContentPadding" height="100%" id="crsl">-->
+		<!--	<pages>-->
+		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" />-->
+		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />-->
+		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselChat" type="XML" />-->
+		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselParties" type="XML" />-->
+		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselUsers" type="XML" />-->
+		<!--	</pages>-->
+		<!--</Carousel>-->
+		
 	</u:Shell>
 </mvc:View>

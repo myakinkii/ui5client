@@ -322,15 +322,18 @@ sap.ui.define([], function () {
 	};
 
 	LocalGame.prototype.onBomb = function (re) {
-		// this.openCells(this.board.mines);
-		// this.resetBoard(re);
 		var coord=re.coords[0]+"_"+re.coords[1];
 		if (!this.lostCoords[coord]){
 			this.lostCoords[coord]=0;
 			this.livesLost++;
 		}
-		this.lostCoords[coord]++;
-		this.openCells(re.cells);
+		if (this.livesLost==8){
+			this.openCells(this.board.mines);
+			this.resetBoard(re);
+		} else {
+			this.lostCoords[coord]++;
+			this.openCells(re.cells);
+		}
 	};
 
 	LocalGame.prototype.onComplete = function (re) {
