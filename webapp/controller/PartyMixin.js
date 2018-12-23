@@ -25,6 +25,10 @@ sap.ui.define([
 				partiesCount[p.bSize][p.mode]++;
 				for (u in p.users) p.users[u]={user:u};
 			}
+			
+			partiesCount.coop=partiesCount.s.coop+partiesCount.m.coop+partiesCount.b.coop;
+			partiesCount.versus=partiesCount.s.versus+partiesCount.m.versus+partiesCount.b.versus;
+			
 			this.getView().getModel().setProperty('/partiesCount',partiesCount);
 			this.getView().getModel().setProperty('/parties',parties);
 		},
@@ -51,8 +55,9 @@ sap.ui.define([
 			var me=this.getView().getModel().getProperty('/auth/user');
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
-			var localGame=this.getView().getModel().getProperty('/localGame');
+			var localGame=(mode=='local'||this.getView().getModel().getProperty('/offlineMode'));
 			if (localGame) {
+				mode="rank";
 				var mockGames={
 					s:{"boardId":"rank1","r":8,"c":8,b:10},
 					m:{"boardId":"rank1","r":16,"c":16,b:40},

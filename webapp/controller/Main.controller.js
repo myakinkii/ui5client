@@ -17,20 +17,26 @@ sap.ui.define([
 			
 			var self=this;
 			
-			this.offlineMode=false;
+			this.forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
+			this.offlineMode=this.forceOfflineMode; // current state of offline/online mode
+			var onlineModeAvailble=true; // not inside webide
 			var initData=this.getOwnerComponent().getComponentData();
-			if (initData && initData.offlineMode) this.offlineMode=true;
-			else if (navigator.connection && navigator.connection.type==Connection.NONE) this.offlineMode=true;
+			if (initData && initData.offlineMode) {
+				this.offlineMode=true;
+				onlineModeAvailble=false;
+			} else if (Connection && navigator.connection && navigator.connection.type==Connection.NONE) {
+				this.offlineMode=true;
+			}
 			
 			this.getView().setModel(new JSONModel({
-				quickMode:"rank",
+				quickMode:"local",
 				evts:{},
 				msg:'',
 				auth:{},
 				altKeyMode:false,
 				showPane:false,
 				gameStarted:false,
-				localGame:true,
+				onlineModeAvailble:onlineModeAvailble,
 				offlineMode:this.offlineMode
 			}));
 			
@@ -57,14 +63,35 @@ sap.ui.define([
 		},
 		
 		deviceOnline:function(){
-			console.log('on');
-			this.getView().getModel().setProperty('/offlineMode', false);
-			this.initNow();
+			if (!this.forceOfflineMode) {
+				this.getView().getModel().setProperty('/offlineMode', false);
+				this.initNow();
+			}
 		},
 		
 		deviceOffline:function(){
-			console.log('off');
 			this.getView().getModel().setProperty('/offlineMode', true);
+		},
+		
+		switchMode:function(){
+			if (this.getView().getModel().getProperty('/offlineMode')){
+				this.forceOfflineMode=true;
+				window.localStorage.setItem("forceOfflineMode",'force');
+			} else {
+				this.forceOfflineMode=false;
+				window.localStorage.removeItem("forceOfflineMode");
+				if (navigator.connection.type==Connection.NONE) this.getView().getModel().setProperty('/offlineMode',true);
+				else {
+					this.getView().getModel().setProperty('/offlineMode', false);
+					this.initNow();
+				}
+			}
+		},
+		
+		formatMode:function(offline,onlineModeAvailble){
+			if (this.forceOfflineMode || !onlineModeAvailble) return 'forced Offline';
+			if (offline) return 'Offline';
+			return 'Online';
 		},
 		
 		handleAltToggle:function(e){
@@ -93,10 +120,10 @@ sap.ui.define([
 		},
 		
 		processCommand:function(s){
-			var localGame=this.getView().getModel().getProperty('/localGame');
+			// var localGame=this.getView().getModel().getProperty('/offlineMode');
 			var cmd=s.split(" ");
 			var me=this.getView().getModel().getProperty('/auth/user');
-			if (localGame && cmd[0]=="/check"){
+			if (this.localGame && cmd[0]=="/check"){
 				this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},

@@ -76,6 +76,7 @@ sap.ui.define([
 			var gamePage=this.getView().byId("game");
 			navContainer.to(gamePage,"flip");
 			this.gameDialog=null;
+			this.localGame=null;
 		},
 
 		onCellValues:function(e){
