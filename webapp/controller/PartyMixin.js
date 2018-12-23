@@ -13,30 +13,7 @@ sap.ui.define([
 		},		
 		
 		onUpdateParties:function(e){
-			var mockParties={
-				"10":{
-					"id":10,"name":"coop10","mode":"coop","bSize":"s","leader":"user1",
-					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
-				},
-				"11":{
-					"id":10,"name":"coop11","mode":"coop","bSize":"s","leader":"user1",
-					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
-				},
-				"12":{
-					"id":10,"name":"coop12","mode":"coop","bSize":"s","leader":"user1",
-					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
-				},
-				"13":{
-					"id":10,"name":"coop13","mode":"coop","bSize":"s","leader":"user1",
-					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
-				},
-				"14":{
-					"id":10,"name":"coop14","mode":"coop","bSize":"s","leader":"user1",
-					"maxPlayers":2,"minLevel":0,"maxLevel":8,"curPlayers":1,"users":{"user1":1,"user2":2}
-				},
-				
-			};
-			var parties=e.arg||mockParties;
+			var parties=e.arg||{};
 			var partiesCount={
 				s:{rank:0,coop:0,versus:0},
 				m:{rank:0,coop:0,versus:0},

@@ -86,7 +86,7 @@
 						</Panel>
 						
 						<Panel>
-							<ToggleButton width="100%" text="Local" pressed="{/localGame}" enabled="{= !${/ideTestMode} }"/>
+							<ToggleButton width="100%" text="Local" pressed="{/localGame}" enabled="{= !${/offlineMode} }"/>
 						</Panel>
 						
 					</l:VerticalLayout>

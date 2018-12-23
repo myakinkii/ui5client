@@ -14,10 +14,14 @@ sap.ui.define([
 		onInit:function(){
 			// just patch controller with some stuff I ripped out of it due to lots of badly written code in controller
 			jQuery.extend(this, GameMixin.prototype, InventoryMixin.prototype, UserMixin.prototype, PartyMixin.prototype);
+			
 			var self=this;
-			this.ideTestMode=false;
+			
+			this.offlineMode=false;
 			var initData=this.getOwnerComponent().getComponentData();
-			if (initData && initData.ideTestMode) this.ideTestMode=true;
+			if (initData && initData.offlineMode) this.offlineMode=true;
+			else if (navigator.connection && navigator.connection.type==Connection.NONE) this.offlineMode=true;
+			
 			this.getView().setModel(new JSONModel({
 				quickMode:"rank",
 				evts:{},
@@ -27,23 +31,40 @@ sap.ui.define([
 				showPane:false,
 				gameStarted:false,
 				localGame:true,
-				ideTestMode:this.ideTestMode
+				offlineMode:this.offlineMode
 			}));
+			
 			// this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 			// 	if(e.which == 13) self.sendMsg.call(self);
 			// });
+			
 			sap.ui.getCore().getEventBus().subscribe(
 				"message",
 				function(channel,evtId,evtData){
 					self.processEvent.call(self,evtData); 
 				}
-			);			
-			if (this.ideTestMode) {
+			);
+			
+			this.initInventory();
+
+			if (this.offlineMode) {
 				this.onAuthorize({});
 				this.onUpdateParties({});
 			} else this.initNow();
 			
-			this.initInventory();
+			document.addEventListener("online", function(){self.deviceOnline.call(self);}, false);
+			document.addEventListener("offline", function(){self.deviceOffline.call(self);}, false);
+		},
+		
+		deviceOnline:function(){
+			console.log('on');
+			this.getView().getModel().setProperty('/offlineMode', false);
+			this.initNow();
+		},
+		
+		deviceOffline:function(){
+			console.log('off');
+			this.getView().getModel().setProperty('/offlineMode', true);
 		},
 		
 		handleAltToggle:function(e){
