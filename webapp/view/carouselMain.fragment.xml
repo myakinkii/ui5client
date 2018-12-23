@@ -83,7 +83,7 @@
 							</List>
 							</Panel>
 							
-							<Panel>
+							<Panel visible="{= !${/onlineOnlyClient} }">
 								<ToggleButton width="100%" 
 									text="{parts: [{path:'/offlineMode'}, {path:'/onlineModeAvailble'}],formatter:'.formatMode'}"
 									type="{= ${/offlineMode}?'Reject':'Default' }"

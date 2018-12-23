@@ -20,11 +20,13 @@ sap.ui.define([
 			this.forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
 			this.offlineMode=this.forceOfflineMode; // current state of offline/online mode
 			var onlineModeAvailble=true; // not inside webide
+			var onlineOnlyClient=typeof Connection == "undefined"; // web ui client
 			var initData=this.getOwnerComponent().getComponentData();
 			if (initData && initData.offlineMode) {
 				this.offlineMode=true;
 				onlineModeAvailble=false;
-			} else if (Connection && navigator.connection && navigator.connection.type==Connection.NONE) {
+				onlineOnlyClient=false;
+			} else if (!onlineOnlyClient && navigator.connection && navigator.connection.type==Connection.NONE) {
 				this.offlineMode=true;
 			}
 			
@@ -37,7 +39,8 @@ sap.ui.define([
 				showPane:false,
 				gameStarted:false,
 				onlineModeAvailble:onlineModeAvailble,
-				offlineMode:this.offlineMode
+				offlineMode:this.offlineMode,
+				onlineOnlyClient:onlineOnlyClient
 			}));
 			
 			// this.getView().byId("input").attachBrowserEvent('keypress', function(e){
