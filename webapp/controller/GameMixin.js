@@ -120,7 +120,23 @@ sap.ui.define([
 			this.digitPocket=null;
 			var msgs=[ 'time:'+ e.arg.time+'s' ];
 			this.showToast(msgs.join('\n'));
-		},		
+		},
+		
+		onShowResultVersus:function(e){
+			var scores=[];
+			for (var s in e.arg.score) scores.push({user:s,score:e.arg.score[s]});
+			scores.sort(function(s1,s2){ return s2.score-s1.score; });
+			var me=this.getView().getModel().getProperty('/auth/user');
+			var result='lost :(';
+			if (scores[0].user==me) {
+				this.mergeResultToInventory(this.digitPocket);
+				result='won!';
+			}
+			this.digitPocket=null;
+			var msgs=[ 'time:'+ e.arg.time+'s', result];
+			msgs=msgs.concat(scores.map(function(s){ return s.user+":"+s.score; }));
+			this.showToast(msgs.join(', '),2000);
+		},			
 		
 		onShowResultLocal:function(e){
 			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
