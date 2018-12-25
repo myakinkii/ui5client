@@ -17,17 +17,17 @@ sap.ui.define([
 			
 			var self=this;
 			
-			this.forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
-			this.offlineMode=this.forceOfflineMode; // current state of offline/online mode
+			var forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
+			var offlineMode=forceOfflineMode; // current state of offline/online mode
 			var onlineModeAvailble=true; // not inside webide
 			var onlineOnlyClient=typeof Connection == "undefined"; // web ui client
 			var initData=this.getOwnerComponent().getComponentData();
 			if (initData && initData.offlineMode) {
-				this.offlineMode=true;
+				offlineMode=true;
 				onlineModeAvailble=false;
 				onlineOnlyClient=false;
 			} else if (!onlineOnlyClient && navigator.connection && navigator.connection.type==Connection.NONE) {
-				this.offlineMode=true;
+				offlineMode=true;
 			}
 			
 			this.getView().setModel(new JSONModel({
@@ -38,9 +38,9 @@ sap.ui.define([
 				altKeyMode:false,
 				showPane:false,
 				gameStarted:false,
-				onlineModeAvailble:onlineModeAvailble,
-				offlineMode:this.offlineMode,
-				onlineOnlyClient:onlineOnlyClient
+				offlineMode:offlineMode,
+				forceOfflineMode:forceOfflineMode,
+				showOfflineButton:!onlineOnlyClient&&onlineModeAvailble
 			}));
 			
 			// this.getView().byId("input").attachBrowserEvent('keypress', function(e){
@@ -56,7 +56,7 @@ sap.ui.define([
 			
 			this.initInventory();
 
-			if (this.offlineMode) {
+			if (offlineMode) {
 				this.onAuthorize({});
 				this.onUpdateParties({});
 			} else this.initNow();
@@ -66,8 +66,10 @@ sap.ui.define([
 		},
 		
 		deviceOnline:function(){
-			if (!this.forceOfflineMode) {
-				this.getView().getModel().setProperty('/offlineMode', false);
+			var mdl=this.getView().getModel();
+			var forceOffline=mdl.getProperty('/forceOfflineMode');
+			if (!forceOffline) {
+				mdl.setProperty('/offlineMode', false);
 				this.initNow();
 			}
 		},
@@ -77,24 +79,26 @@ sap.ui.define([
 		},
 		
 		switchMode:function(){
-			if (this.getView().getModel().getProperty('/offlineMode')){
-				this.forceOfflineMode=true;
+			var mdl=this.getView().getModel();
+			var forceOffline=mdl.getProperty('/forceOfflineMode');
+			if (!forceOffline){
 				window.localStorage.setItem("forceOfflineMode",'force');
+				mdl.setProperty('/offlineMode',true);
+				mdl.setProperty('/forceOfflineMode',true);
 			} else {
-				this.forceOfflineMode=false;
 				window.localStorage.removeItem("forceOfflineMode");
-				if (navigator.connection.type==Connection.NONE) this.getView().getModel().setProperty('/offlineMode',true);
-				else {
-					this.getView().getModel().setProperty('/offlineMode', false);
+				mdl.setProperty('/forceOfflineMode',false);
+				if (navigator.connection.type==Connection.NONE) {
+					mdl.setProperty('/offlineMode',true);
+				} else {
+					mdl.setProperty('/offlineMode', false);
 					this.initNow();
 				}
 			}
 		},
 		
-		formatMode:function(offline,onlineModeAvailble){
-			if (this.forceOfflineMode || !onlineModeAvailble) return 'forced Offline';
-			if (offline) return 'Offline';
-			return 'Online';
+		formatModeIcon:function(offline){
+			return 'sap-icon://'+(offline?'dis':'')+'connected';
 		},
 		
 		handleAltToggle:function(e){

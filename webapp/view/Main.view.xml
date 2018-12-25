@@ -9,19 +9,21 @@
 	displayBlock="true">
 	<u:Shell showPane="{/showPane}">
 		<u:headItems>
-			<u:ShellHeadItem icon="sap-icon://menu2" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />
+			<!--<u:ShellHeadItem icon="sap-icon://menu2" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />-->
 			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline"  press="handleQuitGame" />
 			<u:ShellHeadItem visible="{device>/system/desktop}" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
 		</u:headItems>		
 		<u:headEndItems>
-			<u:ShellHeadItem icon="sap-icon://log" tooltip="Logoff" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
+			<u:ShellHeadItem toggleEnabled="true" selected="{/forceOfflineMode}" 
+				icon="{parts: [{path:'/offlineMode'}],formatter:'.formatModeIcon'}" visible="{/showOfflineButton}" press="switchMode" />
+			<u:ShellHeadItem icon="sap-icon://log" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
 		</u:headEndItems>
 		<u:user>
 			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
 		</u:user>
-		<u:paneContent>
-			<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />
-		</u:paneContent>
+		<!--<u:paneContent>-->
+		<!--	<core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" />-->
+		<!--</u:paneContent>-->
 		
 		<NavContainer id="app">
 			<pages>
