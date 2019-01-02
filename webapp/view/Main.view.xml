@@ -12,7 +12,7 @@
 			<!--<u:ShellHeadItem icon="sap-icon://menu2" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />-->
 			<u:ShellHeadItem visible="{= !${/gameStarted} }" icon="{parts: [{path:'/page'}],formatter:'.formatPageIcon'}" press="switchPage" />
 			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline"  press="handleQuitGame" />
-			<u:ShellHeadItem visible="{device>/system/desktop}" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
+			<u:ShellHeadItem visible="{= ${device>/system/desktop} &amp;&amp; ${/gameStarted} }" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
 		</u:headItems>		
 		<u:headEndItems>
 			<u:ShellHeadItem toggleEnabled="true" selected="{/forceOfflineMode}" 
