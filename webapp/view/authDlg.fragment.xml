@@ -4,21 +4,33 @@
 	xmlns:core="sap.ui.core">
     <Dialog title="{i18n>authDialogTitle}: {/auth/user}" >
         <content>
-            <Panel expandable="true" expanded="true" visible="{= ${/auth/type}==='temp' }">
-            <headerToolbar>
-                <Toolbar>
-                    <Title text="{i18n>authForm}" />
-                    <ToolbarSpacer/>
-                    <Button text="{i18n>authFormLoginBtn}" press="handleAuthUser"/>
-                </Toolbar>
-            </headerToolbar>
-                <f:SimpleForm editable="true" >
-                    <Label text="{i18n>authUserName}" />
-                    <Input id="authUser" value="{auth>/user}" />
-                    <Label text="{i18n>authUserPwd}" />
-                    <Input id="authPwd" type="Password" value="{auth>/pwd}" />
-                </f:SimpleForm>
-            </Panel>
+			<Panel expandable="true" expanded="true" visible="{/showOfflineButton}">
+				<headerToolbar>
+					<Toolbar>
+						<Title text="{i18n>authServer}" />
+						<ToolbarSpacer/>
+						<Button icon="sap-icon://decline" press="resetSrv" />
+					</Toolbar>
+	            </headerToolbar>
+				<ComboBox width="100%" items="{ path:'/srvs'}" selectedKey="{/srv}" change="changeSrv">
+					<core:Item key="{url}" text="{name}" />
+				</ComboBox>
+			</Panel>
+            <!--<Panel expandable="true" expanded="true" visible="{= ${/auth/type}==='temp' }">-->
+            <!--<headerToolbar>-->
+            <!--    <Toolbar>-->
+            <!--        <Title text="{i18n>authForm}" />-->
+            <!--        <ToolbarSpacer/>-->
+            <!--        <Button text="{i18n>authFormLoginBtn}" press="handleAuthUser"/>-->
+            <!--    </Toolbar>-->
+            <!--</headerToolbar>-->
+            <!--    <f:SimpleForm editable="true" >-->
+            <!--        <Label text="{i18n>authUserName}" />-->
+            <!--        <Input id="authUser" value="{auth>/user}" />-->
+            <!--        <Label text="{i18n>authUserPwd}" />-->
+            <!--        <Input id="authPwd" type="Password" value="{auth>/pwd}" />-->
+            <!--    </f:SimpleForm>-->
+            <!--</Panel>-->
             <Panel headerText="{i18n>authProfile}" expandable="true" expanded="true">
                 <List headerText="{i18n>authStats}">
                     <items>

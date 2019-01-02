@@ -26,6 +26,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel"], func
 				this.authDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.authDlg", this );
 				this.getView().addDependent(this.authDlg);
 			}
+			/*
 			var authFn=function(e){ 
 				if(e.which == 13) this.authUser(); 
 			}.bind(this);
@@ -33,6 +34,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel"], func
 			sap.ui.getCore().byId("authPwd").attachBrowserEvent('keypress', authFn);
 			var authMdl=new JSONModel({user:'',pwd:''});
 			this.authDlg.setModel(authMdl,"auth");
+			*/
 			this.authDlg.open();
 		},
 

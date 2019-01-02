@@ -30,6 +30,10 @@ sap.ui.define([
 				offlineMode=true;
 			}
 			
+			var srvs={};
+			var srv=window.localStorage.getItem("srv")||'minesnf.com';
+			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
+			
 			this.getView().setModel(new JSONModel({
 				quickMode:"local",
 				evts:{},
@@ -38,6 +42,8 @@ sap.ui.define([
 				altKeyMode:false,
 				showPane:false,
 				gameStarted:false,
+				srvs:srvs,
+				srv:srv,
 				offlineMode:offlineMode,
 				forceOfflineMode:forceOfflineMode,
 				showOfflineButton:!onlineOnlyClient&&onlineModeAvailble
@@ -59,7 +65,7 @@ sap.ui.define([
 			if (offlineMode) {
 				this.onAuthorize({});
 				this.onUpdateParties({});
-			} else this.initNow();
+			} else this.initNow(srv);
 			
 			document.addEventListener("online", function(){self.deviceOnline.call(self);}, false);
 			document.addEventListener("offline", function(){self.deviceOffline.call(self);}, false);
@@ -111,11 +117,11 @@ sap.ui.define([
 			mdl.setProperty('/showPane',!mdl.getProperty('/showPane'));
 		},		
 		
-		initNow:function(){
+		initNow:function(defSrv){
 			var self=this;
+			var srv="http://"+(defSrv||this.getView().getModel().getProperty("srv"));
 			this.setBusy(this.geti18n("initClient"));
 			if (!window.now) {
-				var srv="http://minesnf.com";
 				$.ajax({ type: "GET", url: srv, async: false }); // just to init session
 				window.now = nowInitialize(srv);
 			}
@@ -124,6 +130,17 @@ sap.ui.define([
 				self.clearBusy();
 				self.nowReady=true;
 			});
+		},
+		
+		changeSrv:function(e){
+			var srv=e.getSource().getValue();
+			this.getView().getModel().setProperty("srv",srv);
+			window.localStorage.setItem("srv",srv);
+		},
+		
+		resetSrv:function(){
+			window.localStorage.removeItem("srv");
+			this.showToast(this.geti18n('genericSuccess'));
 		},
 		
 		processCommand:function(s){
