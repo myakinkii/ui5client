@@ -30,7 +30,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/m/MessageBox"], function (Contr
 				MessageBox.confirm(
 					this.geti18n('inventoryFuseConfirm',[ctx.val,ctx.key,fusedAmt,ctx.key+1]),
 					function(action){
-						if (MessageBox.Action.OK){
+						if (action==MessageBox.Action.OK){
 							inv[ctx.key+1].val+=fusedAmt;
 							inv[ctx.key].val=leftAmt;
 							self.syncInv(mdl,inv);
