@@ -115,6 +115,7 @@ sap.ui.define([
 			if (e.arg.result=="win") this.mergeResultToInventory(e.arg.digitPocket);
 			this.digitPocket=null;
 			var msgs=[
+				this.geti18n('gameResultRank'+(e.arg.result=="win"?'Win':'Lose')),
 				this.geti18n('gameResultTime',e.arg.time),
 				// 'wins/loss ratio:'+e.arg.winPercentage,
 				// 'won:'+e.arg.won,
@@ -144,7 +145,10 @@ sap.ui.define([
 				result=this.geti18n('gameResultVersusWin');
 			}
 			this.digitPocket=null;
-			var msgs=[ this.geti18n('gameResultTime',e.arg.time), result];
+			var msgs=[
+				result,
+				this.geti18n('gameResultTime',e.arg.time)
+			];
 			msgs=msgs.concat(scores.map(function(s){ return s.user+":"+s.score; }));
 			this.showToast(msgs.join('\n'),2000);
 		},
