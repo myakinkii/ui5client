@@ -106,6 +106,8 @@ sap.ui.define([], function () {
 	}
 
 	Game.prototype.dispatchEvent = function (e) {
+		if (e.command == 'hitMob' && this.players[e.user])
+			this.hitMob(e);
 		if (e.command == 'checkCell' && this.players[e.user])
 			this.checkCell(e);
 		if (e.command == 'startBoard')
@@ -292,32 +294,48 @@ sap.ui.define([], function () {
 		this.resetScore();
 		this.livesLost=0;
 		this.lostCoords={};
+		this.digitPocket={};
+		this.bossLevel=1;
+	};
+	
+	LocalGame.prototype.hitMob = function (re) {
+		if (!this.inBattle) return;
+		this.bossLevel--;
+		this.livesLost++;
+		var hitResult={bossLevel:this.bossLevel,livesLost:this.livesLost};
+		if (this.bossLevel==0) {
+			this.inBattle=false;
+			re.win=1;
+			this.resetBoard(re);
+		} else if (this.livesLost==8){
+			this.inBattle=false;
+			this.resetBoard(re);
+		} else {
+			this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
+		}
 	};
 
 	LocalGame.prototype.onResetBoard = function (e) {
-		this.gamesPlayed++;
-		if (e.win) {
-			this.winStreak++;
-			this.loseStreak = 0;
-			this.won++;
-		} else {
-			this.winStreak = 0;
-			this.loseStreak++;
-			this.lost++;
+		var re = {};
+		re.result = e.win ? 'win' : 'fail';
+		if (e.win) re.digitPocket=this.digitPocket;
+		else if (e.lostBeforeBossBattle){
+			var stat=this.getGenericStat();
+			re.time=stat.time;
 		}
-		var stat = this.getGenericStat();
-		stat.bestTime = this.bestTime;
-		stat.result = e.win ? 'win' : 'fail',
-			stat.gamesPlayed = this.gamesPlayed,
-			stat.livesLost=this.livesLost,
-			stat.won = this.won,
-			stat.lost = this.lost,
-			stat.winPercentage = Math.round(100 * this.won / this.gamesPlayed) + '%',
-			stat.streak = this.winStreak ? this.winStreak : this.loseStreak;
-		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', stat);
+		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', re);
 	};
 
 	LocalGame.prototype.onCells = function (re) {
+		var i,n;
+		for (i in re.cells) {
+			n=re.cells[i];
+			if(n>0) {
+				if (!this.digitPocket[n]) this.digitPocket[n]=0;
+				this.digitPocket[n]++;
+				if (n>this.bossLevel) this.bossLevel=n;
+			}
+		}
 		this.openCells(re.cells);
 	};
 
@@ -329,6 +347,7 @@ sap.ui.define([], function () {
 		}
 		if (this.livesLost==8){
 			this.openCells(this.board.mines);
+			re.lostBeforeBossBattle=true;
 			this.resetBoard(re);
 		} else {
 			this.lostCoords[coord]++;
@@ -339,19 +358,15 @@ sap.ui.define([], function () {
 	LocalGame.prototype.onComplete = function (re) {
 		this.openCells(re.cells);
 		this.openCells(this.board.mines);
-		re.win = 1;
-		var time = this.now / 1000;
-		if (!this.bestTime || time < this.bestTime) {
-			this.bestTime = time;
-			this.emitEvent('server', null, null, 'userNewBestTime', {
-				game: this.name,
-				user: re.user,
-				bSize: this.bSize,
-				time: time,
-				log: this.log
-			});
+		var stat=this.getGenericStat();
+		var battle={bossLevel:this.bossLevel,livesLost:this.livesLost,time:stat.time};
+		if (!this.inBattle) {
+			this.inBattle=true;
+			var self = this;
+			setTimeout(function () {
+				self.emitEvent.call(self,'party', this.id, 'game', 'StartBattleLocal', battle);
+			}, 1000);
 		}
-		this.resetBoard(re);
 	};
 	
 	LocalGame.Board=Board;

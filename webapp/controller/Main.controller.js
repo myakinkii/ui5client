@@ -161,8 +161,9 @@ sap.ui.define([
 			// var localGame=this.getView().getModel().getProperty('/offlineMode');
 			var cmd=s.split(" ");
 			var me=this.getView().getModel().getProperty('/auth/user');
-			if (this.localGame && cmd[0]=="/check"){
-				this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
+			if (this.localGame){
+				if (cmd[0]=="/check") this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
+				else if (cmd[0]=="/hit") this.localGame.dispatchEvent({ user:me, command:"hitMob" });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},
 
@@ -195,6 +196,7 @@ sap.ui.define([
 		handleDismissParty:function(){ this.dismissParty(); },
 		handleQuitGame:function(){ this.quitGame(); },
 		handleFuseDigit:function(e){ this.fuseDigit(e); },
+		handleHitMob:function(e){ this.hitMob(e); },
 
 	});
 });

@@ -33,6 +33,7 @@ sap.ui.define([
 					}
 				}
 			}
+			var boardPage=this.getView().byId("board");
 			if (!this.gameDialog) {
 				var board=new Board({ rows:rows, cols:cols, content:cells });
 				board.attachMove(function(cellMoved){ self.checkCell.call(self,cellMoved); });
@@ -40,14 +41,11 @@ sap.ui.define([
 				this.gameDialog=new ScrollContainer({height:"100%",width:"100%",horizontal:false,vertical:true,
 					content:[ new FlexBox({ width:"100%", justifyContent:"Center", items:[ panel ] }) ]
 				});
-				var boardPage=this.getView().byId("board");
 				boardPage.destroyContent();
 				boardPage.addContent(this.gameDialog);
-				var navContainer=this.getView().byId("app");
-				navContainer.to(boardPage,"flip");
-				
 				this.getView().getModel().setProperty('/gameStarted',true);
 			}
+			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
 		
@@ -57,6 +55,16 @@ sap.ui.define([
 			// var self=this;
 			// window.setTimeout(function(){ self.processCommand("/check "+cell.getCol()+" "+cell.getRow()); },0);
 			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
+		},
+		
+		hitMob:function(e){
+			if (this.battleInfo.livesLost<8 && this.battleInfo.bossLevel>0) this.processCommand("/hit");
+		},
+		
+		onResultHitMob:function(e){
+			var msg='you:'+(8-e.arg.livesLost)+' vs mob:'+e.arg.bossLevel;
+			this.battleInfo=e.arg;
+			this.showToast(msg);
 		},
 
 		onEndGame:function(){
@@ -104,10 +112,10 @@ sap.ui.define([
 		},
 
 		onShowResultRank:function(e){
-			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
+			if (e.arg.result=="win") this.mergeResultToInventory(e.arg.digitPocket);
 			this.digitPocket=null;
 			var msgs=[
-				'time:'+ e.arg.time+'s',
+				this.geti18n('gameResultTime',e.arg.time),
 				// 'wins/loss ratio:'+e.arg.winPercentage,
 				// 'won:'+e.arg.won,
 				// 'streak:'+e.arg.streak
@@ -118,7 +126,10 @@ sap.ui.define([
 		onShowResultCoop:function(e){
 			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
-			var msgs=[ 'time:'+ e.arg.time+'s' ];
+			var msgs=[ 
+				this.geti18n('gameResultCoop'+(e.arg.result=="win"?'Win':'Lose')),
+				this.geti18n('gameResultTime',e.arg.time)
+			];
 			this.showToast(msgs.join('\n'));
 		},
 		
@@ -127,24 +138,40 @@ sap.ui.define([
 			for (var s in e.arg.score) scores.push({user:s,score:e.arg.score[s]});
 			scores.sort(function(s1,s2){ return s2.score-s1.score; });
 			var me=this.getView().getModel().getProperty('/auth/user');
-			var result='lost :(';
+			var result=this.geti18n('gameResultVersusLose');
 			if (scores[0].user==me) {
 				this.mergeResultToInventory(this.digitPocket);
-				result='won!';
+				result=this.geti18n('gameResultVersusWin');
 			}
 			this.digitPocket=null;
-			var msgs=[ 'time:'+ e.arg.time+'s', result];
+			var msgs=[ this.geti18n('gameResultTime',e.arg.time), result];
 			msgs=msgs.concat(scores.map(function(s){ return s.user+":"+s.score; }));
-			this.showToast(msgs.join(', '),2000);
-		},			
+			this.showToast(msgs.join('\n'),2000);
+		},
 		
 		onShowResultLocal:function(e){
 			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
-			var msgs=['time:'+ e.arg.time+'s'];
-			if (e.arg.livesLost) msgs.push("lives lost: "+e.arg.livesLost);
-			this.showToast(msgs.join(', '));
-		}		
+			var msgs;
+			if (e.arg.result=="win") {
+				msgs=[this.geti18n('gameResultLocalWin')];
+			} else {
+				msgs=[this.geti18n('gameResultLocalLose')];
+				if (e.arg.time) msgs.push(this.geti18n('gameResultTime',e.arg.time));
+			}
+			this.showToast(msgs.join('\n'));
+		},
+		
+		onStartBattleLocal:function(e){
+			var msgs=[
+				this.geti18n('gameResultTime',e.arg.time),
+				this.geti18n('gameStartBattle',[8-e.arg.livesLost,e.arg.bossLevel]),
+			];
+			this.battleInfo=e.arg;
+			this.showToast(msgs.join('\n'));
+			var battlePage=this.getView().byId("battle");
+			this.getView().byId("app").to(battlePage,"flip");
+		}
 	});
 });
 	
