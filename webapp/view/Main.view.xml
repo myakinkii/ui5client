@@ -10,6 +10,7 @@
 	<u:Shell showPane="{/showPane}">
 		<u:headItems>
 			<!--<u:ShellHeadItem icon="sap-icon://menu2" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />-->
+			<u:ShellHeadItem visible="{= !${/gameStarted} }" icon="{parts: [{path:'/page'}],formatter:'.formatPageIcon'}" press="switchPage" />
 			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline"  press="handleQuitGame" />
 			<u:ShellHeadItem visible="{device>/system/desktop}" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
 		</u:headItems>		
@@ -29,7 +30,7 @@
 			<pages>
 				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.carouselMain" type="XML" /></Page>
 				<Page id="board" showHeader="false" />
-				<!--<Page id="inventory" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" /></Page>-->
+				<Page id="inv" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.carouselInventory" type="XML" /></Page>
 			</pages>
 		</NavContainer>
 		

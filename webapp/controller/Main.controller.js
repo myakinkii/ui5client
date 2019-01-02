@@ -41,6 +41,7 @@ sap.ui.define([
 				auth:{},
 				altKeyMode:false,
 				showPane:false,
+				page:'game',
 				gameStarted:false,
 				srvs:srvs,
 				srv:srv,
@@ -107,6 +108,18 @@ sap.ui.define([
 			return 'sap-icon://'+(offline?'dis':'')+'connected';
 		},
 		
+		switchPage:function(){
+			var mdl=this.getView().getModel();
+			var page=mdl.getProperty('/page');
+			page=(page=='game'?'inv':'game');
+			mdl.setProperty('/page',page);
+			this.getView().byId("app").to(this.getView().byId(page),"flip");
+		},
+		
+		formatPageIcon:function(page){
+			return "sap-icon://"+(page=='game'?'lab':'home');
+		},		
+		
 		handleAltToggle:function(e){
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/altKeyMode',!mdl.getProperty('/altKeyMode'));
@@ -136,11 +149,12 @@ sap.ui.define([
 			var srv=e.getSource().getValue();
 			this.getView().getModel().setProperty("srv",srv);
 			window.localStorage.setItem("srv",srv);
+			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
 		
 		resetSrv:function(){
 			window.localStorage.removeItem("srv");
-			this.showToast(this.geti18n('genericSuccess'));
+			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
 		
 		processCommand:function(s){
