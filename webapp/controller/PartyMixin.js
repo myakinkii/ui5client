@@ -1,7 +1,8 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"com/minesnf/ui5client/model/localGame",
-], function (Controller,LocalGame){
+	'sap/m/MessageBox'
+], function (Controller,LocalGame,MessageBox){
 	"use strict";
 	
 	return Controller.extend("PartyMixin",{
@@ -32,12 +33,13 @@ sap.ui.define([
 			this.getView().getModel().setProperty('/partiesCount',partiesCount);
 			this.getView().getModel().setProperty('/parties',parties);
 		},
-
+		
 		pressParty:function(e){
 			var ctx=e.getSource().getBindingContext();
 			var party=ctx.getObject();
 			var me=this.getView().getModel().getProperty('/auth/user');
 			if (me==party.leader) {
+				/*
 				if (!this.partyDlg) {
 					this.partyDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.partyDlg", this );
 					this.getView().addDependent(this.partyDlg);
@@ -48,6 +50,11 @@ sap.ui.define([
 				})]);
 				this.partyDlg.bindElement(ctx.getPath());
 				this.partyDlg.open();
+				*/
+				var self=this;
+				MessageBox.confirm(this.geti18n('partyDismissConfirm'), function(action) {
+					if (action == MessageBox.Action.OK) self.processCommand('/dismiss '+party.id);
+				});
 			} else this.processCommand('/join '+party.id);
 		},
 

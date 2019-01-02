@@ -132,7 +132,7 @@ sap.ui.define([
 		
 		initNow:function(defSrv){
 			var self=this;
-			var srv="http://"+(defSrv||this.getView().getModel().getProperty("srv"));
+			var srv="http://"+(defSrv||this.getView().getModel().getProperty("/srv"));
 			this.setBusy(this.geti18n("initClient"));
 			if (!window.now) {
 				$.ajax({ type: "GET", url: srv, async: false }); // just to init session
