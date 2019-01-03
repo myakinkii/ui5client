@@ -196,6 +196,10 @@ sap.ui.define([
 		handleDismissParty:function(){ this.dismissParty(); },
 		handleQuitGame:function(){ this.quitGame(); },
 		handleFuseDigit:function(e){ this.fuseDigit(e); },
+		handleForgeDigitButton:function(e){ this.changeForgeDigit(e); },
+		handleForgeStart:function(e){ this.startForge(e); },
+		handleForgeReset:function(e){ this.resetForge(e); },
+		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
 
 	});

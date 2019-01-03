@@ -362,10 +362,7 @@ sap.ui.define([], function () {
 		var battle={bossLevel:this.bossLevel,livesLost:this.livesLost,time:stat.time};
 		if (!this.inBattle) {
 			this.inBattle=true;
-			var self = this;
-			setTimeout(function () {
-				self.emitEvent.call(self,'party', this.id, 'game', 'StartBattleLocal', battle);
-			}, 1000);
+			this.emitEvent('party', this.id, 'game', 'StartBattleLocal', battle);
 		}
 	};
 	

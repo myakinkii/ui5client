@@ -3,15 +3,53 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core">
 	<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
-		<l:VerticalLayout width="100%"> 
-			<Toolbar>
-				<ToolbarSpacer />
-				<Title text="{i18n>inventoryTitle}" />
-				<ToolbarSpacer />
-			</Toolbar>					
-			<List items="{ path:'/inv', sorter:{path:'key',descending:true} }">
-				<ObjectListItem type="Active" press="handleFuseDigit" title="{key}" number="{val}" />
-			</List>
-		</l:VerticalLayout>		
+		<FlexBox justifyContent="Center">
+			<items>
+				<l:VerticalLayout width="100%">
+					<IconTabBar expandable="false" _headerMode="Inline" _selectedKey="{/quickMode}">
+						<items>
+							<IconTabFilter text="Fuse" key="fuse" >
+								<List width="100%" items="{ path:'/inv', sorter:{path:'key',descending:true} }">
+									<ObjectListItem type="Active" press="handleFuseDigit" title="{key}" number="{val}" />
+								</List>
+							</IconTabFilter>
+							<IconTabFilter text="Forge" key="forge" >
+								<!--<l:Grid position="Center" defaultSpan="L4 M4 S4" content="{/forge/buttons}">-->
+									<!--<Button text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>-->
+								<!--</l:Grid>-->
+								<FlexBox justifyContent="Center">
+									<items>
+										<l:VerticalLayout width="100%">
+										<l:HorizontalLayout>
+											<Button binding="{/forge/buttons/1}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
+											<Button binding="{/forge/buttons/2}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
+											<Button binding="{/forge/buttons/3}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
+										</l:HorizontalLayout>
+										<l:HorizontalLayout>
+											<Button binding="{/forge/buttons/4}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
+											<Button binding="{/forge/buttons/5}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
+											<Button binding="{/forge/buttons/6}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
+										</l:HorizontalLayout>
+										<l:HorizontalLayout>
+											<Button binding="{/forge/buttons/7}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
+											<Button binding="{/forge/buttons/8}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
+											<Button binding="{/forge/buttons/9}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
+										</l:HorizontalLayout>
+										</l:VerticalLayout>
+									</items>
+								</FlexBox>
+								<Button width="100%" type="Emphasized" text="{i18n>inventoryForgeStart}" press="handleForgeStart" />
+								<Button width="100%" type="Reject" text="{i18n>inventoryForgeReset}" press="handleForgeReset" />
+							</IconTabFilter>
+							<IconTabFilter text="Equip" key="equip" >
+								<List width="100%" items="{ path:'/equip', sorter:[{path:'rarity',group:true},{path:'effect'}] }">
+									<InputListItem label="{effect}"><Switch state="{equipped}" change="handleEquipGem" /></InputListItem>
+								</List>
+							</IconTabFilter>
+						</items>
+					</IconTabBar>
+				</l:VerticalLayout>
+			</items>
+		</FlexBox>
 	</ScrollContainer>	
 </core:FragmentDefinition>	

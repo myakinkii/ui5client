@@ -174,7 +174,8 @@ sap.ui.define([
 			this.battleInfo=e.arg;
 			this.showToast(msgs.join('\n'));
 			var battlePage=this.getView().byId("battle");
-			this.getView().byId("app").to(battlePage,"flip");
+			var navContainer=this.getView().byId("app");
+			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
 		}
 	});
 });

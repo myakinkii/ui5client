@@ -6,7 +6,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel"], func
 		onAuthorize:function(e){
 			var mockUser={
 				"user":"user1","type":"temp",
-				"profile":{"level":0,"score":0,"rankTotal":0,"muted":{},"rank":{},"coop":{},"versus":{}}
+				"profile":{"level":8,"score":0,"rankTotal":0,"muted":{},"rank":{},"coop":{},"versus":{}}
 			};
 			var user=e.arg||mockUser;
 			this.getView().getModel().setProperty('/auth',user);
