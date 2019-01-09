@@ -4,17 +4,11 @@
 	xmlns:core="sap.ui.core">
     <Dialog title="{i18n>authDialogTitle}: {/auth/user}" >
         <content>
-			<Panel expandable="true" expanded="true" visible="{/showOfflineButton}">
-				<headerToolbar>
-					<Toolbar>
-						<Title text="{i18n>authServer}" />
-						<ToolbarSpacer/>
-						<Button icon="sap-icon://decline" press="resetSrv" />
-					</Toolbar>
-	            </headerToolbar>
+			<Panel headerText="{i18n>authServer}" expandable="false" expanded="true" visible="{/showOfflineButton}">
 				<ComboBox width="100%" items="{ path:'/srvs'}" selectedKey="{/srv}" change="changeSrv">
 					<core:Item key="{url}" text="{name}" />
 				</ComboBox>
+				<Button width="100%" visible="{/customSrv}" type="Reject" text="{i18n>authRestToGlobal}" press="resetSrv" />
 			</Panel>
             <!--<Panel expandable="true" expanded="true" visible="{= ${/auth/type}==='temp' }">-->
             <!--<headerToolbar>-->

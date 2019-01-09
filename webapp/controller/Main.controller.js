@@ -31,7 +31,14 @@ sap.ui.define([
 			}
 			
 			var srvs={};
-			var srv=window.localStorage.getItem("srv")||'minesnf.com';
+			if (!onlineOnlyClient && !offlineMode) {
+				var syncRequest=$.ajax({url:"http://minesnf.com/srv.json",async:false});
+				if (syncRequest.readyState==4 && syncRequest.status==200){
+					srvs=JSON.parse(syncRequest.responseText).reduce(function(prev,cur){prev[cur.url]=cur; return prev;});
+				}
+			}
+			var srv=window.localStorage.getItem("srv")||'global.minesnf.com';
+			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
 			
 			this.getView().setModel(new JSONModel({
@@ -45,6 +52,7 @@ sap.ui.define([
 				gameStarted:false,
 				srvs:srvs,
 				srv:srv,
+				customSrv:customSrv,
 				offlineMode:offlineMode,
 				forceOfflineMode:forceOfflineMode,
 				showOfflineButton:!onlineOnlyClient&&onlineModeAvailble
@@ -146,7 +154,7 @@ sap.ui.define([
 		},
 		
 		changeSrv:function(e){
-			var srv=e.getSource().getValue();
+			var srv=e.getSource().getSelectedKey()||e.getSource().getValue();
 			this.getView().getModel().setProperty("srv",srv);
 			window.localStorage.setItem("srv",srv);
 			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
