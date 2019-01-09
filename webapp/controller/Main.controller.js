@@ -198,6 +198,8 @@ sap.ui.define([
 		handleShowAuthDlg:function(){ this.showAuthDlg(); },
 		handleAuthUser:function(){ this.authUser(); },
 		handleLogOff:function(){ this.logOff(); },
+		handleImportProfile:function(e){ this.importProfile(e); },
+		handleExportProfile:function(e){ this.exportProfile(e); },
 		handlePressParty:function(e){ this.pressParty(e); },
 		handleStartParty:function(e){ this.startParty(e); },
 		handleKickUser:function(e){ this.kickUser(e); },

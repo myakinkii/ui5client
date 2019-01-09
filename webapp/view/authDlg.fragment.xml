@@ -25,7 +25,15 @@
             <!--        <Input id="authPwd" type="Password" value="{auth>/pwd}" />-->
             <!--    </f:SimpleForm>-->
             <!--</Panel>-->
-            <Panel headerText="{i18n>authProfile}" expandable="true" expanded="true">
+            <Panel _headerText="{i18n>authProfile}" expandable="true" expanded="true">
+				<headerToolbar>
+					<Toolbar>
+						<Title text="{i18n>authProfile}" />
+						<ToolbarSpacer/>
+						<Button visible="{/showOfflineButton}" icon="sap-icon://download" press="handleImportProfile"/>
+						<Button icon="sap-icon://upload" press="handleExportProfile"/>
+					</Toolbar>
+				</headerToolbar>	
                 <List headerText="{i18n>authStats}">
                     <items>
                         <ObjectListItem title="{i18n>authScore}" number="{/auth/profile/score}" />
