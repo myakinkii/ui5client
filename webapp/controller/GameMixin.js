@@ -58,13 +58,35 @@ sap.ui.define([
 		},
 		
 		hitMob:function(e){
-			if (this.battleInfo.livesLost<8 && this.battleInfo.bossLevel>0) this.processCommand("/hit");
+			this.processCommand("/hit");
 		},
 		
 		onResultHitMob:function(e){
-			var msg='you:'+(8-e.arg.livesLost)+' vs mob:'+e.arg.bossLevel;
+			var mdl=this.getView().getModel();
+			var log=mdl.getProperty('/log')||[];
+			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.user,e.arg.mob]);
+			log.push({
+				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey,e.arg.dmg),
+				attack:e.arg.user, defense:e.arg.mob, dmg:e.arg.dmg,
+				sorter:log.length, priority:'Medium'
+			});
+			mdl.setProperty( '/log',log);
+			mdl.setProperty( '/battleInfo/userHp',e.arg.userHp);
+			mdl.setProperty( '/battleInfo/bossHp',e.arg.bossHp);
 			this.battleInfo=e.arg;
-			this.showToast(msg);
+			// this.showToast(msg);
+		},
+		
+		formatLogIcon:function(eventKey){
+			var keys={
+				hitDamage:'accept',
+				hitBlocked:'decline',
+				hitEvaded:'move',
+				startBattle:'scissors',
+				endBattleLose:'unpaid-leave',
+				endBattleWin:'lead'
+			};
+			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},
 
 		onEndGame:function(){
@@ -156,14 +178,27 @@ sap.ui.define([
 		onShowResultLocal:function(e){
 			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
 			this.digitPocket=null;
-			var msgs;
+			var msgs,prio;
 			if (e.arg.result=="win") {
+				prio="Low";
 				msgs=[this.geti18n('gameResultLocalWin')];
+				for (var i in e.arg.digitPocket) msgs.push(i+': '+e.arg.digitPocket[i]);
 			} else {
 				msgs=[this.geti18n('gameResultLocalLose')];
-				if (e.arg.time) msgs.push(this.geti18n('gameResultTime',e.arg.time));
+				prio="High";
+				if (e.arg.lostBeforeBossBattle) msgs.push(this.geti18n('gameResultTime',e.arg.time));
 			}
-			this.showToast(msgs.join('\n'));
+			var mdl=this.getView().getModel();
+			var log=mdl.getProperty('/log')||[];
+			var msg=msgs.join('\n');
+			log.push({ 
+				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey),
+				sorter:log.length, priority:prio
+			});
+			mdl.setProperty( '/log',log);
+			if (this.battleInfo) mdl.setProperty( '/log',log);
+			else this.showToast(msg);
+			this.battleInfo=null;
 		},
 		
 		onStartBattleLocal:function(e){
@@ -172,10 +207,16 @@ sap.ui.define([
 				this.geti18n('gameStartBattle',[8-e.arg.livesLost,e.arg.bossLevel]),
 			];
 			this.battleInfo=e.arg;
+			var mdl=this.getView().getModel();
+			mdl.setProperty( '/battleInfo',e.arg);
 			this.showToast(msgs.join('\n'));
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
+			mdl.setProperty('/log',[{
+				eventKey:'startBattle',priority:'None',sorter:-1,
+				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName]), title:this.geti18n('game_startBattle')
+			}]);
 		}
 	});
 });

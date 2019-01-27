@@ -3,12 +3,40 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core">
 	<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
-		<l:VerticalLayout width="100%"> 
-			<FlexBox justifyContent="Center">
-				<items>
-					<Button press="handleHitMob" text="{i18n>gameHitMob}" />
-				</items>
-			</FlexBox>
-		</l:VerticalLayout>			
+		<FlexBox justifyContent="Center">
+			<items>
+				<l:VerticalLayout width="100%"> 
+					<l:Grid defaultSpan="L6 M6 S6" class="sapUiSmallMarginTop">
+						<l:content>
+							<ObjectListItem title="HP: {/battleInfo/userHp}" intro="{/battleInfo/userName}" icon="sap-icon://employee" >
+								<attributes>
+									<ObjectAttribute text="Atk +2" />
+									<ObjectAttribute text="HP +1" />
+								</attributes>				
+							</ObjectListItem>
+							<ObjectListItem title="HP: {/battleInfo/bossHp}" intro="{/battleInfo/bossName}" icon="sap-icon://sap-ui5" >
+								<attributes>
+									<ObjectAttribute text="Crit +2" />
+									<ObjectAttribute text="Def +3" />
+								</attributes>				
+							</ObjectListItem>
+						</l:content>
+					</l:Grid>
+					<Button width="100%" press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
+					<List width="100%" items="{path:'/log', sorter:{path:'sorter',descending:true} }" >
+						<NotificationListItem 
+							showCloseButton="false" priority="{priority}" type="Inactive"
+							title="{title}" description="{descr}"
+							authorName="{attack}" datetime="{defense}"
+							authorPicture="{parts:[{path:'eventKey'}],formatter:'.handleFormatBattleLogIcon'}">
+							<!--<buttons>-->
+							<!--	<Button text="X" />-->
+							<!--	<Button icon="sap-icon://accept" />-->
+							<!--</buttons>-->
+						</NotificationListItem>
+					</List>	
+				</l:VerticalLayout>
+			</items>
+		</FlexBox>
 	</ScrollContainer>	
 </core:FragmentDefinition>	

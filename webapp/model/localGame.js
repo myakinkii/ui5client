@@ -296,13 +296,18 @@ sap.ui.define([], function () {
 		this.lostCoords={};
 		this.digitPocket={};
 		this.bossLevel=1;
+		var names=['angry','hungry','lonely','greedy'];
+		this.bossName=names[Math.round(names.length*Math.random())]+' Phoenix';
 	};
 	
 	LocalGame.prototype.hitMob = function (re) {
 		if (!this.inBattle) return;
 		this.bossLevel--;
 		this.livesLost++;
-		var hitResult={bossLevel:this.bossLevel,livesLost:this.livesLost};
+		var hitResult={
+			eventKey:'hitDamage',user:this.partyLeader,mob:this.bossName,
+			dmg:1, bossHp:this.bossLevel, userHp:8-this.livesLost
+		};
 		if (this.bossLevel==0) {
 			this.inBattle=false;
 			re.win=1;
@@ -318,11 +323,12 @@ sap.ui.define([], function () {
 	LocalGame.prototype.onResetBoard = function (e) {
 		var re = {};
 		re.result = e.win ? 'win' : 'fail';
-		if (e.win) re.digitPocket=this.digitPocket;
-		else if (e.lostBeforeBossBattle){
+		if (e.lostBeforeBossBattle){
 			var stat=this.getGenericStat();
 			re.time=stat.time;
-		}
+			re.lostBeforeBossBattle=true;
+		} else re.eventKey='endBattle'+(e.win?'Win':'Lose');
+		if (e.win) re.digitPocket=this.digitPocket;
 		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', re);
 	};
 
@@ -359,7 +365,13 @@ sap.ui.define([], function () {
 		this.openCells(re.cells);
 		this.openCells(this.board.mines);
 		var stat=this.getGenericStat();
-		var battle={bossLevel:this.bossLevel,livesLost:this.livesLost,time:stat.time};
+		var battle={
+			key:'startBattle',
+			userName:this.partyLeader,bossName:this.bossName,
+			bossLevel:this.bossLevel,bossHp:this.bossLevel,
+			livesLost:this.livesLost,userHp:8-this.livesLost,
+			time:stat.time};
+		// var battle={bossLevel:this.bossLevel,livesLost:this.livesLost,time:stat.time};
 		if (!this.inBattle) {
 			this.inBattle=true;
 			this.emitEvent('party', this.id, 'game', 'StartBattleLocal', battle);

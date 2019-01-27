@@ -211,6 +211,7 @@ sap.ui.define([
 		handleForgeReset:function(e){ this.resetForge(e); },
 		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
+		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(null,[].slice.call(arguments)); }
 
 	});
 });

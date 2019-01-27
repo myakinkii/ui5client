@@ -20,21 +20,24 @@
 								<FlexBox justifyContent="Center">
 									<items>
 										<l:VerticalLayout width="100%">
-										<l:HorizontalLayout>
-											<Button binding="{/forge/buttons/1}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
-											<Button binding="{/forge/buttons/2}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
-											<Button binding="{/forge/buttons/3}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
-										</l:HorizontalLayout>
-										<l:HorizontalLayout>
-											<Button binding="{/forge/buttons/4}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
-											<Button binding="{/forge/buttons/5}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
-											<Button binding="{/forge/buttons/6}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
-										</l:HorizontalLayout>
-										<l:HorizontalLayout>
-											<Button binding="{/forge/buttons/7}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
-											<Button binding="{/forge/buttons/8}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
-											<Button binding="{/forge/buttons/9}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
-										</l:HorizontalLayout>
+											<!--<l:Grid defaultSpan="L4 M4 S4" content="{/forge/buttons}" class="sapUiSmallMarginTop">-->
+											<!--	<Button text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>-->
+											<!--</l:Grid>-->
+											<l:HorizontalLayout>
+												<Button binding="{/forge/buttons/1}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
+												<Button binding="{/forge/buttons/2}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
+												<Button binding="{/forge/buttons/3}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
+											</l:HorizontalLayout>
+											<l:HorizontalLayout>
+												<Button binding="{/forge/buttons/4}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
+												<Button binding="{/forge/buttons/5}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
+												<Button binding="{/forge/buttons/6}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
+											</l:HorizontalLayout>
+											<l:HorizontalLayout>
+												<Button binding="{/forge/buttons/7}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />
+												<Button binding="{/forge/buttons/8}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }" class="sapUiSmallMarginEnd" />				
+												<Button binding="{/forge/buttons/9}" text="{digit}" press="handleForgeDigitButton" type="{= ${special}?'Emphasized':'Default' }"/>											
+											</l:HorizontalLayout>
 										</l:VerticalLayout>
 									</items>
 								</FlexBox>
