@@ -204,7 +204,7 @@ sap.ui.define([
 		onStartBattleLocal:function(e){
 			var msgs=[
 				this.geti18n('gameResultTime',e.arg.time),
-				this.geti18n('gameStartBattle',[8-e.arg.livesLost,e.arg.bossLevel]),
+				this.geti18n('gameStartBattle',[e.arg.livesLost,e.arg.bossLevel]),
 			];
 			this.battleInfo=e.arg;
 			var mdl=this.getView().getModel();

@@ -297,7 +297,7 @@ sap.ui.define([], function () {
 		this.digitPocket={};
 		this.bossLevel=1;
 		var names=['angry','hungry','lonely','greedy'];
-		this.bossName=names[Math.round(names.length*Math.random())]+' Phoenix';
+		this.bossName=names[Math.floor(names.length*Math.random())]+' Phoenix';
 	};
 	
 	LocalGame.prototype.hitMob = function (re) {
@@ -308,6 +308,7 @@ sap.ui.define([], function () {
 			eventKey:'hitDamage',user:this.partyLeader,mob:this.bossName,
 			dmg:1, bossHp:this.bossLevel, userHp:8-this.livesLost
 		};
+		this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
 		if (this.bossLevel==0) {
 			this.inBattle=false;
 			re.win=1;
@@ -315,8 +316,6 @@ sap.ui.define([], function () {
 		} else if (this.livesLost==8){
 			this.inBattle=false;
 			this.resetBoard(re);
-		} else {
-			this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
 		}
 	};
 
@@ -333,16 +332,20 @@ sap.ui.define([], function () {
 	};
 
 	LocalGame.prototype.onCells = function (re) {
+		this.addCells(re.cells);
+		this.openCells(re.cells);
+	};
+	
+	LocalGame.prototype.addCells = function (cells) {
 		var i,n;
-		for (i in re.cells) {
-			n=re.cells[i];
+		for (i in cells) {
+			n=cells[i];
 			if(n>0) {
 				if (!this.digitPocket[n]) this.digitPocket[n]=0;
 				this.digitPocket[n]++;
 				if (n>this.bossLevel) this.bossLevel=n;
 			}
 		}
-		this.openCells(re.cells);
 	};
 
 	LocalGame.prototype.onBomb = function (re) {
@@ -362,6 +365,7 @@ sap.ui.define([], function () {
 	};
 
 	LocalGame.prototype.onComplete = function (re) {
+		this.addCells(re.cells);
 		this.openCells(re.cells);
 		this.openCells(this.board.mines);
 		var stat=this.getGenericStat();
