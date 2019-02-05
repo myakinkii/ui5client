@@ -36,7 +36,8 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			this.authDlg.setModel(authMdl,"auth");
 			*/
 			this.authDlg.open();
-			this.exportProfile();
+			var mdl=this.getView().getModel().getData();
+			this.exportProfile(mdl.inv,mdl.equip);
 		},
 
 		authUser:function(){
@@ -48,29 +49,19 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			this.processCommand('/logoff');
 		},
 		
-		exportProfile: function(e) {
-			// if (!this.qrPopover){
-				// this.qrPopover = sap.ui.xmlfragment("com.minesnf.ui5client.view.qrPopover", this);
-				// this.getView().addDependent(this.qrPopover);
-				// this.qrCreated=false;
-			// }
-			var mdl=this.getView().getModel().getData();
+		exportProfile: function(mdlInv,mdlEquip) {
 			var inv=[],i;
-			for (i in mdl.inv) inv.push(mdl.inv[i].val);
-			var equip=mdl.equip.map(function(gem){return gem.rarity+"_"+gem.effect; });
-			$('#qrcode')[0].innerHTML='';
-			// this.qrPopover.openBy(e.getSource());
-			// if (!this.qrCreated){
-				// this.qrCreated=true;
-				new QRCode("qrcode", {
-					text: JSON.stringify({ inv:inv, equip:equip}),
-					width: 250,
-					height: 250,
-					colorDark: "#000000",
-					colorLight: "#ffffff",
-					correctLevel: QRCode.CorrectLevel.H
-				});
-			// }
+			for (i in mdlInv) inv.push(mdlInv[i].val);
+			var equip=mdlEquip.map(function(gem){return gem.rarity+"_"+gem.effect; });
+			$('#qrcode')[0].innerHTML=''; // clear div
+			new QRCode("qrcode", {
+				text: JSON.stringify({ inv:inv, equip:equip}),
+				width: 250,
+				height: 250,
+				colorDark: "#000000",
+				colorLight: "#ffffff",
+				correctLevel: QRCode.CorrectLevel.H
+			});
 		},
 		
 		importProfile:function(){
@@ -79,17 +70,26 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			if (cordova && cordova.plugins) cordova.plugins.barcodeScanner.scan(function(result){
 				if (result.text) try {
 					var res = JSON.parse(result.text);
-					if (res.inv) mdl.setProperty('/inv',res.inv.reduce(function(prev,cur,ind){ 
-						var key=ind+1;
-						prev[key]={key:key,val:cur};
-						return prev; 
-					},{}));
-					if (res.equip) mdl.setProperty('/equip',res.equip.map(function(val){
-						var gem=val.split('_');
-						return {rarity:gem[0],effect:gem[1],eqiupped:false};
-					}));
+					var inv={},equip=[];
+					if (res.inv) {
+						inv=res.inv.reduce(function(prev,cur,ind){ 
+							var key=ind+1;
+							prev[key]={key:key,val:cur};
+							return prev; 
+						},{});
+						mdl.setProperty('/inv',inv);
+					}
+					if (res.equip) {
+						equip=res.equip.map(function(val){
+							var gem=val.split('_');
+							return {rarity:gem[0],effect:gem[1],eqiupped:false};
+						});
+						mdl.setProperty('/equip',equip);
+					}
 					self.showToast(self.geti18n('authProfileImported'));
+					self.exportProfile(inv,equip);
 				} catch (e) {
+					self.showToast(self.geti18n('authProfileImportFailed'));
 					console.log(e);
 				}
 			}, function(err){
