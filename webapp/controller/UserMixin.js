@@ -55,12 +55,15 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 				// this.qrCreated=false;
 			// }
 			var mdl=this.getView().getModel().getData();
+			var inv=[],i;
+			for (i in mdl.inv) inv.push(mdl.inv[i].val);
+			var equip=mdl.equip.map(function(gem){return gem.rarity+"_"+gem.effect; });
 			$('#qrcode')[0].innerHTML='';
 			// this.qrPopover.openBy(e.getSource());
 			// if (!this.qrCreated){
 				// this.qrCreated=true;
 				new QRCode("qrcode", {
-					text: JSON.stringify({ inv:mdl.inv, equip:mdl.equip }),
+					text: JSON.stringify({ inv:inv, equip:equip}),
 					width: 250,
 					height: 250,
 					colorDark: "#000000",
@@ -76,8 +79,15 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			if (cordova && cordova.plugins) cordova.plugins.barcodeScanner.scan(function(result){
 				if (result.text) try {
 					var res = JSON.parse(result.text);
-					if (res.inv) mdl.setProperty('/inv',res.inv);
-					if (res.equip) mdl.setProperty('/equip',res.equip);
+					if (res.inv) mdl.setProperty('/inv',res.inv.reduce(function(prev,cur,ind){ 
+						var key=ind+1;
+						prev[key]={key:key,val:cur};
+						return prev; 
+					},{}));
+					if (res.equip) mdl.setProperty('/equip',res.equip.map(function(val){
+						var gem=val.split('_');
+						return {rarity:gem[0],effect:gem[1],eqiupped:false};
+					}));
 					self.showToast(self.geti18n('authProfileImported'));
 				} catch (e) {
 					console.log(e);
