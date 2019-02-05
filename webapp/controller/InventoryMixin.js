@@ -15,6 +15,7 @@ sap.ui.define([
 			},{});
 			this.getView().getModel().setProperty('/inv',inv);
 			this.recipes={
+				'22222222':{effect:'speed'},
 				'33333333':{effect:'maxhp'},
 				'44444444':{effect:'pdef'},
 				'55555555':{effect:'patk'}

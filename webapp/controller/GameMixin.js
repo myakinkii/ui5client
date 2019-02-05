@@ -64,24 +64,24 @@ sap.ui.define([
 		onResultHitMob:function(e){
 			var mdl=this.getView().getModel();
 			var log=mdl.getProperty('/log')||[];
-			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.user,e.arg.mob]);
+			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
 			log.push({
 				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey,e.arg.dmg),
-				attack:e.arg.user, defense:e.arg.mob, dmg:e.arg.dmg,
-				sorter:log.length, priority:'Medium'
+				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
+				sorter:log.length, priority:'Medium',icon:this.formatLogIcon(e.arg.eventKey)
 			});
 			mdl.setProperty( '/log',log);
-			mdl.setProperty( '/battleInfo/userHp',e.arg.userHp);
-			mdl.setProperty( '/battleInfo/bossHp',e.arg.bossHp);
+			mdl.setProperty( '/battleInfo',e.arg.profiles);
 			this.battleInfo=e.arg;
-			// this.showToast(msg);
 		},
 		
 		formatLogIcon:function(eventKey){
 			var keys={
 				hitDamage:'accept',
+				hitDamageCrit:'warning',
 				hitBlocked:'decline',
 				hitEvaded:'move',
+				hitParried:'move',
 				startBattle:'scissors',
 				endBattleLose:'unpaid-leave',
 				endBattleWin:'lead'
@@ -208,7 +208,7 @@ sap.ui.define([
 			];
 			this.battleInfo=e.arg;
 			var mdl=this.getView().getModel();
-			mdl.setProperty( '/battleInfo',e.arg);
+			mdl.setProperty( '/battleInfo',e.arg.profiles);
 			this.showToast(msgs.join('\n'));
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");

@@ -59,7 +59,8 @@ sap.ui.define([
 		},
 
 		startParty:function(e){
-			var me=this.getView().getModel().getProperty('/auth/user');
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
 			var boardSize=e.getSource().data().boardSize;
 			var mode=this.getView().getModel().getProperty('/quickMode');
 			var localGame=(mode=='local'||this.getView().getModel().getProperty('/offlineMode'));
@@ -84,7 +85,11 @@ sap.ui.define([
 					leader:me
 				};
 				pars.users[me]={name:me,id:me};
-				pars.profiles[me]={s:{},m:{},b:{}};
+				// pars.profiles[me]={s:{},m:{},b:{}};
+				pars.profiles[me]=mdl.getProperty('/equip').reduce(function(prev,cur){
+					if (cur.equipped) prev[cur.effect]++;
+					return prev;
+				},{"maxhp":0,"patk":0,"pdef":0,"speed":0});
 				pars.board=mockGames[boardSize];
 				pars.board.bSize=boardSize;
 				this.localGame=new LocalGame(pars);

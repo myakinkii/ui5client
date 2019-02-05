@@ -280,12 +280,12 @@ sap.ui.define([], function () {
 
 	function LocalGame(pars) {
 		Game.call(this, pars);
-		this.bestTime = this.profiles[this.partyLeader][this.bSize];
-		this.gamesPlayed = 0;
-		this.won = 0;
-		this.lost = 0;
-		this.winStreak = 0;
-		this.loseStreak = 0;
+		// this.bestTime = this.profiles[this.partyLeader][this.bSize];
+		// this.gamesPlayed = 0;
+		// this.won = 0;
+		// this.lost = 0;
+		// this.winStreak = 0;
+		// this.loseStreak = 0;
 	};
 
 	LocalGame.prototype = new Game;
@@ -296,24 +296,65 @@ sap.ui.define([], function () {
 		this.lostCoords={};
 		this.digitPocket={};
 		this.bossLevel=1;
-		var names=['angry','hungry','lonely','greedy'];
-		this.bossName=names[Math.floor(names.length*Math.random())]+' Phoenix';
+	};
+	
+	LocalGame.prototype.calcAtk = function (atkProfile,defProfile) {
+		var re={dmg:0,eventKey:'hitDamage',attack:atkProfile.name,defense:defProfile.name};
+		var evadeChance=0.2;
+		evadeChance+=0.1*(defProfile.speed-atkProfile.speed);
+		if (Math.random()<=evadeChance) {
+			re.eventKey='hitEvaded';
+			return re;
+		}
+		var parryChance=0.2;
+		parryChance=0.1*(defProfile.patk-defProfile.patk);
+		if (Math.random()<=parryChance){
+			re.eventKey='hitParried';
+			return re;
+		}
+		var atk=atkProfile.patk+1;
+		var critChance=0.1;
+		critChance+=0.1*(atkProfile.speed-defProfile.speed);
+		if (Math.random()<=critChance){
+			atk*=2;
+			re.eventKey='hitDamageCrit';
+		}
+		if (defProfile.pdef+1>atk) re.eventKey='hitBlocked';
+		else re.dmg=atk;
+		return re;
 	};
 	
 	LocalGame.prototype.hitMob = function (re) {
+		
 		if (!this.inBattle) return;
-		this.bossLevel--;
-		this.livesLost++;
-		var hitResult={
-			eventKey:'hitDamage',user:this.partyLeader,mob:this.bossName,
-			dmg:1, bossHp:this.bossLevel, userHp:8-this.livesLost
-		};
+		var userProfile=this.profiles[this.partyLeader],bossProfile=this.profiles.boss;
+		
+		if ( !bossProfile.wasHit && Math.random()<1/2/bossProfile.level) {
+			this.inBattle=false;
+			re.win=1;
+			re.eventKey='Stole';
+			this.resetBoard(re);
+			return;
+		}
+		
+		var hitResult=this.calcAtk(userProfile,bossProfile);
+		if (hitResult.dmg) { 
+			bossProfile.hp--;
+			bossProfile.wasHit=true;
+		}
+		hitResult.profiles=this.profiles;
 		this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
-		if (this.bossLevel==0) {
+		
+		hitResult=this.calcAtk(bossProfile,userProfile);
+		if (hitResult.dmg)  userProfile.hp--;
+		hitResult.profiles=this.profiles;
+		this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
+		
+		if (bossProfile.hp==0) {
 			this.inBattle=false;
 			re.win=1;
 			this.resetBoard(re);
-		} else if (this.livesLost==8){
+		} else if (userProfile.hp==0){
 			this.inBattle=false;
 			this.resetBoard(re);
 		}
@@ -326,7 +367,7 @@ sap.ui.define([], function () {
 			var stat=this.getGenericStat();
 			re.time=stat.time;
 			re.lostBeforeBossBattle=true;
-		} else re.eventKey='endBattle'+(e.win?'Win':'Lose');
+		} else re.eventKey='endBattle'+(e.eventKey||(e.win?'Win':'Lose'));
 		if (e.win) re.digitPocket=this.digitPocket;
 		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', re);
 	};
@@ -369,13 +410,29 @@ sap.ui.define([], function () {
 		this.openCells(re.cells);
 		this.openCells(this.board.mines);
 		var stat=this.getGenericStat();
+		
+		var userProfile=this.profiles[this.partyLeader],bossProfile={"maxhp":0,"patk":0,"pdef":0,"speed":0,"level":this.bossLevel,"mob":1};
+
+		var n=this.bossLevel,rnd=["maxhp","patk","pdef","speed"];
+		while (n>0) { n--; bossProfile[rnd[Math.floor(Math.random()*4)]]++; }
+		
+		var names=['angry','hungry','lonely','greedy'];
+		bossProfile.name=names[Math.floor(names.length*Math.random())]+' Phoenix';
+		bossProfile.hp=bossProfile.level+bossProfile.maxhp;
+		this.profiles.boss=bossProfile;
+		
+		userProfile.name=this.partyLeader;
+		userProfile.level=8;
+		userProfile.livesLost=this.livesLost;
+		userProfile.hp=userProfile.level-this.livesLost+userProfile.maxhp;
+		
 		var battle={
-			key:'startBattle',
+			key:'startBattle',profiles:this.profiles,
 			userName:this.partyLeader,bossName:this.bossName,
 			bossLevel:this.bossLevel,bossHp:this.bossLevel,
 			livesLost:this.livesLost,userHp:8-this.livesLost,
-			time:stat.time};
-		// var battle={bossLevel:this.bossLevel,livesLost:this.livesLost,time:stat.time};
+			time:stat.time
+		};
 		if (!this.inBattle) {
 			this.inBattle=true;
 			this.emitEvent('party', this.id, 'game', 'StartBattleLocal', battle);
