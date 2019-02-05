@@ -2,7 +2,7 @@
 	xmlns="sap.m"
 	xmlns:f="sap.ui.layout.form"
 	xmlns:core="sap.ui.core">
-	<Popover placement="Bottom" contentHeight="300px" title="{i18n>authExportPopoverTitle}">
+	<!--<Popover placement="Bottom" contentHeight="300px" title="{i18n>authExportPopoverTitle}">-->
 		<Panel>
 			<FlexBox justifyContent="Center">
 				<items>
@@ -10,5 +10,5 @@
 				</items>
 			</FlexBox>
 		</Panel>		
-	</Popover>
+	<!--</Popover>-->
 </core:FragmentDefinition>

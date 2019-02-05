@@ -36,6 +36,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			this.authDlg.setModel(authMdl,"auth");
 			*/
 			this.authDlg.open();
+			this.exportProfile();
 		},
 
 		authUser:function(){
@@ -48,15 +49,16 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 		},
 		
 		exportProfile: function(e) {
-			if (!this.qrPopover){
-				this.qrPopover = sap.ui.xmlfragment("com.minesnf.ui5client.view.qrPopover", this);
-				this.getView().addDependent(this.qrPopover);
-				this.qrCreated=false;
-			}
+			// if (!this.qrPopover){
+				// this.qrPopover = sap.ui.xmlfragment("com.minesnf.ui5client.view.qrPopover", this);
+				// this.getView().addDependent(this.qrPopover);
+				// this.qrCreated=false;
+			// }
 			var mdl=this.getView().getModel().getData();
-			this.qrPopover.openBy(e.getSource());
-			if (!this.qrCreated){
-				this.qrCreated=true;
+			$('#qrcode')[0].innerHTML='';
+			// this.qrPopover.openBy(e.getSource());
+			// if (!this.qrCreated){
+				// this.qrCreated=true;
 				new QRCode("qrcode", {
 					text: JSON.stringify({ inv:mdl.inv, equip:mdl.equip }),
 					width: 250,
@@ -65,7 +67,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 					colorLight: "#ffffff",
 					correctLevel: QRCode.CorrectLevel.H
 				});
-			}
+			// }
 		},
 		
 		importProfile:function(){
