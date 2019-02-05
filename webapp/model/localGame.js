@@ -329,7 +329,7 @@ sap.ui.define([], function () {
 		if (!this.inBattle) return;
 		var userProfile=this.profiles[this.partyLeader],bossProfile=this.profiles.boss;
 		
-		if ( !bossProfile.wasHit && Math.random()<1/2/bossProfile.level) {
+		if ( !bossProfile.wasHit && Math.random()<1/6/bossProfile.level) {
 			this.inBattle=false;
 			re.win=1;
 			re.eventKey='Stole';

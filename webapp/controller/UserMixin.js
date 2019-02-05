@@ -54,16 +54,11 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 				this.qrCreated=false;
 			}
 			var mdl=this.getView().getModel().getData();
-			var data={
-				inv:mdl.inv,
-				equip:mdl.equip,
-				profile:mdl.auth.profile
-			};
 			this.qrPopover.openBy(e.getSource());
 			if (!this.qrCreated){
 				this.qrCreated=true;
 				new QRCode("qrcode", {
-					text: JSON.stringify(data),
+					text: JSON.stringify({ inv:mdl.inv, equip:mdl.equip }),
 					width: 250,
 					height: 250,
 					colorDark: "#000000",
@@ -74,12 +69,14 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 		},
 		
 		importProfile:function(){
+			var mdl=this.getView().getModel();
+			var self=this;
 			if (cordova && cordova.plugins) cordova.plugins.barcodeScanner.scan(function(result){
 				if (result.text) try {
 					var res = JSON.parse(result.text);
-					if (res.profile){
-						console.log(res);
-					}
+					if (res.inv) mdl.setProperty('/inv',res.inv);
+					if (res.equip) mdl.setProperty('/equip',res.equip);
+					self.showToast(self.geti18n('authProfileImported'));
 				} catch (e) {
 					console.log(e);
 				}
