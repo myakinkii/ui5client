@@ -329,7 +329,7 @@ sap.ui.define([], function () {
 		if (!this.inBattle) return;
 		var userProfile=this.profiles[this.partyLeader],bossProfile=this.profiles.boss;
 		
-		if ( !bossProfile.wasHit && Math.random()<1/8/bossProfile.level) {
+		if ( !bossProfile.wasHit && Math.random()<this.stealChance) {
 			this.inBattle=false;
 			re.win=1;
 			re.eventKey='Stole';
@@ -428,12 +428,10 @@ sap.ui.define([], function () {
 		}
 		return equip;
 	};
-
-	LocalGame.prototype.onComplete = function (re) {
+	
+	LocalGame.prototype.startBattle = function () {
 		
-		this.addCells(re.cells);
-		this.openCells(re.cells);
-		this.openCells(this.board.mines);
+		this.inBattle=true;
 		
 		var stat=this.getGenericStat();
 		
@@ -454,15 +452,20 @@ sap.ui.define([], function () {
 		userProfile.hp=userProfile.level-this.livesLost+userProfile.maxhp;
 		this.profiles[this.partyLeader]=userProfile;
 		
-		var battle={
+		this.stealChance=1/8/bossProfile.level;
+		
+		this.emitEvent('party', this.id, 'game', 'StartBattleLocal', {
 			key:'startBattle',time:stat.time, profiles:this.profiles,
 			userName:userProfile.name, livesLost:userProfile.livesLost,
 			bossName:bossProfile.name, bossLevel:bossProfile.level
-		};
-		if (!this.inBattle) {
-			this.inBattle=true;
-			this.emitEvent('party', this.id, 'game', 'StartBattleLocal', battle);
-		}
+		});
+	};
+
+	LocalGame.prototype.onComplete = function (re) {
+		this.addCells(re.cells);
+		this.openCells(re.cells);
+		this.openCells(this.board.mines);
+		if (!this.inBattle) this.startBattle();
 	};
 	
 	LocalGame.Board=Board;
