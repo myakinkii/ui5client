@@ -211,7 +211,10 @@ sap.ui.define([
 		handleForgeReset:function(e){ this.resetForge(e); },
 		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
-		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(null,[].slice.call(arguments)); }
+		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
+		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },
+		handleInvGroupHeader:function(oGroup){ return this.getInvGroupHeader(oGroup); },
+		handleInvTabChange:function(){ this.resetForge(); }
 
 	});
 });

@@ -1,8 +1,9 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"sap/m/MessageBox",
-	"sap/m/Dialog","sap/m/Button","sap/ui/model/Sorter","sap/ui/model/Filter","sap/ui/model/FilterOperator","sap/m/List","sap/m/ObjectListItem"
-	], function (Controller,MessageBox,Dialog,Button,Sorter,Filter,FilterOperator,List,ObjectListItem){
+	"sap/m/Dialog","sap/m/Button","sap/ui/model/Sorter","sap/ui/model/Filter","sap/ui/model/FilterOperator",
+	"sap/m/List","sap/m/ObjectListItem","sap/m/GroupHeaderListItem"
+	], function (Controller,MessageBox,Dialog,Button,Sorter,Filter,FilterOperator,List,ObjectListItem,GroupHeaderListItem){
 	"use strict";
 	
 	return Controller.extend("InventoryMixin",{
@@ -179,6 +180,14 @@ sap.ui.define([
 				}
 			}
 			this.syncEquip(mdl,equip);
+		},
+		
+		getInvGroupHeader:function(oGroup) {
+			return new GroupHeaderListItem({ title : this.geti18n('rarity_'+oGroup.key), upperCase : false });
+		},
+		
+		formatGemEffect:function(eff){
+			return this.geti18n('effect_'+eff);
 		}
 
 	});

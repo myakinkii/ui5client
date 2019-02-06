@@ -6,7 +6,7 @@
 		<FlexBox justifyContent="Center">
 			<items>
 				<l:VerticalLayout width="100%">
-					<IconTabBar expandable="false" _headerMode="Inline" _selectedKey="{/quickMode}">
+					<IconTabBar expandable="false" select="handleInvTabChange">
 						<items>
 							<IconTabFilter text="Fuse" key="fuse" >
 								<List width="100%" items="{ path:'/inv', sorter:{path:'key',descending:true} }">
@@ -45,8 +45,10 @@
 								<Button width="100%" type="Reject" text="{i18n>inventoryForgeReset}" press="handleForgeReset" />
 							</IconTabFilter>
 							<IconTabFilter text="Equip" key="equip" >
-								<List width="100%" items="{ path:'/equip', sorter:[{path:'rarity',group:true},{path:'effect'}] }">
-									<InputListItem label="{effect}"><Switch state="{equipped}" change="handleEquipGem" /></InputListItem>
+								<List width="100%" items="{ path:'/equip', sorter:[{path:'rarity',group:true},{path:'effect'}], groupHeaderFactory: '.handleInvGroupHeader' }">
+									<InputListItem _label="{effect}" label="{parts:[{path:'effect'}],formatter:'.handleGemEffectFormatter'}" >
+										<Switch state="{equipped}" change="handleEquipGem" />
+									</InputListItem>
 								</List>
 							</IconTabFilter>
 						</items>

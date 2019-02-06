@@ -307,7 +307,7 @@ sap.ui.define([], function () {
 			return re;
 		}
 		var parryChance=0.2;
-		parryChance=0.1*(defProfile.patk-defProfile.patk);
+		parryChance+=0.1*(defProfile.patk-defProfile.patk);
 		if (Math.random()<=parryChance){
 			re.eventKey='hitParried';
 			return re;
@@ -329,7 +329,7 @@ sap.ui.define([], function () {
 		if (!this.inBattle) return;
 		var userProfile=this.profiles[this.partyLeader],bossProfile=this.profiles.boss;
 		
-		if ( !bossProfile.wasHit && Math.random()<1/6/bossProfile.level) {
+		if ( !bossProfile.wasHit && Math.random()<1/8/bossProfile.level) {
 			this.inBattle=false;
 			re.win=1;
 			re.eventKey='Stole';
@@ -404,34 +404,60 @@ sap.ui.define([], function () {
 			this.openCells(re.cells);
 		}
 	};
+	
+	LocalGame.prototype.adjustProfile=function(equip,template){
+		template.equip=equip;
+		var power={"common":1,"rare":2,"epic":3};
+		return equip.reduce(function(prev,cur){
+			prev[cur.effect]+=power[cur.rarity];
+			return prev;
+		},template);
+	};
+	
+	LocalGame.prototype.genBossEquip=function(bossLevel,bSize,stat){
+		var equip=[];
+		var rnd=["maxhp","patk","pdef","speed"];
+		var rarities={s:['common','common'],m:['rare','common'],b:['epic','rare']};
+		var times={"s":10,"m":40,"b":120};
+		while (bossLevel>0) {
+			bossLevel--; 
+			equip.push({
+				effect:rnd[Math.floor(Math.random()*4)],
+				rarity: (Math.random()<0.5*times[bSize]/stat.time)?rarities[bSize][0]:rarities[bSize][1]
+			});
+		}
+		return equip;
+	};
 
 	LocalGame.prototype.onComplete = function (re) {
+		
 		this.addCells(re.cells);
 		this.openCells(re.cells);
 		this.openCells(this.board.mines);
+		
 		var stat=this.getGenericStat();
 		
-		var userProfile=this.profiles[this.partyLeader],bossProfile={"maxhp":0,"patk":0,"pdef":0,"speed":0,"level":this.bossLevel,"mob":1};
+		var bossProfile=this.adjustProfile(
+			this.genBossEquip(this.bossLevel,this.bSize,stat),
+			{"maxhp":0,"patk":0,"pdef":0,"speed":0,"level":this.bossLevel,"mob":1}
+		);
 
-		var n=this.bossLevel,rnd=["maxhp","patk","pdef","speed"];
-		while (n>0) { n--; bossProfile[rnd[Math.floor(Math.random()*4)]]++; }
-		
-		var names=['angry','hungry','lonely','greedy'];
+		var names=['angry','hungry','greedy','grumpy'];
 		bossProfile.name=names[Math.floor(names.length*Math.random())]+' Phoenix';
 		bossProfile.hp=bossProfile.level+bossProfile.maxhp;
 		this.profiles.boss=bossProfile;
 		
-		userProfile.name=this.partyLeader;
-		userProfile.level=8;
-		userProfile.livesLost=this.livesLost;
+		var userProfile=this.adjustProfile(
+			this.profiles[this.partyLeader].equip,
+			{"maxhp":0,"patk":0,"pdef":0,"speed":0,"level":8,"name":this.partyLeader,"livesLost":this.livesLost}
+		);
 		userProfile.hp=userProfile.level-this.livesLost+userProfile.maxhp;
+		this.profiles[this.partyLeader]=userProfile;
 		
 		var battle={
-			key:'startBattle',profiles:this.profiles,
-			userName:this.partyLeader,bossName:this.bossName,
-			bossLevel:this.bossLevel,bossHp:this.bossLevel,
-			livesLost:this.livesLost,userHp:8-this.livesLost,
-			time:stat.time
+			key:'startBattle',time:stat.time, profiles:this.profiles,
+			userName:userProfile.name, livesLost:userProfile.livesLost,
+			bossName:bossProfile.name, bossLevel:bossProfile.level
 		};
 		if (!this.inBattle) {
 			this.inBattle=true;

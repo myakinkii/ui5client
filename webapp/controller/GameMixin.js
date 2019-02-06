@@ -202,20 +202,16 @@ sap.ui.define([
 		},
 		
 		onStartBattleLocal:function(e){
-			var msgs=[
-				this.geti18n('gameResultTime',e.arg.time),
-				this.geti18n('gameStartBattle',[e.arg.livesLost,e.arg.bossLevel]),
-			];
 			this.battleInfo=e.arg;
 			var mdl=this.getView().getModel();
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
-			this.showToast(msgs.join('\n'));
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
 			mdl.setProperty('/log',[{
 				eventKey:'startBattle',priority:'None',sorter:-1,
-				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName]), title:this.geti18n('game_startBattle')
+				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost]), 
+				title:this.geti18n('game_startBattle')
 			}]);
 		}
 	});

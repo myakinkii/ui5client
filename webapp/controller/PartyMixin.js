@@ -86,10 +86,7 @@ sap.ui.define([
 				};
 				pars.users[me]={name:me,id:me};
 				// pars.profiles[me]={s:{},m:{},b:{}};
-				pars.profiles[me]=mdl.getProperty('/equip').reduce(function(prev,cur){
-					if (cur.equipped) prev[cur.effect]++;
-					return prev;
-				},{"maxhp":0,"patk":0,"pdef":0,"speed":0});
+				pars.profiles[me]={ "equip" : mdl.getProperty('/equip').filter(function(it){ return it.equipped; }) };
 				pars.board=mockGames[boardSize];
 				pars.board.bSize=boardSize;
 				this.localGame=new LocalGame(pars);
