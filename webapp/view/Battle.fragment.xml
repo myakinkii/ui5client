@@ -18,13 +18,14 @@
 							</ObjectListItem>
 					</l:Grid>
 					<Button width="100%" press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
-					<List width="100%" items="{path:'/log', sorter:{path:'sorter',descending:true} }" >
-						<NotificationListItem 
-							showCloseButton="false" priority="{priority}" type="Inactive"
-							title="{title}" description="{descr}"
-							authorName="{attack}" datetime="{defense}"
-							authorPicture="{parts:[{path:'eventKey'}],formatter:'.handleFormatBattleLogIcon'}" />
-					</List>	
+					<List id="battleLog" width="100%" />
+					<!--<List width="100%" items="{path:'/log', sorter:{path:'sorter',descending:true} }" >-->
+					<!--	<NotificationListItem -->
+					<!--		showCloseButton="false" priority="{priority}" type="Inactive"-->
+					<!--		title="{title}" description="{descr}"-->
+					<!--		authorName="{attack}" datetime="{defense}"-->
+					<!--		authorPicture="{parts:[{path:'eventKey'}],formatter:'.handleFormatBattleLogIcon'}" />-->
+					<!--</List>	-->
 				</l:VerticalLayout>
 			</items>
 		</FlexBox>

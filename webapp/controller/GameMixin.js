@@ -3,8 +3,8 @@ sap.ui.define([
 	"com/minesnf/ui5client/controls/Board",
 	"com/minesnf/ui5client/controls/Cell",
 	"sap/m/FlexBox","sap/m/ScrollContainer","sap/m/Panel",
-	"sap/ui/model/json/JSONModel"
-], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel) {
+	"sap/ui/model/json/JSONModel","sap/m/NotificationListItem"
+], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem) {
 	"use strict";
 	
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
@@ -63,30 +63,14 @@ sap.ui.define([
 		
 		onResultHitMob:function(e){
 			var mdl=this.getView().getModel();
-			var log=mdl.getProperty('/log')||[];
 			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
-			log.push({
+			this.addLogEntry({
 				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey,e.arg.dmg),
 				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
-				sorter:log.length, priority:'Medium',icon:this.formatLogIcon(e.arg.eventKey)
+				priority:'Medium',icon:this.formatLogIcon(e.arg.eventKey)
 			});
-			mdl.setProperty( '/log',log);
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
 			this.battleInfo=e.arg;
-		},
-		
-		formatLogIcon:function(eventKey){
-			var keys={
-				hitDamage:'accept',
-				hitDamageCrit:'warning',
-				hitBlocked:'decline',
-				hitEvaded:'move',
-				hitParried:'move',
-				startBattle:'scissors',
-				endBattleLose:'unpaid-leave',
-				endBattleWin:'lead'
-			};
-			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},
 
 		onEndGame:function(){
@@ -188,15 +172,10 @@ sap.ui.define([
 				prio="High";
 				if (e.arg.lostBeforeBossBattle) msgs.push(this.geti18n('gameResultTime',e.arg.time));
 			}
-			var mdl=this.getView().getModel();
-			var log=mdl.getProperty('/log')||[];
 			var msg=msgs.join('\n');
-			log.push({ 
-				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey),
-				sorter:log.length, priority:prio
+			if (this.battleInfo) this.addLogEntry({ 
+				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey),priority:prio
 			});
-			mdl.setProperty( '/log',log);
-			if (this.battleInfo) mdl.setProperty( '/log',log);
 			else this.showToast(msg);
 			this.battleInfo=null;
 		},
@@ -208,12 +187,35 @@ sap.ui.define([
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
-			mdl.setProperty('/log',[{
+			this.getView().byId("battleLog").removeAllItems();
+			this.addLogEntry({
 				eventKey:'startBattle',priority:'None',sorter:-1,
 				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost]), 
 				title:this.geti18n('game_startBattle')
-			}]);
-		}
+			});
+		},
+		
+		addLogEntry:function(e){
+			this.getView().byId("battleLog").insertItem(new NotificationListItem({
+				showCloseButton:false, priority:e.priority, type:"Inactive",
+				title:e.title,description:e.descr,
+				authorPicture:this.formatLogIcon(e.eventKey)
+			}),0);
+		},
+		
+		formatLogIcon:function(eventKey){
+			var keys={
+				hitDamage:'accept',
+				hitDamageCrit:'warning',
+				hitBlocked:'decline',
+				hitEvaded:'move',
+				hitParried:'move',
+				startBattle:'scissors',
+				endBattleLose:'unpaid-leave',
+				endBattleWin:'lead'
+			};
+			return 'sap-icon://'+(keys[eventKey]||'employee');
+		},		
 	});
 });
 	
