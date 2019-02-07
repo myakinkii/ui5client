@@ -122,7 +122,7 @@ sap.ui.define([
 		tryCraftGem:function(recipe,rarity,cost){
 			var gem=this.recipes[recipe.join('')];
 			if(gem && rarity) {
-				this.showToast(this.geti18n('inventoryForgeSuccess',[rarity,gem.effect]));
+				this.showToast(this.geti18n('inventoryForgeSuccess',[this.geti18n('rarity_'+rarity),this.geti18n('effect_'+gem.effect)]));
 				this.mergeGemToEquipment(gem,rarity);
 			} else this.showToast(this.geti18n('inventoryForgeFail'));
 			this.mergeResultToInventory(cost);
