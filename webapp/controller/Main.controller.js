@@ -34,7 +34,7 @@ sap.ui.define([
 			if (!onlineOnlyClient && !offlineMode) {
 				var syncRequest=$.ajax({url:"http://minesnf.com/srv.json",async:false});
 				if (syncRequest.readyState==4 && syncRequest.status==200){
-					srvs=JSON.parse(syncRequest.responseText).reduce(function(prev,cur){prev[cur.url]=cur; return prev;});
+					srvs=JSON.parse(syncRequest.responseText).reduce(function(prev,cur){prev[cur.url]=cur; return prev;},{});
 				}
 			}
 			var srv=window.localStorage.getItem("srv")||'global.minesnf.com';
