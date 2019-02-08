@@ -212,6 +212,7 @@ sap.ui.define([
 		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
 		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
+		handleFormatBattleIconColor:function(){ return this.formatBattleIconColor.apply(this,[].slice.call(arguments)); },
 		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },
 		handleInvGroupHeader:function(oGroup){ return this.getInvGroupHeader(oGroup); },
 		handleInvTabChange:function(){ this.resetForge(); }

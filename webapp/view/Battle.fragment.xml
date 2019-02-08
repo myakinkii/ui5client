@@ -6,26 +6,34 @@
 		<FlexBox justifyContent="Center">
 			<items>
 				<l:VerticalLayout width="100%"> 
-					<l:Grid defaultSpan="L6 M6 S6" class="sapUiSmallMarginTop" content="{/battleInfo}">
-							<ObjectListItem 
-								title="{i18n>hp}: {hp} (+{maxhp})" 
-								intro="[{level}] {name}" 
-								icon="{= ${mob}?'sap-icon://sap-ui5':'sap-icon://employee' }" >
-								<attributes>
-									<ObjectAttribute text="{i18n>patk} +{patk} {i18n>pdef} +{pdef}" />
-									<ObjectAttribute text="{i18n>speed} +{speed}" />
-								</attributes>				
-							</ObjectListItem>
-					</l:Grid>
-					<Button width="100%" press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
+					<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}" >
+						<items>
+							<IconTabFilter text="{name}" count="{hp}" _esign="Horizontal"
+								iconColor="{parts:[{path:'hp'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatBattleIconColor'}"
+								icon="{= ${mob}?'sap-icon://sap-ui5':'sap-icon://employee' }">
+								<ObjectListItem 
+									number="{hp}" numberUnit="{i18n>hp}" numberState="{= ${hp}&gt;3?'Success':${hp}&gt;0?'Warning':'None' }"
+									title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
+									intro="[{level}] {name}" >
+								</ObjectListItem>
+								<!--<Toolbar >-->
+								<!--	<ToolbarSpacer />-->
+								<!--	<Button press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />-->
+								<!--	<ToolbarSpacer />-->
+								<!--	<Button press="handleSteal" text="{i18n>gameStealLoot}" type="Emphasized" />-->
+								<!--	<ToolbarSpacer />-->
+								<!--</Toolbar>-->
+							</IconTabFilter>
+						</items>
+					</IconTabBar>
+					<Toolbar >
+						<ToolbarSpacer />
+						<Button press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
+						<ToolbarSpacer />
+						<Button press="handleSteal" text="{i18n>gameStealLoot}" type="Emphasized" />
+						<ToolbarSpacer />
+					</Toolbar>
 					<List id="battleLog" width="100%" />
-					<!--<List width="100%" items="{path:'/log', sorter:{path:'sorter',descending:true} }" >-->
-					<!--	<NotificationListItem -->
-					<!--		showCloseButton="false" priority="{priority}" type="Inactive"-->
-					<!--		title="{title}" description="{descr}"-->
-					<!--		authorName="{attack}" datetime="{defense}"-->
-					<!--		authorPicture="{parts:[{path:'eventKey'}],formatter:'.handleFormatBattleLogIcon'}" />-->
-					<!--</List>	-->
 				</l:VerticalLayout>
 			</items>
 		</FlexBox>

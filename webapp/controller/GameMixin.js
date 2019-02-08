@@ -183,11 +183,15 @@ sap.ui.define([
 		onStartBattleLocal:function(e){
 			this.battleInfo=e.arg;
 			var mdl=this.getView().getModel();
+			// e.arg.profiles.mob2=e.arg.profiles.boss;
+			// e.arg.profiles.mob3=e.arg.profiles.boss;
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
 			this.getView().byId("battleLog").removeAllItems();
+			// this.getView().byId("gameTabBar").destroyContent();
+			// this.getView().byId("gameTabBar").insertContent(new sap.m.List({id:"battleLog"}));
 			this.addLogEntry({
 				eventKey:'startBattle',priority:'None',sorter:-1,
 				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost]), 
@@ -215,7 +219,15 @@ sap.ui.define([
 				endBattleWin:'lead'
 			};
 			return 'sap-icon://'+(keys[eventKey]||'employee');
-		},		
+		},	
+		
+		formatBattleIconColor:function(hp,name,me,mob){
+			var color='Default';
+			if (name!=me) color='Positive';
+			if (mob) color='Negative';
+			if (hp==0) color='Neutral';
+			return color;
+		}
 	});
 });
 	
