@@ -52,7 +52,7 @@ sap.ui.define([
 		},
 
 		onmouseover : function(e) {
-			if ( this.getAltKeyMode() && !e.altKey) this.fireOpenCell();
+			if ( this.getAltKeyMode() && !e.altKey && !this.getParent().getPreventAltKeyMode() ) this.fireOpenCell();
 		}
 	});
 });	

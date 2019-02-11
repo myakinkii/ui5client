@@ -7,6 +7,7 @@ sap.ui.define([
 	return Control.extend("com.minesnf.ui5client.controls.Board", {
 		metadata : {
 			properties : {
+				"preventAltKeyMode":{type: "boolean", defaultValue: false},
 				"boxColor" :  {type: "sap.ui.core.CSSColor", defaultValue: Parameters.get("sapUiBrand")},
 				"rows":"int",
 				"cols":"int",
@@ -33,6 +34,8 @@ sap.ui.define([
 			});
 			oRm.write("</div>");
 		},
+		
+		ondblclick:function(e){ this.setPreventAltKeyMode(!this.getPreventAltKeyMode()); },
 		
 		attachMove:function(cbFn){
 			this.attachBrowserEvent('touchmove', function(e){
