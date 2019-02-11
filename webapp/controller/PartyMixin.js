@@ -1,8 +1,8 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"com/minesnf/ui5client/model/localGame",
-	'sap/m/MessageBox'
-], function (Controller,LocalGame,MessageBox){
+	'sap/m/MessageBox',"sap/ui/model/json/JSONModel"
+], function (Controller,LocalGame,MessageBox,JSONModel){
 	"use strict";
 	
 	return Controller.extend("PartyMixin",{
@@ -57,54 +57,81 @@ sap.ui.define([
 				});
 			} else this.processCommand('/join '+party.id);
 		},
+		
+		showCreatePartyDlg:function(e){
+			var mdl=this.getView().getModel();
+			var iAmOnline=!mdl.getProperty('/offlineMode');
+			var partyMdl={
+				me:mdl.getProperty('/auth/user'),
+				bSize:e.getSource().data().boardSize,
+				mode:iAmOnline?mdl.getProperty('/quickMode'):"solo",
+				iAmOnline:iAmOnline,
+				maxPlayers:2,
+				rpg:true,
+				online:iAmOnline
+			};
+			if (!this.partyDlg) {
+				this.partyDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.newPartyDlg", this );
+				this.getView().addDependent(this.partyDlg);
+			}
+			this.partyDlg.setModel(new JSONModel(partyMdl));
+			this.partyDlg.open();
+			// console.log(partyMdl);
+		},
+		
+		createParty:function(){
+			var partyMdl=this.partyDlg.getModel().getData();
+			var mode=partyMdl.mode;
+			if (partyMdl.rpg) mode+='RPG';
+			this.partyDlg.close();
+			if (partyMdl.online) this.processCommand('/create '+mode+' '+boardSize+' '+maxPlayers);
+			else this.createLocalGame(mode,partyMdl.bSize,partyMdl.maxPlayers);
+		},
 
-		startParty:function(e){
+		createLocalGame:function(mode,boardSize,maxPlayers){
+			// console.log(localGame,mode,boardSize,maxPlayers);
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
-			var boardSize=e.getSource().data().boardSize;
-			var mode=this.getView().getModel().getProperty('/quickMode');
-			var localGame=(mode=='local'||this.getView().getModel().getProperty('/offlineMode'));
-			if (localGame) {
-				mode="rank";
-				var mockGames={
-					s:{"boardId":"rank1","r":8,"c":8,b:10},
-					m:{"boardId":"rank1","r":16,"c":16,b:40},
-					b:{"boardId":"rank1","r":16,"c":30,b:99}
-				};
-				// this.runTest2(mockGames[boardSize]); return;
-				// this.runTest(mockGames[boardSize],8,8); return;
-				var pars={
-					multiThread:false,
-					id:mockGames[boardSize].boardId,
-					name:mockGames[boardSize].boardId,
-					board:{},
-					mode:mode,
-					minPlayers:1,
-					users:{},
-					profiles:{},
-					leader:me
-				};
-				pars.users[me]={name:me,id:me};
-				// pars.profiles[me]={s:{},m:{},b:{}};
-				pars.profiles[me]={ "equip" : mdl.getProperty('/equip').filter(function(it){ return it.equipped; }) };
-				pars.board=mockGames[boardSize];
-				pars.board.bSize=boardSize;
-				this.localGame=new LocalGame(pars);
-				this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
-					sap.ui.getCore().getEventBus().publish('message', {
-						dst: dst,
-						dstId: dstId,
-						contextId: contextId,
-						func: func,
-						arg: arg
-					});
-				};
-				this.localGame.dispatchEvent({
-					user:null,
-					command:"startBoard",
-					pars:null
+			mode="rank";
+			var mockGames={
+				s:{"boardId":"rank1","r":8,"c":8,b:10},
+				m:{"boardId":"rank1","r":16,"c":16,b:40},
+				b:{"boardId":"rank1","r":16,"c":30,b:99}
+			};
+			// this.runTest3(mockGames[boardSize],16,8); return;
+			// this.runTest2(mockGames[boardSize]); return;
+			// this.runTest(mockGames[boardSize],8,8); return;
+			var pars={
+				multiThread:false,
+				id:mockGames[boardSize].boardId,
+				name:mockGames[boardSize].boardId,
+				board:{},
+				mode:mode,
+				minPlayers:1,
+				users:{},
+				profiles:{},
+				leader:me
+			};
+			pars.users[me]={name:me,id:me};
+			// pars.profiles[me]={s:{},m:{},b:{}};
+			pars.profiles[me]={ "equip" : mdl.getProperty('/equip').filter(function(it){ return it.equipped; }) };
+			pars.board=mockGames[boardSize];
+			pars.board.bSize=boardSize;
+			this.localGame=new LocalGame(pars);
+			this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
+				sap.ui.getCore().getEventBus().publish('message', {
+					dst: dst,
+					dstId: dstId,
+					contextId: contextId,
+					func: func,
+					arg: arg
 				});
-			} else this.processCommand('/create '+mode+' '+boardSize);
+			};
+			this.localGame.dispatchEvent({
+				user:null,
+				command:"startBoard",
+				pars:null
+			});
 		},
 		
 		runTest:function(board,x,y){
@@ -137,6 +164,22 @@ sap.ui.define([
 				});
 			}
 			for (i in res) res[i]/=times;
+			console.log(Date.now()-now,res);
+		},
+		
+		runTest3:function(board,x,y){
+			var times=10000;
+			var res={};
+			var i,m,mines,now=Date.now();
+			var summer=function(prev,cur){ return cur==9?prev+1:prev; }
+			var reducer=function(prev,cur,i){ prev[i]=cur.reduce(summer,0); return prev;}
+			for (i=0;i<times;i++){
+				mines=this.runBoard(board,x,y).board.reduce(reducer,{});
+				for (m in mines ) if (m>0 && m<=board.r) {
+					if (!res[m]) res[m]=0;
+					res[m]+=mines[m];
+				}
+			}
 			console.log(Date.now()-now,res);
 		},		
 		

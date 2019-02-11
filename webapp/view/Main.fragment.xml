@@ -9,10 +9,9 @@
 					<l:VerticalLayout width="100%">
 						<IconTabBar expandable="false" headerMode="Inline" selectedKey="{/quickMode}">
 							<items>
-								<IconTabFilter text="Local" key="local" />
-								<IconTabFilter text="Rank" key="rank" enabled="{= !${/offlineMode}}" />
-								<IconTabFilter text="Coop" count="{/partiesCount/coop}" key="coop" enabled="{= !${/offlineMode}}" />
-								<IconTabFilter text="Versus" count="{/partiesCount/versus}" key="versus" enabled="{= !${/offlineMode}}" />
+								<IconTabFilter text="{i18n>modeSolo}" key="solo" />
+								<IconTabFilter text="{i18n>modeCoop}" count="{/partiesCount/coop}" key="coop" enabled="{= !${/offlineMode}}" />
+								<IconTabFilter text="{i18n>modeVersus}" count="{/partiesCount/versus}" key="versus" enabled="{= !${/offlineMode}}" />
 							</items>
 							<content>
 								<Panel>
