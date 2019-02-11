@@ -23,6 +23,11 @@ sap.ui.define([
 			var i,p,u;
 			for (i in parties) {
 				p=parties[i];
+				p.rpg=false;
+				if (p.mode=="coopRPG"){
+					p.mode="coop";
+					p.rpg=true;
+				}
 				partiesCount[p.bSize][p.mode]++;
 				for (u in p.users) p.users[u]={user:u};
 			}

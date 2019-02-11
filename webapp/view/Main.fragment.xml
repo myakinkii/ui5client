@@ -19,10 +19,14 @@
 									<customData> <core:CustomData key="boardSize" value="s" /> </customData>
 								</Button>
 								<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/s/coop}>0 }" 
-									items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'s'} ] }">
+									items="{ 
+										path:'/parties', 
+										_sorter:{path:'rpg',group:true},groupHeaderFactory: '.handlePartyGroupHeader',
+										filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'s'} ] }">
 									<customData> <core:CustomData key="boardSize" value="s" /> </customData>
 									<StandardListItem 
-										type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+										type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+										highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
 										press="handlePressParty"
 										title="{name}^{leader}"
 										description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
@@ -30,7 +34,8 @@
 								<List visible="{= ${/quickMode}==='versus' &amp;&amp; ${/partiesCount/s/versus}>0 }" 
 									items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'s'} ] }">
 									<StandardListItem 
-										type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+										type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+										highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
 										press="handlePressParty"
 										title="{name}^{leader}"
 										description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
@@ -41,9 +46,13 @@
 									<customData> <core:CustomData key="boardSize" value="m" /> </customData>
 								</Button>
 								<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/m/coop}>0 }" 
-									items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
+									items="{ 
+										path:'/parties', 
+										sorter:{path:'rpg',group:true},groupHeaderFactory: '.handlePartyGroupHeader',
+										filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
 									<StandardListItem 
-										type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+										type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+										highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
 										press="handlePressParty"
 										title="{name}^{leader}"
 										description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
@@ -51,7 +60,8 @@
 								<List visible="{= ${/quickMode}==='versus' &amp;&amp; ${/partiesCount/m/versus}>0 }" 
 									items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'m'} ] }">
 									<StandardListItem 
-										type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+										type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+										highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
 										press="handlePressParty"
 										title="{name}^{leader}"
 										description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
@@ -62,9 +72,13 @@
 									<customData> <core:CustomData key="boardSize" value="b" /> </customData>
 								</Button>
 								<List visible="{= ${/quickMode}==='coop' &amp;&amp; ${/partiesCount/b/coop}>0 }" 
-									items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
+									items="{ 
+										path:'/parties', 
+										sorter:{path:'rpg',group:true},groupHeaderFactory: '.handlePartyGroupHeader',
+										filters : [ {path:'mode',operator:'EQ',value1:'coop'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
 									<StandardListItem 
-										type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+										type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+										highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
 										press="handlePressParty"
 										title="{name}^{leader}"
 										description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
@@ -72,7 +86,8 @@
 								<List visible="{= ${/quickMode}==='versus' &amp;&amp; ${/partiesCount/b/versus}>0 }" 
 									items="{ path:'/parties', filters : [ {path:'mode',operator:'EQ',value1:'versus'},{path:'bSize',operator:'EQ',value1:'b'} ] }">
 									<StandardListItem 
-										type="{= ${leader}===${/auth/user}?'Navigation':'Active' }"
+										type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+										highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
 										press="handlePressParty"
 										title="{name}^{leader}"
 										description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
