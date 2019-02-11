@@ -61,14 +61,16 @@ sap.ui.define([
 		showCreatePartyDlg:function(e){
 			var mdl=this.getView().getModel();
 			var iAmOnline=!mdl.getProperty('/offlineMode');
+			var mode=mdl.getProperty('/quickMode');
+			if (!iAmOnline) mode="solo";
 			var partyMdl={
 				me:mdl.getProperty('/auth/user'),
 				bSize:e.getSource().data().boardSize,
-				mode:iAmOnline?mdl.getProperty('/quickMode'):"solo",
+				mode:mode,
 				iAmOnline:iAmOnline,
 				maxPlayers:2,
 				rpg:true,
-				online:iAmOnline
+				online:(mode=="solo"?false:iAmOnline)
 			};
 			if (!this.partyDlg) {
 				this.partyDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.newPartyDlg", this );
@@ -82,30 +84,35 @@ sap.ui.define([
 		createParty:function(){
 			var partyMdl=this.partyDlg.getModel().getData();
 			var mode=partyMdl.mode;
+			var onlineMode=partyMdl.online;
+			if (mode!=="solo") onlineMode=true;
 			if (partyMdl.rpg) mode+='RPG';
+			if (partyMdl.online && mode=="solo") mode="rank";
 			this.partyDlg.close();
-			if (partyMdl.online) this.processCommand('/create '+mode+' '+boardSize+' '+maxPlayers);
-			else this.createLocalGame(mode,partyMdl.bSize,partyMdl.maxPlayers);
+			if (onlineMode) this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
+			else this.createLocalGame(mode, partyMdl.bSize, partyMdl.maxPlayers);
 		},
 
 		createLocalGame:function(mode,boardSize,maxPlayers){
-			// console.log(localGame,mode,boardSize,maxPlayers);
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
-			mode="rank";
-			var mockGames={
-				s:{"boardId":"rank1","r":8,"c":8,b:10},
-				m:{"boardId":"rank1","r":16,"c":16,b:40},
-				b:{"boardId":"rank1","r":16,"c":30,b:99}
+			var modes={
+				solo:{constr:LocalGame.RankGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}},
+				soloRPG:{constr:LocalGame.RPGGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}}
+			 };
+			 var boards={
+				 s:{bSize:'small',r:8,c:8,b:10},
+				 m:{bSize:'medium',r:16,c:16,b:40},
+				 b:{bSize:'big',c:30,r:16,b:99}
 			};
-			// this.runTest3(mockGames[boardSize],16,8); return;
-			// this.runTest2(mockGames[boardSize]); return;
-			// this.runTest(mockGames[boardSize],8,8); return;
+			// this.runTest3(boards[boardSize],16,8); return;
+			// this.runTest2(boards[boardSize]); return;
+			// this.runTest(boards[boardSize],8,8); return;
 			var pars={
 				multiThread:false,
-				id:mockGames[boardSize].boardId,
-				name:mockGames[boardSize].boardId,
-				board:{},
+				id:"solo1",
+				name:"solo1",
+				board:boards[boardSize],
 				mode:mode,
 				minPlayers:1,
 				users:{},
@@ -115,9 +122,7 @@ sap.ui.define([
 			pars.users[me]={name:me,id:me};
 			// pars.profiles[me]={s:{},m:{},b:{}};
 			pars.profiles[me]={ "equip" : mdl.getProperty('/equip').filter(function(it){ return it.equipped; }) };
-			pars.board=mockGames[boardSize];
-			pars.board.bSize=boardSize;
-			this.localGame=new LocalGame(pars);
+			this.localGame=new modes[mode].constr(pars);
 			this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
 				sap.ui.getCore().getEventBus().publish('message', {
 					dst: dst,

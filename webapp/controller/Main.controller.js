@@ -42,7 +42,7 @@ sap.ui.define([
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
 			
 			this.getView().setModel(new JSONModel({
-				quickMode:"local",
+				quickMode:"solo",
 				evts:{},
 				msg:'',
 				auth:{},
