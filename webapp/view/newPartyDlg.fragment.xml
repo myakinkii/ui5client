@@ -5,32 +5,34 @@
 	<Dialog title="{i18n>partyCreateDialogTitle}" >
 		<content>
 			<List>
+				<InputListItem label="{i18n>partyOnlineMode}"> 
+					<Switch enabled="{/iAmOnline}" state="{/online}"  change="handleNewPartyOnlineChange" type="AcceptReject"/>
+				</InputListItem>
 				<InputListItem label="{i18n>partyRPGMode}"> <Switch state="{/rpg}" type="AcceptReject"/> </InputListItem>								
-				<InputListItem label="{i18n>partyOnlineMode}"> <Switch enabled="{/iAmOnline}" state="{/online}" type="AcceptReject"/> </InputListItem>
 				<InputListItem label="{i18n>partyGameMode}">
-					<SegmentedButton enabled="{/iAmOnline}" selectedKey="{/mode}">
+					<SegmentedButton enabled="{/iAmOnline}" select="handleNewPartyModeChange" selectedKey="{/mode}">
 						<items>
-							<SegmentedButtonItem text="{i18n>modeSolo}" key="solo" />
-							<SegmentedButtonItem text="{i18n>modeCoop}" key="coop" />
-							<SegmentedButtonItem text="{i18n>modeVersus}" key="versus" />
+							<SegmentedButtonItem icon="sap-icon://employee" key="solo" />
+							<SegmentedButtonItem icon="sap-icon://decision" key="coop" enabled="{/online}" />
+							<SegmentedButtonItem icon="sap-icon://scissors" key="versus" enabled="{/online}" />
 						</items>
 					</SegmentedButton>
 				</InputListItem>
 				<InputListItem label="{i18n>partyBoardSize}">
-					<SegmentedButton selectedKey="{/bSize}">
+					<SegmentedButton select="handleNewPartyBsizeChange" selectedKey="{/bSize}">
 						<items>
-							<SegmentedButtonItem text="{i18n>sizeSmall}" key="s" />
-							<SegmentedButtonItem text="{i18n>sizeMedium}" key="m" />
-							<SegmentedButtonItem text="{i18n>sizeBig}" key="b" />
+							<SegmentedButtonItem icon="sap-icon://navigation-up-arrow" key="s" />
+							<SegmentedButtonItem icon="sap-icon://collapse-group" key="m" />
+							<SegmentedButtonItem icon="sap-icon://drill-up" key="b" enabled="{= ${device>/system/desktop} || ${device>/system/tablet} }"/>
 						</items>
 					</SegmentedButton>
 				</InputListItem>				
-				<InputListItem label="{i18n>partyMaxPlayers}">
+				<InputListItem label="{i18n>partyMaxPlayers}" visible="{= ${/mode}!=='solo' }">
 					<SegmentedButton enabled="{= ${/mode}!=='solo' }" selectedKey="{/maxPlayers}">
 						<items>
 							<SegmentedButtonItem text="2" key="2" />
-							<SegmentedButtonItem text="3" key="3" />
-							<SegmentedButtonItem text="4" key="4" />
+							<SegmentedButtonItem text="3" key="3" enabled="{= ${/bSize}==='m' || ${/bSize}==='b' }"/>
+							<SegmentedButtonItem text="4" key="4" enabled="{= ${/bSize}==='b' }"/>
 						</items>
 					</SegmentedButton>
 				</InputListItem>

@@ -86,19 +86,34 @@ sap.ui.define([
 			// console.log(partyMdl);
 		},
 		
+		onPartyModeChange:function(e){
+			var mode=e.getParameter("key");
+			if (mode=="versus") this.partyDlg.getModel().setProperty("/rpg",false);
+		},
+		
+		onPartyOnlineChange:function(e){
+			var online=e.getParameter("state");
+			if (!online) this.partyDlg.getModel().setProperty("/mode","solo");
+		},
+		
+		onPartyBsizeChange:function(e){
+			var bSize=e.getParameter("key");
+			var players=this.partyDlg.getModel().getProperty("/maxPlayers");
+			var allowedPlayers={s:2,m:3,b:4};
+			if (players>allowedPlayers[bSize]) this.partyDlg.getModel().setProperty("/maxPlayers",2);
+		},
+		
 		createParty:function(){
 			var partyMdl=this.partyDlg.getModel().getData();
 			var mode=partyMdl.mode;
-			var onlineMode=partyMdl.online;
-			if (mode!=="solo") onlineMode=true;
 			if (partyMdl.rpg) mode+='RPG';
 			if (partyMdl.online && mode=="solo") mode="rank";
 			this.partyDlg.close();
-			if (onlineMode) this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
-			else this.createLocalGame(mode, partyMdl.bSize, partyMdl.maxPlayers);
+			if (partyMdl.online) this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
+			else this.createLocalGame(mode,partyMdl.bSize);
 		},
 
-		createLocalGame:function(mode,boardSize,maxPlayers){
+		createLocalGame:function(mode,boardSize){
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			var modes={
@@ -125,7 +140,6 @@ sap.ui.define([
 				leader:me
 			};
 			pars.users[me]={name:me,id:me};
-			// pars.profiles[me]={s:{},m:{},b:{}};
 			pars.profiles[me]={ "equip" : mdl.getProperty('/equip').filter(function(it){ return it.equipped; }) };
 			this.localGame=new modes[mode].constr(pars);
 			this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
