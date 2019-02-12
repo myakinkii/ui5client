@@ -8,7 +8,9 @@
 				<InputListItem label="{i18n>partyOnlineMode}"> 
 					<Switch enabled="{/iAmOnline}" state="{/online}"  change="handleNewPartyOnlineChange" type="AcceptReject"/>
 				</InputListItem>
-				<InputListItem label="{i18n>partyRPGMode}"> <Switch state="{/rpg}" type="AcceptReject"/> </InputListItem>								
+				<InputListItem label="{i18n>partyRPGMode}"> 
+					<Switch state="{/rpg}" change="handleNewPartyRPGChange" type="AcceptReject"/>
+				</InputListItem>								
 				<InputListItem label="{i18n>partyGameMode}">
 					<SegmentedButton enabled="{/iAmOnline}" select="handleNewPartyModeChange" selectedKey="{/mode}">
 						<items>

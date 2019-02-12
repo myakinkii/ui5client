@@ -74,7 +74,7 @@ sap.ui.define([
 				mode:mode,
 				iAmOnline:iAmOnline,
 				maxPlayers:2,
-				rpg:true,
+				rpg:(mode=="versus"?false:true),
 				online:(mode=="solo"?false:iAmOnline)
 			};
 			if (!this.partyDlg) {
@@ -95,6 +95,12 @@ sap.ui.define([
 			var online=e.getParameter("state");
 			if (!online) this.partyDlg.getModel().setProperty("/mode","solo");
 		},
+		
+		onPartyRPGChange:function(e){
+			var rpg=e.getParameter("state");
+			var mode=this.partyDlg.getModel().getProperty("/mode");
+			if (rpg && mode=="versus") this.partyDlg.getModel().setProperty("/mode","coop");
+		},		
 		
 		onPartyBsizeChange:function(e){
 			var bSize=e.getParameter("key");
