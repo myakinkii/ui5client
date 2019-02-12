@@ -12,6 +12,8 @@ sap.ui.define([
 	return Controller.extend("GameMixin",{
 
 		onStartGame: function (e) {
+			if (e.arg.mode=="coopRPG") 
+				this.processCommand('/equip '+this.serializeEquip().join(" ")); // not so good, but will do for now
 			var self = this;
 			var cols=e.arg.c;
 			var rows=e.arg.r;

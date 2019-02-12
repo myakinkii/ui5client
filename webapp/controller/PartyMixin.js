@@ -115,8 +115,16 @@ sap.ui.define([
 			if (partyMdl.rpg) mode+='RPG';
 			if (partyMdl.online && mode=="solo") mode="rank";
 			this.partyDlg.close();
-			if (partyMdl.online) this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
-			else this.createLocalGame(mode,partyMdl.bSize);
+			if (partyMdl.online) {
+				this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
+			} else this.createLocalGame(mode,partyMdl.bSize);
+		},
+
+		serializeEquip:function(){
+			return this.getView().getModel().getProperty('/equip').reduce(function(prev,cur){ 
+				if (cur.equipped) prev.push(cur.rarity+"_"+cur.effect)
+				return prev;
+			},[]);
 		},
 
 		createLocalGame:function(mode,boardSize){
@@ -146,7 +154,7 @@ sap.ui.define([
 				leader:me
 			};
 			pars.users[me]={name:me,id:me};
-			pars.profiles[me]={ "equip" : mdl.getProperty('/equip').filter(function(it){ return it.equipped; }) };
+			pars.profiles[me]={ "equip":this.serializeEquip() };
 			this.localGame=new modes[mode].constr(pars);
 			this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
 				sap.ui.getCore().getEventBus().publish('message', {

@@ -106,8 +106,10 @@ sap.ui.define([], function () {
 	}
 
 	Game.prototype.dispatchEvent = function (e) {
-		if (e.command == 'hitMob' && this.players[e.user])
-			this.hitMob(e);
+
+		var rpgCommands=['hitMob','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'];
+		if (rpgCommands.indexOf(e.command)>-1 && this[e.command] && this.players[e.user]) this[e.command](e);
+
 		if (e.command == 'checkCell' && this.players[e.user])
 			this.checkCell(e);
 		if (e.command == 'startBoard')
@@ -323,6 +325,17 @@ sap.ui.define([], function () {
 		else re.dmg=atk;
 		return re;
 	};
+
+	RPGGame.prototype.equipGear = function (e) {
+		if (e.pars.length==0 || e.pars.length>8 ) return;
+		var userProfile=this.profiles[e.user];
+		if (this.inBattle || userProfile.livesLost==8)  {
+			this.emitEvent('client', e.user, 'system', 'Message','You are in either dead, or in battle now! No time for that stuff');
+			return;
+		}
+		userProfile.equip=e.pars;
+		this.emitEvent('client', e.user, 'system', 'Message','Equipped '+userProfile.equip);
+	};
 	
 	RPGGame.prototype.hitMob = function (e) {
 		
@@ -461,6 +474,31 @@ sap.ui.define([], function () {
 		return equip;
 	};
 	
+	RPGGame.prototype.adjustProfile=function(equip,template){
+		template.equip=equip;
+		var power={"common":1,"rare":2,"epic":3};
+		var effects={"maxhp":1,"patk":1,"pdef":1,"speed":1};
+		return equip.reduce(function(prev,cur){
+			var gem=cur.split("_");
+			if (effects[gem[1]] && power[gem[0]] )prev[gem[1]]+=power[gem[0]];
+			return prev;
+		},template);
+	};
+
+	RPGGame.prototype.genBossEquip=function(bossLevel,bSize,stat){
+		var equip=[],effect,rarity;
+		var rnd=["maxhp","patk","pdef","speed"];
+		var rarities={small:['common','common'],medium:['rare','common'],big:['epic','rare']};
+		var times={"s":10,"m":40,"b":120};
+		while (bossLevel>0) {
+			bossLevel--; 
+			effect=rnd[Math.floor(Math.random()*4)];
+			rarity=(Math.random()<0.5*times[bSize]/stat.time)?rarities[bSize][0]:rarities[bSize][1];
+			equip.push(rarity+"_"+effect);
+		}
+		return equip;
+	};
+
 	RPGGame.prototype.startBattle = function () {
 		
 		this.inBattle=true;
