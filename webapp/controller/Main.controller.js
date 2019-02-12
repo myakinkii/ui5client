@@ -165,13 +165,15 @@ sap.ui.define([
 			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
 		
+		rpgCmds:{"/hit":'hitMob',"/steal":'stealLoot',"/flee":'fleeBattle',"/ascend":'ascendToFloor1',"/descend":'descendToNextFloor'},
+		
 		processCommand:function(s){
 			// var localGame=this.getView().getModel().getProperty('/offlineMode');
-			var cmd=s.split(" ");
 			var me=this.getView().getModel().getProperty('/auth/user');
 			if (this.localGame){
+				var cmd=s.split(" ");
 				if (cmd[0]=="/check") this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
-				else if (cmd[0]=="/hit") this.localGame.dispatchEvent({ user:me, command:"hitMob" });
+				else if (this.rpgCmds[cmd[0]]) this.localGame.dispatchEvent({ user:me, command:this.rpgCmds[cmd[0]] });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},
 
@@ -216,6 +218,8 @@ sap.ui.define([
 		handleForgeReset:function(e){ this.resetForge(e); },
 		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
+		handleStealLoot:function(e){ this.stealLoot(e); },
+		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleIconColor:function(){ return this.formatBattleIconColor.apply(this,[].slice.call(arguments)); },
 		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },

@@ -3,13 +3,26 @@ sap.ui.define([
 	"com/minesnf/ui5client/controls/Board",
 	"com/minesnf/ui5client/controls/Cell",
 	"sap/m/FlexBox","sap/m/ScrollContainer","sap/m/Panel",
-	"sap/ui/model/json/JSONModel","sap/m/NotificationListItem"
-], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem) {
+	"sap/ui/model/json/JSONModel","sap/m/NotificationListItem",
+	"sap/m/MessageBox"
+], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem,MessageBox) {
 	"use strict";
 	
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
 	
 	return Controller.extend("GameMixin",{
+		
+		onCompleteFloor:function(e){
+			var self=this;
+			var cmd='/descend';
+			MessageBox.confirm(
+				this.geti18n('gameConfirmDescendFloor',e.arg.floor+1),
+				function(action){
+					if (action!=MessageBox.Action.OK) cmd='/ascend';
+					self.processCommand.call(self,cmd);
+				}
+			);
+		},
 
 		onStartGame: function (e) {
 			if (e.arg.mode=="coopRPG") 
@@ -18,6 +31,7 @@ sap.ui.define([
 			var cols=e.arg.c;
 			var rows=e.arg.r;
 			var width=(CELL_SIZE+4)*cols+32+'px'; // panel has 16px margin
+			var mdl=this.getView().getModel();
 			var mdlData={};
 			var cells=[],coord;
 			for (var r=1;r<=rows;r++) {
@@ -45,8 +59,9 @@ sap.ui.define([
 				});
 				boardPage.destroyContent();
 				boardPage.addContent(this.gameDialog);
-				this.getView().getModel().setProperty('/gameStarted',true);
+				mdl.setProperty('/gameStarted',true);
 			}
+			mdl.setProperty('/canSteal',true);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
@@ -63,8 +78,30 @@ sap.ui.define([
 			this.processCommand("/hit");
 		},
 		
+		stealLoot:function(e){
+			this.processCommand("/steal");
+		},
+		
+		fleeBattle:function(e){
+			this.processCommand("/flee");
+		},
+		
+		onStealFailed:function(e){
+			if (e.arg.spotted){
+				var mdl=this.getView().getModel();
+				mdl.setProperty('/canSteal',false);
+				mdl.setProperty( '/battleInfo',e.arg.profiles);
+			}
+			this.addLogEntry({
+				eventKey:'stealFailed',priority:'None',
+				descr:this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user), 
+				title:this.geti18n('game_stealFailed')
+			});			
+		},
+		
 		onResultHitMob:function(e){
 			var mdl=this.getView().getModel();
+			if (e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
 			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
 			this.addLogEntry({
 				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey,e.arg.dmg),
@@ -162,13 +199,12 @@ sap.ui.define([
 		},
 		
 		onShowResultLocal:function(e){
-			if (e.arg.result=="win") this.mergeResultToInventory(this.digitPocket);
-			this.digitPocket=null;
 			var msgs,prio;
 			if (e.arg.result=="win") {
 				prio="Low";
 				msgs=[this.geti18n('gameResultLocalWin')];
-				for (var i in e.arg.digitPocket) msgs.push(i+': '+e.arg.digitPocket[i]);
+				for (var i in e.arg.loot) msgs.push(i+': '+e.arg.loot[i]);
+				this.mergeResultToInventory(e.arg.loot);
 			} else {
 				msgs=[this.geti18n('gameResultLocalLose')];
 				prio="High";
@@ -196,7 +232,7 @@ sap.ui.define([
 			// this.getView().byId("gameTabBar").insertContent(new sap.m.List({id:"battleLog"}));
 			this.addLogEntry({
 				eventKey:'startBattle',priority:'None',sorter:-1,
-				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost]), 
+				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost,e.arg.floor]), 
 				title:this.geti18n('game_startBattle')
 			});
 		},

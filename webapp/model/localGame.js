@@ -107,7 +107,7 @@ sap.ui.define([], function () {
 
 	Game.prototype.dispatchEvent = function (e) {
 
-		var rpgCommands=['hitMob','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'];
+		var rpgCommands=['hitMob','stealLoot','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'];
 		if (rpgCommands.indexOf(e.command)>-1 && this[e.command] && this.players[e.user]) this[e.command](e);
 
 		if (e.command == 'checkCell' && this.players[e.user])
@@ -283,18 +283,25 @@ sap.ui.define([], function () {
 	function RPGGame(pars) {
 		Game.call(this, pars);
 		for (var u in this.players) if(!this.profiles[u]) this.profiles[u]={};
+		this.floor=1;
+		this.loot={};
 	};
 	
 	RPGGame.prototype = new Game;
 	
 	RPGGame.prototype.onStartBoard = function () {
-		this.resetScore();
-		this.livesLost=0;
-		this.livesTotal=0;
-		for (var u in this.players) {
-			this.profiles[u].livesLost=0;
-			this.livesTotal+=8;
+		this.voteFlee={};
+		this.voteAscend={};
+		this.voteDescend={};
+		if (!this.fledPreviousBattle){
+			this.livesLost=0;
+			this.livesTotal=0;
+			for (var u in this.players) {
+				this.profiles[u].livesLost=0;
+				this.livesTotal+=8;
+			}
 		}
+		this.fledPreviousBattle=false;
 		this.lostCoords={};
 		this.digitPocket={};
 		this.bossLevel=1;
@@ -337,6 +344,45 @@ sap.ui.define([], function () {
 		this.emitEvent('client', e.user, 'system', 'Message','Equipped '+userProfile.equip);
 	};
 	
+	RPGGame.prototype.stealLoot = function (e) {
+		
+		var userProfile=this.profiles[e.user],bossProfile=this.profiles.boss;
+		
+		if (!this.inBattle || bossProfile.wasHit || bossProfile.spottedStealing) return;
+
+		if (userProfile.livesLost==8 || userProfile.hp==0) {
+			this.emitEvent('client', e.user, 'system', 'Message','You are dead now, and cannot do that');
+			return;
+		}
+		
+		if (!bossProfile.stealAttempts) bossProfile.stealAttempts=0;
+		bossProfile.stealAttempts++;
+		
+		var fasterRatio=1;
+		if (userProfile.speed>bossProfile.speed) fasterRatio=(userProfile.speed+1)/(bossProfile.speed+1);
+		
+		var spotChance=0.2*bossProfile.stealAttempts/fasterRatio;
+		if (Math.random()<spotChance){
+			bossProfile.spottedStealing=true;
+			bossProfile.patk+=2;
+			bossProfile.speed+=2;
+			this.emitEvent('party', this.id, 'system', 'Message', 'Stealing failed. Spotted');
+			this.emitEvent('party', this.id, 'game', 'StealFailed', {user:e.user,spotted:true,profiles:this.profiles});
+			return;
+		}
+		
+		var stealChance=fasterRatio/bossProfile.level/Math.sqrt(bossProfile.stealAttempts)/8;
+
+		if (Math.random()<stealChance) {
+			this.inBattle=false;
+			this.completeFloor({eventKey:'endBattleStole'});
+		} else {
+			this.emitEvent('party', this.id, 'system', 'Message', 'Stealing failed');
+			this.emitEvent('party', this.id, 'game', 'StealFailed', {user:e.user,spotted:false});
+		}
+	};
+	
+	
 	RPGGame.prototype.hitMob = function (e) {
 		
 		if (!this.inBattle) return;
@@ -348,14 +394,6 @@ sap.ui.define([], function () {
 		}
 	
 		var re={};
-		
-		if ( !bossProfile.wasHit && Math.random()<this.stealChance) {
-			this.inBattle=false;
-			re.win=1;
-			re.eventKey='Stole';
-			this.resetBoard(re);
-			return;
-		}
 		
 		var hitResult=this.calcAtk(userProfile,bossProfile);
 		if (hitResult.dmg) { 
@@ -377,25 +415,71 @@ sap.ui.define([], function () {
 		
 		if (bossProfile.hp==0) {
 			this.inBattle=false;
-			re.win=1;
-			this.resetBoard(re);
+			re.eventKey='endBattleWin';
+			this.completeFloor(re);
 		} else if (this.totalHp==0){
 			this.inBattle=false;
+			re.eventKey='endBattleLose';
+			re.floor=this.floor;
 			this.resetBoard(re);
+			this.resetFloor();
 		}
 	};
 	
+	RPGGame.prototype.resetFloor = function () {
+		this.loot={};
+		this.floor=1;
+	};
+	
+	RPGGame.prototype.fleeBattle = function (e) {
+		if (!this.inBattle) return;
+		this.voteFlee[e.user]=true;
+		var voteFleeAccepted=true;
+		for (var p in this.players) if(!this.voteFlee[p]) voteFleeAccepted=false;
+		if (voteFleeAccepted) {
+			this.fledPreviousBattle=true;
+			this.resetBoard({eventKey:'endBattleFlee'});
+		}
+	};
+	
+	RPGGame.prototype.ascendToFloor1 = function (e) {
+		if (!this.floorCompleted) return;
+		this.voteAscend[e.user]=true;
+		var voteAscendAccepted=true;
+		for (var p in this.players) if(!this.voteAscend[p]) voteAscendAccepted=false;
+		if (voteAscendAccepted) {
+			this.resetBoard({eventKey:'completeFloorAscend',result:"win",floor:this.floor,loot:this.loot});
+			this.resetFloor();
+		}
+	};
+	
+	RPGGame.prototype.descendToNextFloor = function (e) {
+		if (!this.floorCompleted) return;
+		// this.voteDescend[e.user]=true;
+		var voteDescendAccepted=true;
+		// for (var p in this.players) if(!this.voteDescend[p]) voteDescendAccepted=false;
+		if (voteDescendAccepted) {
+			this.floor++;
+			this.resetBoard({floor:this.floor,eventKey:'completeFloorDescend',user:e.user});
+		}
+	};
+	
+	RPGGame.prototype.completeFloor = function (e) {
+		this.floorCompleted=true;
+		for (var d in this.digitPocket){
+			if (!this.loot[d]) this.loot[d]=0;
+			this.loot[d]+=this.digitPocket[d];
+		}
+		e.loot=this.loot;
+		e.floor=this.floor;
+		this.emitEvent('party', this.id, 'game', 'CompleteFloor', e);
+	};
+	
 	RPGGame.prototype.onResetBoard = function (e) {
-		var re = {};
-		re.result = e.win ? 'win' : 'fail';
-		if (e.lostBeforeBossBattle){
-			var stat=this.getGenericStat();
-			re.time=stat.time;
-			re.lostBeforeBossBattle=true;
-		} else re.eventKey='endBattle'+(e.eventKey||(e.win?'Win':'Lose'));
-		if (e.win) re.digitPocket=this.digitPocket;
-		this.emitEvent('party', this.id, 'system', 'Message', 'Battle result: '+re.eventKey||'endBattleLostAllLives');
-		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', re);
+		this.inBattle=false;
+		this.floorCompleted=false;
+		this.emitEvent('party', this.id, 'system', 'Message', 'Floor result: '+e.eventKey);
+		this.emitEvent('party', this.id, 'game', 'ShowResultLocal', e);
 	};
 	
 	RPGGame.prototype.onCells = function (re) {
@@ -443,7 +527,12 @@ sap.ui.define([], function () {
 		if (this.livesTotal==0){
 			this.openCells(this.board.mines);
 			re.lostBeforeBossBattle=true;
+			re.eventKey="endBattleLostAllLives";
+			// this.resetBoard(re);
+			re.floor=this.floor;
+			re.time=this.getGenericStat().time;
 			this.resetBoard(re);
+			this.resetFloor();
 		} else {
 			this.lostCoords[coord]++;
 			this.openCells(re.cells);
@@ -527,13 +616,11 @@ sap.ui.define([], function () {
 		bossProfile.hp=bossProfile.level+bossProfile.maxhp;
 		this.profiles.boss=bossProfile;
 		
-		this.stealChance=1/8/bossProfile.level;
-		
 		var names=[]; 
 		for (var p in this.players) names.push(p);
 		this.emitEvent('party', this.id, 'system', 'Message', 'Start Battle: '+names.join(',')+' vs '+ bossProfile.name);
 		this.emitEvent('party', this.id, 'game', 'StartBattleLocal', {
-			key:'startBattle',time:stat.time, profiles:this.profiles,
+			key:'startBattle',time:stat.time, floor:this.floor, profiles:this.profiles,
 			userName:names.join(','), livesLost:this.livesLost,
 			bossName:bossProfile.name, bossLevel:bossProfile.level
 		});
