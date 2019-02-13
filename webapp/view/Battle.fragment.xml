@@ -6,9 +6,9 @@
 		<FlexBox justifyContent="Center">
 			<items>
 				<l:VerticalLayout width="100%"> 
-					<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}" >
+					<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">
 						<items>
-							<IconTabFilter text="{name}" count="{hp}" _esign="Horizontal"
+							<IconTabFilter text="{name}" key="{name}" count="{hp}" _esign="Horizontal"
 								iconColor="{parts:[{path:'hp'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatBattleIconColor'}"
 								icon="{= ${mob}?'sap-icon://sap-ui5':'sap-icon://employee' }">
 								<ObjectListItem 
@@ -21,7 +21,7 @@
 					</IconTabBar>
 					<Toolbar >
 						<ToolbarSpacer />
-						<Button press="handleStealLoot" text="{i18n>gameStealLoot}" enabled="{/canSteal}" type="Emphasized" />
+						<Button press="handleStealLoot" text="{i18n>gameStealLoot}" enabled="{/canSteal}" _type="Emphasized" />
 						<ToolbarSpacer />
 						<Button press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
 						<ToolbarSpacer />

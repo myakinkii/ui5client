@@ -12,6 +12,19 @@ sap.ui.define([
 	
 	return Controller.extend("GameMixin",{
 		
+		onUserDied:function(e){
+			if (this.localGame) return;
+			var me=this.getView().getModel().getProperty('/auth/user');
+			this.showToast(this.geti18n(e.arg.user==me?'gameResultLocalLose':'gameUserDied',e.arg.user));
+		},
+		
+		onGameUserVote:function(e){
+			if (this.localGame) return;
+			e.arg.title=this.geti18n('game_userVote_'+e.arg.eventKey);
+			e.arg.descr=this.geti18n('game_userVote_text',e.arg.user);
+			this.addLogEntry(e.arg);
+		},
+		
 		onCompleteFloor:function(e){
 			var self=this;
 			var commander=function(cmd){ self.processCommand.call(self,cmd); };
@@ -64,6 +77,7 @@ sap.ui.define([
 				mdl.setProperty('/gameStarted',true);
 			}
 			mdl.setProperty('/canSteal',true);
+			mdl.setProperty('/canFlee',true);
 			mdl.setProperty( '/battleLog',[]);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
@@ -93,6 +107,7 @@ sap.ui.define([
 			if (e.arg.spotted){
 				var mdl=this.getView().getModel();
 				mdl.setProperty('/canSteal',false);
+				mdl.setProperty('/canFlee',false);
 				mdl.setProperty( '/battleInfo',e.arg.profiles);
 			}
 			this.addLogEntry({
@@ -107,9 +122,11 @@ sap.ui.define([
 			if (e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
 			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
 			this.addLogEntry({
-				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey,e.arg.dmg),
+				eventKey:e.arg.eventKey, descr:msg, 
+				title: this.geti18n('game_'+e.arg.eventKey,e.arg[e.arg.dmg?"attack":"defense"]),
 				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
-				priority:'Medium',icon:this.formatLogIcon(e.arg.eventKey)
+				priority:e.arg.dmg?'Medium':'None',
+				icon:this.formatLogIcon(e.arg.eventKey)
 			});
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
 			this.battleInfo=e.arg;
@@ -202,13 +219,18 @@ sap.ui.define([
 		},
 		
 		onShowResultLocal:function(e){
-			var msgs,prio="Low";
+			var msgs,prio="None";
 			if (e.arg.result=="win") {
+				prio="Low";
 				msgs=[this.geti18n('gameResultLocalWin')];
 				if (e.arg.floor>1) msgs.push(this.geti18n('gameResultLocalAscend'));
 				this.mergeResultToInventory(e.arg.loot);
-			} if (e.arg.result=="continue") {
+			} else if (e.arg.result=="continue") {
+				prio="Low";
 				msgs=[this.geti18n('gameResultLocalContinue',e.arg.floor)];
+			} else if (e.arg.result=="flee") {
+				prio="High";
+				msgs=[this.geti18n('gameResultLocalFlee',[e.arg.floor,e.arg.lives])];
 			} else {
 				msgs=[this.geti18n('gameResultLocalLose')];
 				prio="High";
@@ -229,7 +251,7 @@ sap.ui.define([
 			this.battleLog=[];
 			var mdl=this.getView().getModel();
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
-
+			this.getView().byId("gameTabBar").setSelectedKey(this.getView().getModel().getProperty('/auth/user'));
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);

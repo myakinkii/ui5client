@@ -364,8 +364,8 @@ sap.ui.define([], function () {
 		var spotChance=0.2*bossProfile.stealAttempts/fasterRatio;
 		if (Math.random()<spotChance){
 			bossProfile.spottedStealing=true;
-			bossProfile.patk+=2;
-			bossProfile.speed+=2;
+			bossProfile.patk=Math.ceil(1.3*(bossProfile.patk+1));
+			bossProfile.speed=Math.ceil(1.3*(bossProfile.speed+1));
 			this.emitEvent('party', this.id, 'system', 'Message', 'Stealing failed. Spotted');
 			this.emitEvent('party', this.id, 'game', 'StealFailed', {user:e.user,spotted:true,profiles:this.profiles});
 			return;
@@ -412,7 +412,7 @@ sap.ui.define([], function () {
 		hitResult.profiles=this.profiles;
 		this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
 		this.emitEvent('party', this.id, 'system', 'Message',[hitResult.eventKey,bossProfile.name,'>',userProfile.name,'(',userProfile.hp,')'].join(' '));
-		
+
 		if (bossProfile.hp==0) {
 			this.inBattle=false;
 			re.eventKey='endBattleWin';
@@ -431,20 +431,27 @@ sap.ui.define([], function () {
 		this.floor=1;
 	};
 	
+	RPGGame.prototype.sendUserVote = function (user, eventKey) {
+		this.emitEvent('party', this.id, 'system', 'Message', user+'voted for '+eventKey);
+		this.emitEvent('party', this.id, 'game', 'GameUserVote', {user:user,eventKey:eventKey});
+	};
+	
 	RPGGame.prototype.fleeBattle = function (e) {
-		if (!this.inBattle) return;
+		if (!this.inBattle || this.profiles.boss.spottedStealing) return;
 		this.voteFlee[e.user]=true;
+		this.sendUserVote(e.user,"battleFlee");
 		var voteFleeAccepted=true;
 		for (var p in this.players) if(!this.voteFlee[p]) voteFleeAccepted=false;
 		if (voteFleeAccepted) {
 			this.fledPreviousBattle=true;
-			this.resetBoard({eventKey:'endBattleFlee'});
+			this.resetBoard({eventKey:'endBattleFlee',result:"flee",floor:this.floor,lives:this.livesTotal});
 		}
 	};
 	
 	RPGGame.prototype.ascendToFloor1 = function (e) {
 		if (!this.floorCompleted) return;
 		this.voteAscend[e.user]=true;
+		this.sendUserVote(e.user,"battleAscend");
 		var voteAscendAccepted=true;
 		for (var p in this.players) if(!this.voteAscend[p]) voteAscendAccepted=false;
 		if (voteAscendAccepted) {
@@ -456,6 +463,7 @@ sap.ui.define([], function () {
 	RPGGame.prototype.descendToNextFloor = function (e) {
 		if (!this.floorCompleted) return;
 		// this.voteDescend[e.user]=true;
+		this.sendUserVote(e.user,"battleDescend");
 		var voteDescendAccepted=true;
 		// for (var p in this.players) if(!this.voteDescend[p]) voteDescendAccepted=false;
 		if (voteDescendAccepted) {
@@ -523,6 +531,8 @@ sap.ui.define([], function () {
 		}
 		if (this.profiles[re.user].livesLost==8) {
 			this.emitEvent('client', re.user, 'system', 'Message', 'You have lost all your lives');
+			this.emitEvent('party', this.id, 'system', 'Message', re.user+' died');
+			this.emitEvent('party', this.id, 'game', 'UserDied', {user:re.user});
 		}
 		if (this.livesTotal==0){
 			this.openCells(this.board.mines);
@@ -605,6 +615,8 @@ sap.ui.define([], function () {
 			if (userProfile.livesLost<8) this.totalHp+=userProfile.hp;
 			this.profiles[u]=userProfile;
 		}
+		
+		for (var p in this.profiles) if (!this.players[p]) delete this.profiles[p];
 		
 		var bossProfile=this.adjustProfile(
 			this.genBossEquip(this.bossLevel,this.bSize,stat),
