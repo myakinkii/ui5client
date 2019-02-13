@@ -3,9 +3,9 @@ sap.ui.define([
 	"com/minesnf/ui5client/controls/Board",
 	"com/minesnf/ui5client/controls/Cell",
 	"sap/m/FlexBox","sap/m/ScrollContainer","sap/m/Panel",
-	"sap/ui/model/json/JSONModel","sap/m/NotificationListItem",
-	"sap/m/MessageBox"
-], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem,MessageBox) {
+	"sap/ui/model/json/JSONModel",
+	"sap/m/NotificationListItem","sap/m/MessageBox","sap/m/Button"
+], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem, MessageBox, Button) {
 	"use strict";
 	
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
@@ -14,14 +14,16 @@ sap.ui.define([
 		
 		onCompleteFloor:function(e){
 			var self=this;
-			var cmd='/descend';
-			MessageBox.confirm(
-				this.geti18n('gameConfirmDescendFloor',e.arg.floor+1),
-				function(action){
-					if (action!=MessageBox.Action.OK) cmd='/ascend';
-					self.processCommand.call(self,cmd);
-				}
-			);
+			var commander=function(cmd){ self.processCommand.call(self,cmd); };
+			e.arg.actions=[
+				{action:this.geti18n("gameVoteAscend"),callback:function(){commander("/ascend"); }},
+				{action:this.geti18n("gameVoteDescend",e.arg.floor+1),callback:function(){ commander("/descend"); }}
+				];
+			e.arg.title=this.geti18n("game_completeFloor",e.arg.floor);
+			var stash=[''];
+			for (var i in e.arg.loot) stash.push(i+': '+e.arg.loot[i]);
+			e.arg.descr=this.geti18n("game_completeFloor_text",stash.join("\n"));
+			this.addLogEntry(e.arg);
 		},
 
 		onStartGame: function (e) {
@@ -62,6 +64,7 @@ sap.ui.define([
 				mdl.setProperty('/gameStarted',true);
 			}
 			mdl.setProperty('/canSteal',true);
+			mdl.setProperty( '/battleLog',[]);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
@@ -199,37 +202,38 @@ sap.ui.define([
 		},
 		
 		onShowResultLocal:function(e){
-			var msgs,prio;
+			var msgs,prio="Low";
 			if (e.arg.result=="win") {
-				prio="Low";
 				msgs=[this.geti18n('gameResultLocalWin')];
-				for (var i in e.arg.loot) msgs.push(i+': '+e.arg.loot[i]);
+				if (e.arg.floor>1) msgs.push(this.geti18n('gameResultLocalAscend'));
 				this.mergeResultToInventory(e.arg.loot);
+			} if (e.arg.result=="continue") {
+				msgs=[this.geti18n('gameResultLocalContinue',e.arg.floor)];
 			} else {
 				msgs=[this.geti18n('gameResultLocalLose')];
 				prio="High";
 				if (e.arg.lostBeforeBossBattle) msgs.push(this.geti18n('gameResultTime',e.arg.time));
+				if (e.arg.floor>1) msgs.push(this.geti18n('gameResultLocalAscend'));
 			}
 			var msg=msgs.join('\n');
-			if (this.battleInfo) this.addLogEntry({ 
-				eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey),priority:prio
-			});
-			else this.showToast(msg);
+			if (this.battleInfo) {
+				this.addLogEntry({ 
+					eventKey:e.arg.eventKey, descr:msg, title:this.geti18n('game_'+e.arg.eventKey),priority:prio
+				});
+			} else this.showToast(msg);
 			this.battleInfo=null;
 		},
 		
 		onStartBattleLocal:function(e){
 			this.battleInfo=e.arg;
+			this.battleLog=[];
 			var mdl=this.getView().getModel();
-			// e.arg.profiles.mob2=e.arg.profiles.boss;
-			// e.arg.profiles.mob3=e.arg.profiles.boss;
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
+
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
-			this.getView().byId("battleLog").removeAllItems();
-			// this.getView().byId("gameTabBar").destroyContent();
-			// this.getView().byId("gameTabBar").insertContent(new sap.m.List({id:"battleLog"}));
+			// this.getView().byId("battleLog").removeAllItems();
 			this.addLogEntry({
 				eventKey:'startBattle',priority:'None',sorter:-1,
 				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost,e.arg.floor]), 
@@ -238,11 +242,31 @@ sap.ui.define([
 		},
 		
 		addLogEntry:function(e){
-			this.getView().byId("battleLog").insertItem(new NotificationListItem({
-				showCloseButton:false, priority:e.priority, type:"Inactive",
-				title:e.title,description:e.descr,
-				authorPicture:this.formatLogIcon(e.eventKey)
-			}),0);
+			// var item=new NotificationListItem({
+			// 	showCloseButton:false, priority:e.priority, type:"Inactive",
+			// 	title:e.title,description:e.descr,
+			// 	authorPicture:this.formatLogIcon(e.eventKey)
+			// });
+			// if (e.actions) e.actions.forEach(function(act){
+			// 	item.addButton(new Button({text:act.action,press:act.callback}));
+			// });
+			// this.getView().byId("battleLog").insertItem(item,0);
+			this.battleLog.push(e);
+			e.entryNumber=this.battleLog.length;
+			var lastN=[],N=6,i;
+			for (i=this.battleLog.length-1;i>=0;i--){
+				if (N==0) break;
+				lastN.push(this.battleLog[i]);
+				N--;
+			}
+			this.getView().getModel().setProperty("/battleLog",lastN);
+		},
+		
+		callBattleActionCb:function(e){
+			var src=e.getSource();
+			var battleEventCtx=src.getParent().getBindingContext().getObject();
+			var cb=src.getBindingContext().getProperty("callback");
+			cb(battleEventCtx);
 		},
 		
 		formatLogIcon:function(eventKey){
@@ -254,7 +278,8 @@ sap.ui.define([
 				hitParried:'move',
 				startBattle:'scissors',
 				endBattleLose:'unpaid-leave',
-				endBattleWin:'lead'
+				endBattleWin:'lead',
+				completeFloorDescend:'thumb-up'
 			};
 			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},	

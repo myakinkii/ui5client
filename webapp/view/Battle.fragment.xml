@@ -25,10 +25,22 @@
 						<ToolbarSpacer />
 						<Button press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
 						<ToolbarSpacer />
-						<Button press="handleFleeBattle" text="{i18n>gameFleeBattle}" enabled="{/canFlee}" _type="Accept" />
+						<Button press="handleFleeBattle" text="{i18n>gameVoteFlee}" enabled="{/canFlee}" _type="Accept" />
 						<ToolbarSpacer />
 					</Toolbar>
-					<List id="battleLog" width="100%" />
+					<!--<List id="battleLog" width="100%" />-->
+					<List width="100%" items="{/battleLog}" >
+						<NotificationListItem buttons="{actions}"
+							showCloseButton="false" priority="{priority}" type="Inactive"
+							title="{entryNumber}: {title}" description="{descr}"
+							authorName="{attack}" datetime="{defense}"
+							authorPicture="{parts:[{path:'eventKey'}],formatter:'.handleFormatBattleLogIcon'}">
+							<buttons>
+								<Button text="{action}" press="handleBattleActionCb" />
+							</buttons>
+						</NotificationListItem>
+					</List>
+					
 				</l:VerticalLayout>
 			</items>
 		</FlexBox>

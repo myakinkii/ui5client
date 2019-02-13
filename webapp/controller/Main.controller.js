@@ -220,6 +220,7 @@ sap.ui.define([
 		handleHitMob:function(e){ this.hitMob(e); },
 		handleStealLoot:function(e){ this.stealLoot(e); },
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
+		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },
 		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleIconColor:function(){ return this.formatBattleIconColor.apply(this,[].slice.call(arguments)); },
 		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },
