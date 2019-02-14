@@ -645,11 +645,6 @@ sap.ui.define([], function () {
 	RPGGame.prototype.genBossEquip=function(floor,bossLevel,bSize,stat){
 		var equip=[];
 		var effects=["maxhp","patk","pdef","speed"];
-		// var times={"small":10,"medium":40,"big":120};
-		// var bossLevelRatio={ 1:0.8, 2:0.9, 3:1, 4:1.1, 5:1.2, 6:1.3, 7:1.5, 8:2};
-		// var timeRatio=(times[bSize]-stat.time)/times.big;
-		// if (timeRatio<0) timeRatio=0;
-		// var gemCount=Math.floor(floor*bossLevelRatio[bossLevel]*(1-timeRatio) );
 		var gemCount=floor;
 		while (gemCount>0) {
 			equip.push( "common_"+effects[Math.floor(Math.random()*4)] );
