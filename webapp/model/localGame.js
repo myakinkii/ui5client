@@ -346,6 +346,7 @@ sap.ui.define([], function () {
 		this.floor=1;
 		this.loot={};
 		this.recipes=[];
+		this.armorEndurance=1;
 	};
 	
 	RPGGame.prototype = new Game;
@@ -375,7 +376,7 @@ sap.ui.define([], function () {
 	RPGGame.prototype.calcFloorCompleteRatio=function(bossLevel,bSize,stat){
 		var ratio=1;
 		var times={"small":10.0,"medium":40.0,"big":120.0};
-		var bossLevelRatio={ 1:0.8, 2:0.9, 3:1, 4:1.1, 5:1.2, 6:1.3, 7:1.5, 8:2};
+		var bossLevelRatio={ 1:0.7, 2:0.8, 3:0.9, 4:1.1, 5:1.2, 6:1.3, 7:1.4, 8:1.5};
 		ratio*=bossLevelRatio[bossLevel];
 		var timeRatio=(times[bSize]-stat.time)/times[bSize];
 		if (timeRatio<0) timeRatio=1;
@@ -421,13 +422,12 @@ sap.ui.define([], function () {
 		var armorEndureChance=0.5;
 		armorEndureChance+=0.1*(atkProfile.patk-defProfile.pdef);
 		if (defProfile.pdef+1>atk) {
-			re.eventKey='hitBlocked';
-			if (Math.random()<armorEndureChance) defProfile.armorEndurance--;
-			if (defProfile.armorEndurance<2 && defProfile.pdef>0){
+			if ( defProfile.armorEndurance==0 && defProfile.pdef>0 ){
 				re.eventKey='hitPdefDecrease';
 				defProfile.pdef--;
-				defProfile.armorEndurance=2;
-			}
+				defProfile.armorEndurance=this.armorEndurance;
+			} else re.eventKey='hitBlocked';
+			if (Math.random()<armorEndureChance) defProfile.armorEndurance--;
 			return re;
 		}
 		re.dmg=atk;
@@ -696,7 +696,10 @@ sap.ui.define([], function () {
 		for (var u in this.players){
 			var userProfile=this.adjustProfile(
 				this.profiles[u].equip||[],
-				{"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":2,"level":8,"name":u,"livesLost":this.profiles[u].livesLost}
+				{
+					"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":this.armorEndurance,
+					"level":8, "name":u, "livesLost":this.profiles[u].livesLost
+				}
 			);
 			userProfile.hp=userProfile.level-userProfile.livesLost+userProfile.maxhp;
 			if (userProfile.livesLost<8) this.totalHp+=userProfile.hp;
@@ -707,7 +710,10 @@ sap.ui.define([], function () {
 		
 		var bossProfile=this.adjustProfile(
 			this.genBossEquip(this.floor,this.bossLevel,this.bSize,stat),
-			{"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":2,"level":this.bossLevel,"mob":1}
+			{
+				"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":this.armorEndurance,
+				"level":this.bossLevel, "mob":1
+			}
 		);
 		
 		var recipeChance=0.1;
