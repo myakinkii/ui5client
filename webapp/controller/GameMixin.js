@@ -260,7 +260,7 @@ sap.ui.define([
 			this.battleLog=[];
 			var mdl=this.getView().getModel();
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
-			this.getView().byId("gameTabBar").setSelectedKey(this.getView().getModel().getProperty('/auth/user'));
+			this.getView().byId("gameTabBar").setSelectedKey(e.arg.profiles.boss.name);
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
