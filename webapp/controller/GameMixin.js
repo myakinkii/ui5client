@@ -29,12 +29,15 @@ sap.ui.define([
 			var self=this;
 			var commander=function(cmd){ self.processCommand.call(self,cmd); };
 			e.arg.actions=[
-				{icon:"sap-icon://navigation-up-arrow",action:"1",callback:function(){commander("/ascend"); }},
+				{icon:"sap-icon://refresh",action:"1",callback:function(){commander("/ascend"); }},
 				{icon:"sap-icon://navigation-down-arrow",action:e.arg.floor+1,callback:function(){ commander("/descend"); }}
 				];
 			e.arg.title=this.geti18n("game_completeFloor",e.arg.floor);
-			var stash=[''];
-			for (var i in e.arg.loot) stash.push(i+': '+e.arg.loot[i]);
+			var stash=[''],res=8;
+			while (res>0) {
+				if (e.arg.loot[res]) stash.push(res+': '+e.arg.loot[res]);
+				res--;
+			}
 			e.arg.descr=this.geti18n("game_completeFloor_text",stash.join("\n"));
 			this.addLogEntry(e.arg);
 		},
