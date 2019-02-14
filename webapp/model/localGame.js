@@ -431,7 +431,6 @@ sap.ui.define([], function () {
 			return re;
 		}
 		re.dmg=atk;
-        re.eventKey='hitDamage';
 		return re;
 	};
 
