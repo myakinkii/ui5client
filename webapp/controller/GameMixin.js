@@ -39,6 +39,8 @@ sap.ui.define([
 				res--;
 			}
 			e.arg.descr=this.geti18n("game_completeFloor_text",stash.join("\n"));
+			if (e.arg.effect) e.arg.descr+=this.geti18n( 'game_completeFloor_text_recipe',this.geti18n('effect_'+e.arg.effect));
+			e.arg.descr+=this.geti18n("game_completeFloor_text_ascend");
 			this.addLogEntry(e.arg);
 		},
 
@@ -234,6 +236,7 @@ sap.ui.define([
 				msgs=[this.geti18n('gameResultLocalWin')];
 				if (e.arg.floor>1) msgs.push(this.geti18n('gameResultLocalAscend'));
 				this.mergeResultToInventory(e.arg.loot);
+				if (e.arg.recipes) this.refreshKnownRecipes(e.arg.recipes);
 			} else if (e.arg.result=="continue") {
 				prio="Low";
 				msgs=[this.geti18n('gameResultLocalContinue',e.arg.floor)];
@@ -264,11 +267,10 @@ sap.ui.define([
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
-			this.addLogEntry({
-				eventKey:'startBattle',priority:'None',sorter:-1,
-				descr:this.geti18n('game_startBattle_text',e.arg.bossName),
-				title:this.geti18n('game_startBattle',[e.arg.floor,e.arg.time,e.arg.livesLost])
-			});
+			e.arg.title=this.geti18n('game_startBattle',[e.arg.floor,e.arg.time,e.arg.livesLost]);
+			e.arg.descr=this.geti18n('game_startBattle_text',e.arg.bossName);
+			if (e.arg.knowledgePresence) e.arg.descr+=this.geti18n('game_startBattle_text_knowledge');
+			this.addLogEntry(e.arg);
 		},
 		
 		addLogEntry:function(e){

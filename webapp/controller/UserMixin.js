@@ -54,9 +54,10 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			var inv=[],i;
 			for (i in mdlInv) inv.push(mdlInv[i].val);
 			var equip=mdlEquip.map(function(gem){return gem.rarity+"_"+gem.effect; });
+			var recipes=JSON.parse(window.localStorage.getItem("knownRecipes")||"[]");
 			$('#qrcode')[0].innerHTML=''; // clear div
 			new QRCode("qrcode", {
-				text: JSON.stringify({ inv:inv, equip:equip}),
+				text: JSON.stringify({ inv:inv, equip:equip,recipes:recipes}),
 				width: 250,
 				height: 250,
 				colorDark: "#000000",
@@ -71,6 +72,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			if (cordova && cordova.plugins) cordova.plugins.barcodeScanner.scan(function(result){
 				if (result.text) try {
 					var res = JSON.parse(result.text);
+					this.refreshKnownRecipes(res.recipes);
 					var inv={},equip=[];
 					if (res.inv) {
 						inv=res.inv.reduce(function(prev,cur,ind){ 

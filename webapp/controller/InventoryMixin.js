@@ -16,22 +16,72 @@ sap.ui.define([
 			},{});
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/inv',inv);
+			
+			var recipes=JSON.parse(window.localStorage.getItem("gameRecipes")||"[]");
+			if (recipes.length==0) recipes=this.seedRecipes();
 			this.recipes={
 				'22222222':{effect:'speed',recipe:'22222222'},
 				'33333333':{effect:'maxhp',recipe:'33333333'},
 				'44444444':{effect:'pdef',recipe:'44444444'},
 				'55555555':{effect:'patk',recipe:'55555555'},
 			};
+			this.recipes=recipes.reduce(function(prev,cur){
+				var rec=cur.split("_");
+				prev[rec[1]]={effect:rec[0],recipe:rec[1]};
+				return prev;
+			},{});
 			this.modifiers={6:'common',7:'rare',8:'epic'};
+			this.refreshKnownRecipes();
 			this.resetForge();
-			
 			var equip=JSON.parse(window.localStorage.getItem("myEquipment")||"[]");
 			mdl.setProperty('/equip',equip);
-			
-			// var recipes=JSON.parse(window.localStorage.getItem("knownRecipes")||"[]");
-			mdl.setProperty('/recipesKnown',true);
-			mdl.setProperty('/recipes',this.recipes);
-			
+		},
+		
+		refreshKnownRecipes:function(effects){
+			var knownRecipes=JSON.parse(window.localStorage.getItem("knownRecipes")||"[]");
+			var knownHash=knownRecipes.reduce(function(prev,cur){
+				prev[cur]=cur;
+				return prev;
+			},{});
+			if (effects) {
+				effects.forEach(function(eff){
+					if(!knownHash[eff]) {
+						knownHash[eff]=eff;
+						knownRecipes.push(eff);
+					}
+				});
+				window.localStorage.setItem("knownRecipes",JSON.stringify(knownRecipes));
+			}
+			var gameRecipes=JSON.parse(window.localStorage.getItem("gameRecipes"));
+			var recipes=gameRecipes.map(function(r){
+				var rcp=r.split("_");
+				return {effect:rcp[0],recipe:rcp[1]};
+			}).filter(function(rec){
+				return knownHash[rec.effect]?true:false;
+			});
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/recipesKnown',recipes.length>0);
+			mdl.setProperty('/recipes',recipes);
+		},
+		
+		addKnownRecipe:function(effect){
+			this.refreshKnownRecipes(effect);
+		},
+		
+		seedRecipes:function(){
+			var uniq={};
+			function genRecipe(index){
+				var recipe='';
+				for (var i=0;i<8;i++) recipe+=(Math.floor(Math.random()*5)+1);
+				if (uniq[recipe]) return genRecipe(index);
+				uniq[recipe]=recipe;
+				return recipe;
+			}
+			var recipes=['speed','maxhp','pdef','patk'].map(function(eft,index){
+				return eft+"_"+genRecipe(index);
+			});
+			window.localStorage.setItem("gameRecipes",JSON.stringify(recipes));
+			return recipes;
 		},
 		
 		resetForge:function(){
