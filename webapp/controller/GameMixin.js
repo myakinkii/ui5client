@@ -29,8 +29,8 @@ sap.ui.define([
 			var self=this;
 			var commander=function(cmd){ self.processCommand.call(self,cmd); };
 			e.arg.actions=[
-				{action:this.geti18n("gameVoteAscend"),callback:function(){commander("/ascend"); }},
-				{action:this.geti18n("gameVoteDescend",e.arg.floor+1),callback:function(){ commander("/descend"); }}
+				{icon:"sap-icon://navigation-up-arrow",action:"1",callback:function(){commander("/ascend"); }},
+				{icon:"sap-icon://navigation-down-arrow",action:e.arg.floor+1,callback:function(){ commander("/descend"); }}
 				];
 			e.arg.title=this.geti18n("game_completeFloor",e.arg.floor);
 			var stash=[''];
@@ -78,7 +78,6 @@ sap.ui.define([
 			}
 			mdl.setProperty('/canSteal',true);
 			mdl.setProperty('/canFlee',true);
-			mdl.setProperty( '/battleLog',[]);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
@@ -110,12 +109,19 @@ sap.ui.define([
 				mdl.setProperty('/canFlee',false);
 				mdl.setProperty( '/battleInfo',e.arg.profiles);
 			}
-			this.addLogEntry({
-				eventKey:'stealFailed',priority:'None',
-				descr:this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user), 
-				title:this.geti18n('game_stealFailed')
-			});			
+			e.arg.descr=this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user);
+			e.arg.title=this.geti18n('game_stealFailed',this.formatChance(e.arg.chance));
+			this.addLogEntry(e.arg);
 		},
+		
+		onStealSucceeded:function(e){
+			e.arg.priority='Medium';
+			e.arg.title=this.geti18n('game_stealSucceeeded',this.formatChance(e.arg.chance));
+			e.arg.descr=this.geti18n('game_stealSucceeeded_text',e.arg.user);
+			this.addLogEntry(e.arg);
+		},	
+		
+		formatChance:function(chance){ return (chance*100).toFixed(2)+"%"; },
 		
 		onResultHitMob:function(e){
 			var mdl=this.getView().getModel();
@@ -123,7 +129,7 @@ sap.ui.define([
 			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
 			this.addLogEntry({
 				eventKey:e.arg.eventKey, descr:msg, 
-				title: this.geti18n('game_'+e.arg.eventKey,e.arg[e.arg.dmg?"attack":"defense"]),
+				title: this.geti18n('game_'+e.arg.eventKey,[e.arg[e.arg.dmg?"attack":"defense"],this.formatChance(e.arg.chance)]),
 				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
 				priority:e.arg.dmg?'Medium':'None',
 				icon:this.formatLogIcon(e.arg.eventKey)
@@ -255,33 +261,37 @@ sap.ui.define([
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
-			// this.getView().byId("battleLog").removeAllItems();
 			this.addLogEntry({
 				eventKey:'startBattle',priority:'None',sorter:-1,
-				descr:this.geti18n('game_startBattle_text',[e.arg.userName,e.arg.bossName,e.arg.time,e.arg.livesLost,e.arg.floor]), 
-				title:this.geti18n('game_startBattle')
+				descr:this.geti18n('game_startBattle_text',e.arg.bossName),
+				title:this.geti18n('game_startBattle',[e.arg.floor,e.arg.time,e.arg.livesLost])
 			});
 		},
 		
 		addLogEntry:function(e){
-			// var item=new NotificationListItem({
-			// 	showCloseButton:false, priority:e.priority, type:"Inactive",
-			// 	title:e.title,description:e.descr,
-			// 	authorPicture:this.formatLogIcon(e.eventKey)
-			// });
-			// if (e.actions) e.actions.forEach(function(act){
-			// 	item.addButton(new Button({text:act.action,press:act.callback}));
-			// });
-			// this.getView().byId("battleLog").insertItem(item,0);
+			var log=this.getView().byId("battleLog")
+			log.removeAllItems();
 			this.battleLog.push(e);
 			e.entryNumber=this.battleLog.length;
 			var lastN=[],N=6,i;
 			for (i=this.battleLog.length-1;i>=0;i--){
 				if (N==0) break;
-				lastN.push(this.battleLog[i]);
+				// lastN.push(this.battleLog[i]);
+				log.addItem(this.createLogItem(this.battleLog[i]));
 				N--;
 			}
-			this.getView().getModel().setProperty("/battleLog",lastN);
+			// this.getView().getModel().setProperty("/battleLog",lastN);
+		},
+		
+		createLogItem:function(e){
+			var item=new NotificationListItem({
+				showCloseButton:false, priority:e.priority, type:"Inactive",
+				title:e.title, description:e.descr, authorPicture:this.formatLogIcon(e.eventKey)
+			});
+			if (e.actions) e.actions.forEach(function(act){
+				item.addButton(new Button({text:act.action,icon:act.icon,press:act.callback}));
+			});
+			return item;
 		},
 		
 		callBattleActionCb:function(e){
