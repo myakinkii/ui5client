@@ -423,7 +423,7 @@ sap.ui.define([], function () {
 		if (defProfile.pdef+1>atk) {
 			re.eventKey='hitBlocked';
 			if (Math.random()<armorEndureChance) defProfile.armorEndurance--;
-			if (defProfile.armorEndurance<1 && defProfile.pdef>0){
+			if (defProfile.armorEndurance<2 && defProfile.pdef>0){
 				re.eventKey='hitPdefDecrease';
 				defProfile.pdef--;
 				defProfile.armorEndurance=2;
