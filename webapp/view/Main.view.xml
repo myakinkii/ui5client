@@ -17,7 +17,7 @@
 		<u:headEndItems>
 			<u:ShellHeadItem toggleEnabled="true" selected="{/forceOfflineMode}" 
 				icon="{parts: [{path:'/offlineMode'}],formatter:'.formatModeIcon'}" visible="{/showOfflineButton}" press="switchMode" />
-			<u:ShellHeadItem icon="sap-icon://log" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
+			<u:ShellHeadItem icon="sap-icon://log" visible="false" _visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />
 		</u:headEndItems>
 		<u:user>
 			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
