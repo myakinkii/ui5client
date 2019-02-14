@@ -43,6 +43,9 @@
 								</FlexBox>
 								<Button width="100%" type="Emphasized" text="{i18n>inventoryForgeStart}" press="handleForgeStart" />
 								<Button width="100%" type="Reject" text="{i18n>inventoryForgeReset}" press="handleForgeReset" />
+								<List visible="{/recipesKnown}" headerText="{i18n>inventoryKnownRecipes}" width="100%" items="{/recipes}">
+									<StandardListItem type="Active" title="{parts:[{path:'effect'}],formatter:'.handleGemEffectFormatter'}" info="{recipe}" press="handleApplyRecipe" />
+								</List>
 							</IconTabFilter>
 							<IconTabFilter text="Equip" key="equip" >
 								<List width="100%" items="{ path:'/equip', sorter:[{path:'rarity',group:true},{path:'effect'}], groupHeaderFactory: '.handleInvGroupHeader' }">

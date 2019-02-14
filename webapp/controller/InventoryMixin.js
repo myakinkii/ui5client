@@ -14,18 +14,24 @@ sap.ui.define([
 				prev[++i]={key:i,val:0};
 				return prev;
 			},{});
-			this.getView().getModel().setProperty('/inv',inv);
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/inv',inv);
 			this.recipes={
-				'22222222':{effect:'speed'},
-				'33333333':{effect:'maxhp'},
-				'44444444':{effect:'pdef'},
-				'55555555':{effect:'patk'}
+				'22222222':{effect:'speed',recipe:'22222222'},
+				'33333333':{effect:'maxhp',recipe:'33333333'},
+				'44444444':{effect:'pdef',recipe:'44444444'},
+				'55555555':{effect:'patk',recipe:'55555555'},
 			};
 			this.modifiers={6:'common',7:'rare',8:'epic'};
 			this.resetForge();
 			
 			var equip=JSON.parse(window.localStorage.getItem("myEquipment")||"[]");
-			this.getView().getModel().setProperty('/equip',equip);
+			mdl.setProperty('/equip',equip);
+			
+			// var recipes=JSON.parse(window.localStorage.getItem("knownRecipes")||"[]");
+			mdl.setProperty('/recipesKnown',true);
+			mdl.setProperty('/recipes',this.recipes);
+			
 		},
 		
 		resetForge:function(){
@@ -45,12 +51,27 @@ sap.ui.define([
 			};
 			this.getView().getModel().setProperty('/forge',forge);
 		},
-		
+
 		mergeResultToInventory:function(result){
 			var mdl=this.getView().getModel();
 			var inv=mdl.getProperty('/inv');
 			for (var i in result) inv[i].val+=result[i];
 			this.syncInv(mdl,inv);
+		},
+		
+		applyKnownRecipe:function(e){
+			this.resetForge();
+			var mdl=this.getView().getModel();
+			var recipe=e.getSource().getBindingContext().getProperty("recipe");
+			var forgeInv=mdl.getProperty('/forge/inv');
+			var map=[1,2,3,6,9,8,7,4];
+			for (var i=0,dig; i<recipe.length; i++) {
+				dig=recipe.charAt(i);
+				if (forgeInv[dig].val==0) break;
+				forgeInv[dig].val--;
+				mdl.setProperty('/forge/buttons/'+map[i]+'/digit',dig);
+			}
+			mdl.setProperty('/forge/inv',forgeInv);
 		},
 		
 		changeForgeDigit:function(evt){
@@ -159,6 +180,7 @@ sap.ui.define([
 		
 		syncInv:function(mdl,inv){
 			mdl.setProperty('/inv',inv);
+			this.resetForge();
 			window.localStorage.setItem('myInventory',JSON.stringify(inv));
 		},
 	

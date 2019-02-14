@@ -225,7 +225,8 @@ sap.ui.define([
 		handleFormatBattleIconColor:function(){ return this.formatBattleIconColor.apply(this,[].slice.call(arguments)); },
 		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },
 		handleInvGroupHeader:function(oGroup){ return this.getInvGroupHeader(oGroup); },
-		handleInvTabChange:function(){ this.resetForge(); }
+		handleInvTabChange:function(){ },
+		handleApplyRecipe:function(e){ this.applyKnownRecipe(e); }
 
 	});
 });
