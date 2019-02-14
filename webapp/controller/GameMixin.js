@@ -131,10 +131,10 @@ sap.ui.define([
 		onResultHitMob:function(e){
 			var mdl=this.getView().getModel();
 			if (e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
-			var msg=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
 			this.addLogEntry({
-				eventKey:e.arg.eventKey, descr:msg, 
+				eventKey:e.arg.eventKey,
 				title: this.geti18n('game_'+e.arg.eventKey,[e.arg[e.arg.dmg?"attack":"defense"],this.formatChance(e.arg.chance)]),
+				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]),
 				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
 				priority:e.arg.dmg?'Medium':'None',
 				icon:this.formatLogIcon(e.arg.eventKey)
@@ -311,6 +311,7 @@ sap.ui.define([
 				hitDamage:'accept',
 				hitDamageCrit:'warning',
 				hitBlocked:'decline',
+				hitPdefDecrease:'trend-down',
 				hitEvaded:'move',
 				hitParried:'move',
 				startBattle:'scissors',

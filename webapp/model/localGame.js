@@ -418,8 +418,20 @@ sap.ui.define([], function () {
 			re.eventKey='hitDamageCrit';
 			re.chance=critChance;
 		}
-		if (defProfile.pdef+1>atk) re.eventKey='hitBlocked';
-		else re.dmg=atk;
+		var armorEndureChance=0.5;
+		armorEndureChance+=0.1*(atkProfile.patk-defProfile.pdef);
+		if (defProfile.pdef+1>atk) {
+			re.eventKey='hitBlocked';
+			if (Math.random()<armorEndureChance) defProfile.armorEndurance--;
+			if (defProfile.armorEndurance<1 && defProfile.pdef>0){
+				re.eventKey='hitPdefDecrease';
+				defProfile.pdef--;
+				defProfile.armorEndurance=2;
+			}
+			return re;
+		}
+		re.dmg=atk;
+        re.eventKey='hitDamage';
 		return re;
 	};
 
@@ -665,8 +677,10 @@ sap.ui.define([], function () {
 		template.equip=equip;
 		var power={"common":1,"rare":2,"epic":3};
 		var effects={"maxhp":1,"patk":1,"pdef":1,"speed":1};
+		var skipPdef=this.fledPreviousBattle;
 		return equip.reduce(function(prev,cur){
 			var gem=cur.split("_");
+			if (gem[1]=='pdef' && skipPdef) return prev;
 			if (effects[gem[1]] && power[gem[0]] )prev[gem[1]]+=power[gem[0]];
 			return prev;
 		},template);
@@ -683,7 +697,7 @@ sap.ui.define([], function () {
 		for (var u in this.players){
 			var userProfile=this.adjustProfile(
 				this.profiles[u].equip||[],
-				{"maxhp":0,"patk":0,"pdef":0,"speed":0,"level":8,"name":u,"livesLost":this.profiles[u].livesLost}
+				{"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":2,"level":8,"name":u,"livesLost":this.profiles[u].livesLost}
 			);
 			userProfile.hp=userProfile.level-userProfile.livesLost+userProfile.maxhp;
 			if (userProfile.livesLost<8) this.totalHp+=userProfile.hp;
@@ -694,7 +708,7 @@ sap.ui.define([], function () {
 		
 		var bossProfile=this.adjustProfile(
 			this.genBossEquip(this.floor,this.bossLevel,this.bSize,stat),
-			{"maxhp":0,"patk":0,"pdef":0,"speed":0,"level":this.bossLevel,"mob":1}
+			{"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":2,"level":this.bossLevel,"mob":1}
 		);
 		
 		var recipeChance=0.1;
