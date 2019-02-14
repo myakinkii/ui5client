@@ -17,14 +17,14 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/inv',inv);
 			
+			// this.recipes={
+			// 	'22222222':{effect:'speed',recipe:'22222222'},
+			// 	'33333333':{effect:'maxhp',recipe:'33333333'},
+			// 	'44444444':{effect:'pdef',recipe:'44444444'},
+			// 	'55555555':{effect:'patk',recipe:'55555555'},
+			// };
 			var recipes=JSON.parse(window.localStorage.getItem("gameRecipes")||"[]");
 			if (recipes.length==0) recipes=this.seedRecipes();
-			this.recipes={
-				'22222222':{effect:'speed',recipe:'22222222'},
-				'33333333':{effect:'maxhp',recipe:'33333333'},
-				'44444444':{effect:'pdef',recipe:'44444444'},
-				'55555555':{effect:'patk',recipe:'55555555'},
-			};
 			this.recipes=recipes.reduce(function(prev,cur){
 				var rec=cur.split("_");
 				prev[rec[1]]={effect:rec[0],recipe:rec[1]};

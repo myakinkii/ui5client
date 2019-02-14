@@ -72,7 +72,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			if (cordova && cordova.plugins) cordova.plugins.barcodeScanner.scan(function(result){
 				if (result.text) try {
 					var res = JSON.parse(result.text);
-					this.refreshKnownRecipes(res.recipes);
+					self.refreshKnownRecipes.call(self,res.recipes);
 					var inv={},equip=[];
 					if (res.inv) {
 						inv=res.inv.reduce(function(prev,cur,ind){ 
@@ -80,14 +80,14 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 							prev[key]={key:key,val:cur};
 							return prev; 
 						},{});
-						mdl.setProperty('/inv',inv);
+						self.syncInv.call(self,mdl,inv);
 					}
 					if (res.equip) {
 						equip=res.equip.map(function(val){
 							var gem=val.split('_');
 							return {rarity:gem[0],effect:gem[1],eqiupped:false};
 						});
-						mdl.setProperty('/equip',equip);
+						self.syncEquip.call(self,mdl,equip);
 					}
 					self.showToast(self.geti18n('authProfileImported'));
 					self.exportProfile(inv,equip);
