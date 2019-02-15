@@ -395,7 +395,7 @@ sap.ui.define([], function () {
 		evadeChance+=0.1*(defProfile.speed-atkProfile.speed);
 		evadeChance*=this.adjustLivesLost(defProfile);
 		evadeChance*=this.adjustBossRatio(defProfile);
-		if (Math.random()<=evadeChance) {
+		if (this.rollDice("fightEvade",evadeChance)){
 			re.eventKey='hitEvaded';
 			re.chance=evadeChance;
 			return re;
@@ -404,7 +404,7 @@ sap.ui.define([], function () {
 		parryChance+=0.1*(defProfile.patk-atkProfile.patk);
 		parryChance*=this.adjustLivesLost(defProfile);
 		parryChance*=this.adjustBossRatio(defProfile);
-		if (Math.random()<=parryChance){
+		if (this.rollDice("fightParry",parryChance)){
 			re.eventKey='hitParried';
 			re.chance=parryChance;
 			return re;
@@ -414,7 +414,7 @@ sap.ui.define([], function () {
 		critChance+=0.1*(atkProfile.speed-defProfile.speed);
 		critChance*=this.adjustLivesLost(atkProfile);
 		critChance*=this.adjustBossRatio(atkProfile);
-		if (Math.random()<=critChance){
+		if (this.rollDice("fightCrit",critChance)){
 			atk*=2;
 			re.eventKey='hitDamageCrit';
 			re.chance=critChance;
@@ -426,8 +426,10 @@ sap.ui.define([], function () {
 				re.eventKey='hitPdefDecrease';
 				defProfile.pdef--;
 				defProfile.armorEndurance=this.armorEndurance;
-			} else re.eventKey='hitBlocked';
-			if (Math.random()<armorEndureChance) defProfile.armorEndurance--;
+			} else {
+				re.eventKey='hitBlocked';
+				if (this.rollDice("fightArmorEndure",armorEndureChance)) defProfile.armorEndurance--;
+			}
 			return re;
 		}
 		re.dmg=atk;
@@ -463,7 +465,7 @@ sap.ui.define([], function () {
 		if (userProfile.speed>bossProfile.speed) fasterRatio=Math.sqrt((userProfile.speed+1)/(bossProfile.speed+1));
 		
 		var spotChance=0.2*bossProfile.stealAttempts/fasterRatio;
-		if (Math.random()<spotChance){
+		if (this.rollDice("stealSpotted",spotChance)){
 			bossProfile.spottedStealing=true;
 			bossProfile.patk=Math.ceil(1.3*(bossProfile.patk+1));
 			bossProfile.speed=Math.ceil(1.3*(bossProfile.speed+1));
@@ -476,7 +478,7 @@ sap.ui.define([], function () {
 		
 		var stealChance=fasterRatio/bossProfile.level*Math.sqrt(bossProfile.stealAttempts)/8;
 		stealChance*=this.adjustLivesLost(userProfile);
-		if (Math.random()<stealChance) {
+		if (this.rollDice("stealSucceed",stealChance)){
 			this.inBattle=false;
 			this.emitEvent('party', this.id, 'game', 'StealSucceeded',  { user:e.user,chance:stealChance } );
 			this.completeFloor({eventKey:'endBattleStole'});
@@ -676,7 +678,7 @@ sap.ui.define([], function () {
 		template.equip=equip;
 		var power={"common":1,"rare":2,"epic":3};
 		var effects={"maxhp":1,"patk":1,"pdef":1,"speed":1};
-		var skipPdef=this.fledPreviousBattle;
+		var skipPdef=!template.mob && this.fledPreviousBattle;
 		return equip.reduce(function(prev,cur){
 			var gem=cur.split("_");
 			if (gem[1]=='pdef' && skipPdef) return prev;
@@ -719,8 +721,7 @@ sap.ui.define([], function () {
 		var recipeChance=0.1;
 		if (this.fledPreviousBattle || this.floor<3) recipeChance=0;
 		this.fledPreviousBattle=false;
-		
-		this.knowledgePresence=Math.random()<recipeChance;
+		this.knowledgePresence=this.rollDice("recipeFind",recipeChance);
 	
 		var names=['angry','hungry','greedy','grumpy'];
 		bossProfile.name=(this.knowledgePresence?'wise':names[Math.floor(names.length*Math.random())])+' Phoenix';
@@ -733,6 +734,12 @@ sap.ui.define([], function () {
 			key:'startBattle',profiles:this.profiles,knowledgePresence:this.knowledgePresence,
 			time:stat.time, floor:this.floor, livesLost:this.livesLost, bossName:bossProfile.name
 		});
+	};
+	
+	RPGGame.prototype.rollDice = function (effect,chance) {
+		var rnd=Math.random();
+		// console.log(effect,chance,rnd); //some logging or processing later maybe
+		return chance>rnd;
 	};
 	
 	RPGGame.prototype.onComplete = function (re) {
