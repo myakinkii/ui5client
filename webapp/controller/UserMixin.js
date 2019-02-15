@@ -55,7 +55,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 			for (i in mdlInv) inv.push(mdlInv[i].val);
 			var equip=mdlEquip.map(function(gem){return gem.rarity+"_"+gem.effect; });
 			var recipes=JSON.parse(window.localStorage.getItem("knownRecipes")||"[]");
-			var cheated=window.localStorage.getItem("exportUsed")?true:false;
+			var cheated=window.localStorage.getItem("importUsed")?true:false;
 			$('#qrcode')[0].innerHTML=''; // clear div
 			new QRCode("qrcode", {
 				text: JSON.stringify({ inv:inv, equip:equip,recipes:recipes,cheated:cheated}),
@@ -91,7 +91,7 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 						self.syncEquip.call(self,mdl,equip);
 					}
 					self.showToast(self.geti18n('authProfileImported'));
-					window.localStorage.setItem("exportUsed","x");
+					window.localStorage.setItem("importUsed","x");
 					self.exportProfile(inv,equip);
 				} catch (e) {
 					self.showToast(self.geti18n('authProfileImportFailed'));
