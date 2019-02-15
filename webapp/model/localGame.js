@@ -719,9 +719,15 @@ sap.ui.define([], function () {
 		);
 		
 		var recipeChance=0.1;
+		var wiseBosses={ 
+			small:{ 5:1.5, 6:2, 7:2, 8:3 },
+			medium:{ 6:1.5, 7:2, 8:3 },
+			large:{ 6:1.25, 7:2, 8:3 }
+		};
+		if (wiseBosses[this.bSize][this.bossLevel]) recipeChance*=wiseBosses[this.bSize][this.bossLevel];
 		if (this.fledPreviousBattle || this.floor<3) recipeChance=0;
 		this.fledPreviousBattle=false;
-		this.knowledgePresence=this.rollDice("recipeFind",recipeChance);
+		this.knowledgePresence=this.rollDice("recipeFind",recipeChance,1);
 	
 		var names=['angry','hungry','greedy','grumpy'];
 		bossProfile.name=(this.knowledgePresence?'wise':names[Math.floor(names.length*Math.random())])+' Phoenix';
@@ -736,9 +742,9 @@ sap.ui.define([], function () {
 		});
 	};
 	
-	RPGGame.prototype.rollDice = function (effect,chance) {
+	RPGGame.prototype.rollDice = function (effect,chance,log) {
 		var rnd=Math.random();
-		// console.log(effect,chance,rnd); //some logging or processing later maybe
+		if(log) console.log(effect,chance,rnd); //some logging or processing later maybe
 		return chance>rnd;
 	};
 	
