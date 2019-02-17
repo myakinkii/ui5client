@@ -722,7 +722,7 @@ sap.ui.define([], function () {
 		var wiseBosses={ 
 			small:{ 5:1.5, 6:2, 7:2, 8:3 },
 			medium:{ 6:1.5, 7:2, 8:3 },
-			large:{ 6:1.25, 7:2, 8:3 }
+			big:{ 6:1.25, 7:2, 8:3 }
 		};
 		if (wiseBosses[this.bSize][this.bossLevel]) recipeChance*=wiseBosses[this.bSize][this.bossLevel];
 		if (this.fledPreviousBattle || this.floor<3) recipeChance=0;
