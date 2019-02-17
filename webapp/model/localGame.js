@@ -701,7 +701,7 @@ sap.ui.define([], function () {
 					"level":8, "name":u, "livesLost":this.profiles[u].livesLost
 				}
 			);
-			if (this.fledPreviousBattle) userProfile.pdef=his.profiles[u].pdef;
+			if (this.fledPreviousBattle) userProfile.pdef=this.profiles[u].pdef;
 			if (userProfile.livesLost<8) userProfile.hp=userProfile.level-userProfile.livesLost+userProfile.maxhp;
 			else userProfile.hp=0;
 			this.totalHp+=userProfile.hp;
@@ -728,7 +728,7 @@ sap.ui.define([], function () {
 		var wiseFloors={small:3,medium:2,big:1};
 		if (this.fledPreviousBattle || this.floor<wiseFloors[this.bSize]) recipeChance=0;
 		this.fledPreviousBattle=false;
-		this.knowledgePresence=this.rollDice("recipeFind",recipeChance,1);
+		this.knowledgePresence=this.rollDice("recipeFind",recipeChance);
 	
 		var names=['angry','hungry','greedy','grumpy'];
 		bossProfile.name=(this.knowledgePresence?'wise':names[Math.floor(names.length*Math.random())])+' Phoenix';
