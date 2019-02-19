@@ -144,6 +144,7 @@ sap.ui.define([], function () {
 		this.logStart = 0;
 		this.log = {};
 		this.emitEvent('party', this.id, 'game', 'StartGame', {
+			mode:this.mode,
 			boardId: this.name,
 			r: this.board.sizeY,
 			c: this.board.sizeX
@@ -642,6 +643,7 @@ sap.ui.define([], function () {
 			this.livesLost++;
 			this.profiles[re.user].livesLost++;
 			this.livesTotal--;
+			this.emitEvent('party', this.id, 'game', 'UserLostLife', {user:re.user,livesLost:this.profiles[re.user].livesLost});
 		}
 		if (this.profiles[re.user].livesLost==8) {
 			this.emitEvent('client', re.user, 'system', 'Message', 'You have lost all your lives');

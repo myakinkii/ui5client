@@ -212,6 +212,7 @@ sap.ui.define([
 		handleNewPartyBsizeChange:function(e){ this.onPartyBsizeChange(e); },
 		handleDismissParty:function(){ this.dismissParty(); },
 		handleQuitGame:function(){ this.quitGame(); },
+		handleConfirmQuitGame:function(){ this.quitGameConfirm(); },
 		handleFuseDigit:function(e){ this.fuseDigit(e); },
 		handleForgeDigitButton:function(e){ this.changeForgeDigit(e); },
 		handleForgeStart:function(e){ this.startForge(e); },

@@ -18,6 +18,13 @@ sap.ui.define([
 			this.showToast(this.geti18n(e.arg.user==me?'gameResultLocalLose':'gameUserDied',e.arg.user));
 		},
 		
+		onUserLostLife:function(e){
+			var mdl=this.getView().getModel();
+			var livesLost=mdl.getProperty('/gameInfo/livesLost');
+			livesLost[e.arg.user]=e.arg;
+			mdl.setProperty('/gameInfo/livesLost',livesLost);
+		},
+		
 		onGameUserVote:function(e){
 			if (this.localGame) return;
 			e.arg.title=this.geti18n('game_userVote_'+e.arg.eventKey);
@@ -33,12 +40,13 @@ sap.ui.define([
 				{icon:"sap-icon://navigation-down-arrow",action:e.arg.floor+1,callback:function(){ commander("/descend"); }}
 				];
 			e.arg.title=this.geti18n("game_completeFloor",e.arg.floor);
-			var stash=[''],res=8;
+			var stash=[],res=8;
 			while (res>0) {
-				if (e.arg.loot[res]) stash.push(res+': '+e.arg.loot[res]);
+				if (e.arg.loot[res]) stash.push({key:res, val:e.arg.loot[res], text:res+': '+e.arg.loot[res]});
 				res--;
 			}
-			e.arg.descr=this.geti18n("game_completeFloor_text",stash.join("\n"));
+			this.getView().getModel().setProperty('/gameInfo/stash',stash);
+			e.arg.descr=this.geti18n("game_completeFloor_text",stash.map(function(s){return s.text; }).join("\n"));
 			if (e.arg.effect) e.arg.descr+=this.geti18n( 'game_completeFloor_text_recipe',this.geti18n('effect_'+e.arg.effect));
 			e.arg.descr+=this.geti18n("game_completeFloor_text_ascend");
 			this.addLogEntry(e.arg);
@@ -80,6 +88,13 @@ sap.ui.define([
 				boardPage.destroyContent();
 				boardPage.addContent(this.gameDialog);
 				mdl.setProperty('/gameStarted',true);
+				mdl.setProperty('/gameInfo',{ 
+					mode:e.arg.mode, 
+					rpg:(e.arg.mode=='soloRPG'||e.arg.mode=='coopRPG'), 
+					floor:1, 
+					stash:null,
+					livesLost:{} 
+				});
 			}
 			mdl.setProperty('/canSteal',true);
 			mdl.setProperty('/canFlee',true);
@@ -151,6 +166,20 @@ sap.ui.define([
 			if (this.localGame){
 				this.closeGame();
 			} else this.processCommand("/quit");
+		},
+		
+		quitGameConfirm:function(){
+			var self=this;
+			var mdl=this.getView().getModel();
+			MessageBox.confirm(
+				this.geti18n('gameInfoQuitGameConfirm'),
+				function(action){ 
+					if (action==MessageBox.Action.OK) {
+						self.quitGame.call(self);
+						mdl.setProperty('/showPane',false);
+					}
+				}
+			);
 		},
 		
 		closeGame:function(){
@@ -231,6 +260,10 @@ sap.ui.define([
 		
 		onShowResultLocal:function(e){
 			var msgs,prio="None";
+			var mdl=this.getView().getModel();
+			var resetLostLives=true;
+			var resetStash=true;
+			var floor=1;
 			if (e.arg.result=="win") {
 				prio="Low";
 				msgs=[this.geti18n('gameResultLocalWin')];
@@ -240,9 +273,13 @@ sap.ui.define([
 			} else if (e.arg.result=="continue") {
 				prio="Low";
 				msgs=[this.geti18n('gameResultLocalContinue',e.arg.floor)];
+				var resetStash=false;
+				floor=e.arg.floor;
 			} else if (e.arg.result=="flee") {
 				prio="High";
 				msgs=[this.geti18n('gameResultLocalFlee',[e.arg.floor,e.arg.lives])];
+				resetLostLives=false;
+				floor=e.arg.floor;
 			} else {
 				msgs=[this.geti18n('gameResultLocalLose')];
 				prio="High";
@@ -256,6 +293,9 @@ sap.ui.define([
 				});
 			} else this.showToast(msg);
 			this.battleInfo=null;
+			if (resetLostLives) mdl.setProperty('/gameInfo/livesLost',{});
+			if (resetStash) mdl.setProperty('/gameInfo/stash',null);
+			mdl.setProperty('/gameInfo/floor',floor);
 		},
 		
 		onStartBattleLocal:function(e){

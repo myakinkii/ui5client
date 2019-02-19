@@ -9,9 +9,9 @@
 	displayBlock="true">
 	<u:Shell showPane="{/showPane}">
 		<u:headItems>
-			<!--<u:ShellHeadItem icon="sap-icon://menu2" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />-->
 			<u:ShellHeadItem visible="{= !${/gameStarted} }" icon="{parts: [{path:'/page'}],formatter:'.formatPageIcon'}" press="switchPage" />
-			<u:ShellHeadItem visible="{/gameStarted}" icon="sap-icon://decline"  press="handleQuitGame" />
+			<u:ShellHeadItem icon="sap-icon://menu2" visible="{= ${/gameStarted} &amp;&amp; ${/gameInfo/rpg} }" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />			
+			<u:ShellHeadItem visible="{= ${/gameStarted} &amp;&amp; !${/gameInfo/rpg} }" icon="sap-icon://decline"  press="handleQuitGame" />
 			<u:ShellHeadItem visible="{= ${device>/system/desktop} &amp;&amp; ${/gameStarted} }" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
 		</u:headItems>		
 		<u:headEndItems>
@@ -22,9 +22,9 @@
 		<u:user>
 			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
 		</u:user>
-		<!--<u:paneContent>-->
-		<!--	<core:Fragment fragmentName="com.minesnf.ui5client.view.Inventory" type="XML" />-->
-		<!--</u:paneContent>-->
+		<u:paneContent>
+			<core:Fragment fragmentName="com.minesnf.ui5client.view.Stash" type="XML" />
+		</u:paneContent>
 		
 		<NavContainer id="app">
 			<pages>
