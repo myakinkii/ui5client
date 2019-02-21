@@ -8,7 +8,7 @@
 				<!--<l:VerticalLayout width="100%"> -->
 					<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">
 						<items>
-							<IconTabFilter text="{name}" key="{name}" count="{hp}" _esign="Horizontal"
+							<IconTabFilter text="{name}" key="{name}" count="{ parts:[{path:'hp'},{path:'state'}],formatter:'.handleFormatBattleState'}" _count="{hp}" _esign="Horizontal"
 								iconColor="{parts:[{path:'hp'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatBattleIconColor'}"
 								icon="{= ${mob}?'sap-icon://sap-ui5':'sap-icon://employee' }">
 								<ObjectListItem 

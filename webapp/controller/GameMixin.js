@@ -11,15 +11,25 @@ sap.ui.define([
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
 	
 	return Controller.extend("GameMixin",{
+
+		formatBattleState:function(hp,state){
+			var val=hp;
+			var stateSymbols={attack:"!",cooldown:"x",evade:"~",parry:"/",assist:"+",active:""};
+			if (stateSymbols[state]) val+=stateSymbols[state];
+			return val;
+		},
 		
 		onChangeState:function(e){
 
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
-			
+
+			var name=e.arg.profile.mob?"boss":e.arg.user;
+			mdl.setProperty("/battleInfo/"+name,e.arg.profile);
+
 			if (e.arg.user==me) mdl.setProperty('/canHit',e.arg.state=="active");
 
-			if (e.arg.state=="active") return;
+			if (e.arg.state=="active" || e.arg.state=="cooldown") return;
 			
 			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
 			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val/1000]);

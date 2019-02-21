@@ -165,17 +165,24 @@ sap.ui.define([
 			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
 		
-		rpgCmds:{"/steal":'stealLoot',"/flee":'fleeBattle',"/ascend":'ascendToFloor1',"/descend":'descendToNextFloor'},
-		actionCmds:{"/hit":'hitTarget',"/assist":"assistAttack"},
+		rpgCmds:{
+			"/hit":'hitTarget',
+			"/assist":"assistAttack",
+			"/steal":'stealLoot',
+			"/flee":'fleeBattle',
+			"/ascend":'ascendToFloor1',
+			"/descend":'descendToNextFloor',
+			"/check":"checkCell"
+		},
 		
 		processCommand:function(s){
 			// var localGame=this.getView().getModel().getProperty('/offlineMode');
 			var me=this.getView().getModel().getProperty('/auth/user');
 			if (this.localGame){
-				var cmd=s.split(" ");
-				if (cmd[0]=="/check") this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
-				else if (this.rpgCmds[cmd[0]]) this.localGame.dispatchEvent({ user:me, command:this.rpgCmds[cmd[0]] });
-				else if (this.actionCmds[cmd[0]]) this.localGame.dispatchEvent({ user:me, target:cmd[1], command:this.actionCmds[cmd[0]] });
+				var pars=s.split(" ");
+				var cmd=pars.shift();
+				// if (cmd=="/check") this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[0],cmd[1]] });
+				if (this.rpgCmds[cmd]) this.localGame.dispatchEvent({ user:me, command:this.rpgCmds[cmd], pars:pars });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},
 
@@ -227,6 +234,7 @@ sap.ui.define([
 		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleIconColor:function(){ return this.formatBattleIconColor.apply(this,[].slice.call(arguments)); },
 		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },
+		handleFormatBattleState:function(){ return this.formatBattleState.apply(this,[].slice.call(arguments)); },
 		handleInvGroupHeader:function(oGroup){ return this.getInvGroupHeader(oGroup); },
 		handleInvTabChange:function(){ },
 		handleApplyRecipe:function(e){ this.applyKnownRecipe(e); }
