@@ -23,7 +23,7 @@
 						<ToolbarSpacer />
 						<Button press="handleStealLoot" text="{i18n>gameStealLoot}" enabled="{/canSteal}" _type="Emphasized" />
 						<ToolbarSpacer />
-						<Button press="handleHitMob" text="{i18n>gameHitMob}" type="Reject" />
+						<Button press="handleHitMob" text="{i18n>gameHitMob}" enabled="{/canHit}" type="Reject" />
 						<ToolbarSpacer />
 						<Button press="handleFleeBattle" text="{i18n>gameVoteFlee}" enabled="{/canFlee}" _type="Accept" />
 						<ToolbarSpacer />

@@ -12,6 +12,28 @@ sap.ui.define([
 	
 	return Controller.extend("GameMixin",{
 		
+		onChangeState:function(e){
+
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
+			
+			if (e.arg.user==me) mdl.setProperty('/canHit',e.arg.state=="active");
+
+			if (e.arg.state=="active") return;
+			
+			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
+			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val/1000]);
+			
+			if (e.arg.state=="attack" && e.arg.user!=me) {
+				var self=this;
+				var commander=function(cmd){ self.processCommand.call(self,cmd); };
+				e.arg.actions=[
+					{icon:"sap-icon://add",action:"",callback:function(){commander("/assist "+e.arg.user); }}
+				];
+			}
+			this.addLogEntry(e.arg);
+		},
+		
 		onUserDied:function(e){
 			if (this.localGame) return;
 			var me=this.getView().getModel().getProperty('/auth/user');
@@ -98,6 +120,7 @@ sap.ui.define([
 			}
 			mdl.setProperty('/canSteal',true);
 			mdl.setProperty('/canFlee',true);
+			mdl.setProperty('/canHit',true);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
@@ -143,7 +166,7 @@ sap.ui.define([
 		
 		formatChance:function(chance){ return (chance*100).toFixed(2)+"%"; },
 		
-		onResultHitMob:function(e){
+		onResultHitTarget:function(e){
 			var mdl=this.getView().getModel();
 			if (e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
 			this.addLogEntry({

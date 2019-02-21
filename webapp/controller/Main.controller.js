@@ -165,7 +165,8 @@ sap.ui.define([
 			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
 		
-		rpgCmds:{"/hit":'hitMob',"/steal":'stealLoot',"/flee":'fleeBattle',"/ascend":'ascendToFloor1',"/descend":'descendToNextFloor'},
+		rpgCmds:{"/steal":'stealLoot',"/flee":'fleeBattle',"/ascend":'ascendToFloor1',"/descend":'descendToNextFloor'},
+		actionCmds:{"/hit":'hitTarget',"/assist":"assistAttack"},
 		
 		processCommand:function(s){
 			// var localGame=this.getView().getModel().getProperty('/offlineMode');
@@ -174,6 +175,7 @@ sap.ui.define([
 				var cmd=s.split(" ");
 				if (cmd[0]=="/check") this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[1],cmd[2]] });
 				else if (this.rpgCmds[cmd[0]]) this.localGame.dispatchEvent({ user:me, command:this.rpgCmds[cmd[0]] });
+				else if (this.actionCmds[cmd[0]]) this.localGame.dispatchEvent({ user:me, target:cmd[1], command:this.actionCmds[cmd[0]] });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},
 

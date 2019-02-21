@@ -107,7 +107,7 @@ sap.ui.define([], function () {
 
 	Game.prototype.dispatchEvent = function (e) {
 
-		var rpgCommands=['hitMob','stealLoot','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'];
+		var rpgCommands=['hitTarget','assistAttack','stealLoot','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'];
 		if (rpgCommands.indexOf(e.command)>-1 && this[e.command] && this.players[e.user]) this[e.command](e);
 
 		if (e.command == 'checkCell' && this.players[e.user])
@@ -289,7 +289,7 @@ sap.ui.define([], function () {
 		this.lost=0;
 		this.winStreak=0;
 		this.loseStreak=0;
-	};
+	}
   
   	RankGame.prototype=new Game;
   
@@ -340,15 +340,149 @@ sap.ui.define([], function () {
 		}
 		this.resetBoard(re);
 	};
+
+	function Player(game,equip){
+		this.game=game;
+		this.equip=equip;
+	}
+
+	Player.prototype={
+		
+		adjustProfile:function(template){
+			var power={"common":1,"rare":2,"epic":3};
+			var effects={"maxhp":1,"patk":1,"pdef":1,"speed":1};
+			this.profile=this.equip.reduce(function(prev,cur){
+				var gem=cur.split("_");
+				if (effects[gem[1]] && power[gem[0]] )prev[gem[1]]+=power[gem[0]];
+				return prev;
+			},template);
+			this.profile.equip=this.equip;
+			return this.profile;
+		},
+			
+		setState:function(profile,state,arg){
+			var game=this.game;
+			profile.state=state;
+			game.emitEvent('party', game.id, 'game', 'ChangeState', { user:profile.name, state:profile.state, val:arg });
+		},
+		
+		applyCoolDown:function(players){
+			var self=this;
+			var game=this.game;
+			players.forEach(function(p){
+				var profile=game.profiles[p.name];
+				if (p.time>0) {
+					self.setState(profile,"cooldown",p.time);
+					profile.timer=setTimeout(function(){ self.setState(profile,"active"); }, p.time);
+				} else {
+					self.setState(profile,"active");
+					profile.timer=null;
+				}
+			});
+		},
+		
+		onStartAttack:function(atkProfile){
+			var defProfile=this.profile;
+			var game=this.game;
+			if (defProfile.speed>atkProfile.speed) defProfile.state="evade";
+			else if (defProfile.patk>atkProfile.patk) defProfile.state="parry";
+			if (defProfile!="active") game.emitEvent('party', game.id, 'game', 'ChangeState', { mob:1, user:defProfile.name, state:defProfile.state});
+		},
+		
+		onEndAttack:function(atkProfile){
+			
+			var defProfile=this.profile;
+			var re={dmg:0,eventKey:'hitDamage',attack:atkProfile.name,defense:defProfile.name};
+			
+			var game=this.game;
+			var rpg=RPGMechanics;
+			
+			var adjustedAtk={ mob:0, livesLost:atkProfile.livesLost, patk:atkProfile.patk||1, speed:atkProfile.speed};
+			for (var a in atkProfile.assists) {
+				adjustedAtk.patk+=(atkProfile.assists[a].patk||1);
+				adjustedAtk.speed+=atkProfile.assists[a].speed;
+				adjustedAtk.livesLost+=atkProfile.assists[a].livesLost;
+			}
+			// atkProfile.assists=null;
+
+			var chances=rpg.calcAtkChances.call(game,adjustedAtk,defProfile);
+			
+			var cooldown=[];
+			var defCooldownHit=1000;
+			var atkCooldownMiss=1000;
+			var noCooldown=0;
+				
+			function addCoolDown(cd,profile,time){
+				cd.push({ name:profile.mob?"boss":profile.name, time:time });
+				for (var a in profile.assists) cd.push({user:a,time:time});
+			}
+			
+			if ( chances[this.state] && chances[this.state].result) {
+				re.eventKey=chances[this.state].eventKey;
+				re.chance=chances[this.state].chance;
+				addCoolDown(cooldown,atkProfile,atkCooldownMiss);
+				addCoolDown(cooldown,defProfile,noCooldown);
+			} else {
+				var dmg=adjustedAtk.patk;
+				if (chances.crit.result) {
+					dmg*=2;
+					defCooldownHit*=2;
+					re.eventKey=chances.crit.eventKey;
+					re.chance=chances.crit.chance;
+				}
+				var armorEndureChance=0.5;
+				armorEndureChance+=0.1*(adjustedAtk.patk-defProfile.pdef);
+				if (defProfile.pdef+1>dmg) {
+					if ( defProfile.armorEndurance==0 && defProfile.pdef>0 ){
+						re.eventKey='hitPdefDecrease';
+						defProfile.pdef--;
+						defProfile.armorEndurance=this.armorEndurance;
+					} else {
+						re.eventKey='hitBlocked';
+						if (rpg.rollDice("fightArmorEndure",armorEndureChance)) defProfile.armorEndurance--;
+					}
+					addCoolDown(cooldown,atkProfile,atkCooldownMiss);
+					addCoolDown(cooldown,defProfile,atkCooldownMiss/2);
+				} else {
+					defProfile.hp--;
+					defProfile.wasHit=true;
+					re.dmg=dmg;
+					addCoolDown(cooldown,defProfile,defCooldownHit);
+					addCoolDown(cooldown,atkProfile,noCooldown);
+				}
+			}
+			
+			re.profiles=game.profiles;
+			game.emitEvent('party', this.id, 'game', 'ResultHitTarget', re);
+			
+			this.state="active";
+			
+			if (defProfile.mob && defProfile.hp==0) {
+				game.inBattle=false;
+				game.completeFloor.call(game,{eventKey:'endBattleWin'});
+			} else if (!defProfile.mob && game.totalHp==0){
+				game.inBattle=false;
+				game.resetBoard.call(game,{eventKey:'endBattleLose', floor:game.floor});
+				game.resetFloor.call(game);
+			} else {
+				this.applyCoolDown(cooldown);
+			}
+			
+		}
+	};
 	
 	function RPGGame(pars) {
 		Game.call(this, pars);
-		for (var u in this.players) if(!this.profiles[u]) this.profiles[u]={};
+		this.actors={};
+		for (var u in this.players) {
+			if(!this.profiles[u]) this.profiles[u]={};
+			this.actors[u]=new Player(this,this.profiles[u].equip||[]);
+		}
 		this.floor=1;
 		this.loot={};
 		this.recipes=[];
 		this.armorEndurance=1;
-	};
+	}
 	
 	RPGGame.prototype = new Game;
 	
@@ -369,86 +503,95 @@ sap.ui.define([], function () {
 		this.bossLevel=1;
 	};
 	
-	RPGGame.prototype.adjustLivesLost=function(profile){
-		if (profile.mob) return 1;
-		return Math.sqrt((8-profile.livesLost)/9);
-	};
-	
-	RPGGame.prototype.calcFloorCompleteRatio=function(bossLevel,bSize,stat){
-		var ratio=1;
-		var times={"small":10.0,"medium":40.0,"big":120.0};
-		var bossLevelRatio={ 1:0.7, 2:0.8, 3:0.9, 4:1.1, 5:1.2, 6:1.3, 7:1.4, 8:1.5};
-		ratio*=bossLevelRatio[bossLevel];
-		var timeRatio=(times[bSize]-stat.time)/times[bSize];
-		if (timeRatio<0) timeRatio=1;
-		ratio*=Math.sqrt(timeRatio);
-		return ratio;
-	};
-	
-	RPGGame.prototype.adjustBossRatio=function(profile){
-		if (profile.mob) return profile.bossRatio;
-		return 1;
-	};	
-	
-	RPGGame.prototype.calcAtk = function (atkProfile,defProfile) {
-		var re={dmg:0,eventKey:'hitDamage',attack:atkProfile.name,defense:defProfile.name};
-		var evadeChance=0.2;
-		evadeChance+=0.1*(defProfile.speed-atkProfile.speed);
-		evadeChance*=this.adjustLivesLost(defProfile);
-		evadeChance*=this.adjustBossRatio(defProfile);
-		if (this.rollDice("fightEvade",evadeChance)){
-			re.eventKey='hitEvaded';
-			re.chance=evadeChance;
-			return re;
-		}
-		var parryChance=0.2;
-		parryChance+=0.1*(defProfile.patk-atkProfile.patk);
-		parryChance*=this.adjustLivesLost(defProfile);
-		parryChance*=this.adjustBossRatio(defProfile);
-		if (this.rollDice("fightParry",parryChance)){
-			re.eventKey='hitParried';
-			re.chance=parryChance;
-			return re;
-		}
-		var atk=atkProfile.patk+1;
-		var critChance=0.1;
-		critChance+=0.1*(atkProfile.speed-defProfile.speed);
-		critChance*=this.adjustLivesLost(atkProfile);
-		critChance*=this.adjustBossRatio(atkProfile);
-		if (this.rollDice("fightCrit",critChance)){
-			atk*=2;
-			re.eventKey='hitDamageCrit';
-			re.chance=critChance;
-		}
-		var armorEndureChance=0.5;
-		armorEndureChance+=0.1*(atkProfile.patk-defProfile.pdef);
-		if (defProfile.pdef+1>atk) {
-			if ( defProfile.armorEndurance==0 && defProfile.pdef>0 ){
-				re.eventKey='hitPdefDecrease';
-				defProfile.pdef--;
-				defProfile.armorEndurance=this.armorEndurance;
-			} else {
-				re.eventKey='hitBlocked';
-				if (this.rollDice("fightArmorEndure",armorEndureChance)) defProfile.armorEndurance--;
+	var RPGMechanics={
+		
+		rollDice:function (effect,chance,log) {
+			var rnd=Math.random();
+			if(log) console.log(effect,chance,rnd); //some logging or processing later maybe
+			return chance>rnd;
+		},
+		
+		adjustLivesLost:function(profile){
+			if (profile.mob) return 1;
+			return Math.sqrt((8-profile.livesLost)/9);
+		},
+		
+		calcFloorCompleteRatio:function(bossLevel,bSize,stat){
+			var ratio=1;
+			var times={"small":10.0,"medium":40.0,"big":120.0};
+			var bossLevelRatio={ 1:0.7, 2:0.8, 3:0.9, 4:1.1, 5:1.2, 6:1.3, 7:1.4, 8:1.5};
+			ratio*=bossLevelRatio[bossLevel];
+			var timeRatio=(times[bSize]-stat.time)/times[bSize];
+			if (timeRatio<0) timeRatio=1;
+			ratio*=Math.sqrt(timeRatio);
+			return ratio;
+		},
+		
+		adjustBossRatio:function(profile){
+			if (profile.mob) return profile.bossRatio;
+			return 1;
+		},
+		
+		genBossEquip:function(floor,bossLevel,bSize,stat){
+			var equip=[];
+			var effects=["maxhp","patk","pdef","speed"];
+			var gemCount=floor;
+			while (gemCount>0) {
+				equip.push( "common_"+effects[Math.floor(Math.random()*4)] );
+				gemCount--;
 			}
-			return re;
+			return equip;
+		},
+		
+		calcAtkChances:function (atkProfile,defProfile) {
+
+			var rpg=RPGMechanics;
+			
+			function evade(){
+				var evadeChance=0.2;
+				evadeChance+=0.1*(defProfile.speed-atkProfile.speed);
+				evadeChance*=rpg.adjustLivesLost(defProfile);
+				evadeChance*=rpg.adjustBossRatio(defProfile);
+				var re={ eventKey:'hitEvaded', chance:evadeChance, result:false};
+				if (rpg.rollDice("fightEvade",evadeChance)) re.result=true;
+				return re;
+			}
+			function parry(){
+				var parryChance=0.2;
+				parryChance+=0.1*(defProfile.patk-atkProfile.patk);
+				parryChance*=rpg.adjustLivesLost(defProfile);
+				parryChance*=rpg.adjustBossRatio(defProfile);
+				var re={ eventKey:'hitParried', chance:parryChance, result:false};
+				if (rpg.rollDice("fightParry",parryChance)) re.result=true;
+				return re;
+			}
+			function crit(){
+				var critChance=0.1;
+				critChance+=0.1*(atkProfile.speed-defProfile.speed);
+				critChance*=rpg.adjustLivesLost(atkProfile);
+				critChance*=rpg.adjustBossRatio(atkProfile);
+				var re={ eventKey:'hitDamageCrit', chance:critChance, result:false};
+				if (rpg.rollDice("fightCrit",critChance)) re.result=true;
+				return re;		
+			}
+			return { evade:evade(), parry:parry(), crit:crit() };
 		}
-		re.dmg=atk;
-		return re;
 	};
 
 	RPGGame.prototype.equipGear = function (e) {
 		if (e.pars.length==0 || e.pars.length>8 ) return;
-		var userProfile=this.profiles[e.user];
-		if (this.inBattle || userProfile.livesLost==8)  {
+		var user=this.actors[e.user];
+		if (this.inBattle || user.profile.livesLost==8)  {
 			this.emitEvent('client', e.user, 'system', 'Message','You are in either dead, or in battle now! No time for that stuff');
 			return;
 		}
-		userProfile.equip=e.pars;
-		this.emitEvent('client', e.user, 'system', 'Message','Equipped '+userProfile.equip);
+		user.equip=e.pars;
+		this.emitEvent('client', e.user, 'system', 'Message','Equipped '+user.equip);
 	};
 	
 	RPGGame.prototype.stealLoot = function (e) {
+		
+		var rpg=RPGMechanics;
 		
 		var userProfile=this.profiles[e.user],bossProfile=this.profiles.boss;
 		
@@ -466,7 +609,7 @@ sap.ui.define([], function () {
 		if (userProfile.speed>bossProfile.speed) fasterRatio=Math.sqrt((userProfile.speed+1)/(bossProfile.speed+1));
 		
 		var spotChance=0.2*bossProfile.stealAttempts/fasterRatio;
-		if (this.rollDice("stealSpotted",spotChance)){
+		if (rpg.rollDice("stealSpotted",spotChance)){
 			bossProfile.spottedStealing=true;
 			bossProfile.patk=Math.ceil(1.3*(bossProfile.patk+1));
 			bossProfile.speed=Math.ceil(1.3*(bossProfile.speed+1));
@@ -478,8 +621,8 @@ sap.ui.define([], function () {
 		}
 		
 		var stealChance=fasterRatio/bossProfile.level*Math.sqrt(bossProfile.stealAttempts)/8;
-		stealChance*=this.adjustLivesLost(userProfile);
-		if (this.rollDice("stealSucceed",stealChance)){
+		stealChance*=rpg.adjustLivesLost(userProfile);
+		if (rpg.rollDice("stealSucceed",stealChance)){
 			this.inBattle=false;
 			this.emitEvent('party', this.id, 'game', 'StealSucceeded',  { user:e.user,chance:stealChance } );
 			this.completeFloor({eventKey:'endBattleStole'});
@@ -489,50 +632,36 @@ sap.ui.define([], function () {
 		}
 	};
 	
+	RPGGame.prototype.assistAttack = function (e) {
+		if (!this.inBattle) return;
+		var user=this.actors[e.user], tgt=this.actors[e.target];
+		
+		if (user.profile.name==tgt.profile.name) return;
+		if (user.profile.state=="cooldown" || tgt.profile.state!="attack" ) return;
+		
+		if (!tgt.profile.assists) tgt.profile.assists={};
+		tgt.profile.assists[e.user]=user.profile;
+		user.setState(user.profile,"assist",tgt.profile.name);
+	};
 	
-	RPGGame.prototype.hitMob = function (e) {
+	RPGGame.prototype.hitTarget = function (e) {
 		
 		if (!this.inBattle) return;
-		var userProfile=this.profiles[e.user],bossProfile=this.profiles.boss;
-	
-		if (userProfile.livesLost==8 || userProfile.hp==0) {
+		
+		var user=this.actors[e.user],tgt=this.actors[e.target||"boss"];
+		
+		if (user.profile.livesLost==8 || user.profile.hp==0) {
 			this.emitEvent('client', e.user, 'system', 'Message','You are dead now, and cannot do that');
 			return;
 		}
-	
-		var re={};
 		
-		var hitResult=this.calcAtk(userProfile,bossProfile);
-		if (hitResult.dmg) { 
-			bossProfile.hp--;
-			bossProfile.wasHit=true;
-		}
-		hitResult.profiles=this.profiles;
-		this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
-		this.emitEvent('party', this.id, 'system', 'Message',[hitResult.eventKey,userProfile.name,'>',bossProfile.name,'(',bossProfile.hp,')'].join(' '));
+		if (user.profile.state!="active") return;
 		
-		hitResult=this.calcAtk(bossProfile,userProfile);
-		if (hitResult.dmg)  {
-			userProfile.hp--;
-			this.totalHp--;
-		}
-		hitResult.profiles=this.profiles;
-		this.emitEvent('party', this.id, 'game', 'ResultHitMob', hitResult);
-		this.emitEvent('party', this.id, 'system', 'Message',[hitResult.eventKey,bossProfile.name,'>',userProfile.name,'(',userProfile.hp,')'].join(' '));
-
-		if (bossProfile.hp==0) {
-			this.inBattle=false;
-			re.eventKey='endBattleWin';
-			this.completeFloor(re);
-		} else if (this.totalHp==0){
-			this.inBattle=false;
-			re.eventKey='endBattleLose';
-			re.floor=this.floor;
-			this.resetBoard(re);
-			this.resetFloor();
-		}
+		user.setState(user.profile,"attack",tgt.profile.name);
+		tgt.onStartAttack(user.profile);
+		user.profile.timer=setTimeout(function(){ tgt.onEndAttack(user.profile); },1000);
 	};
-	
+
 	RPGGame.prototype.resetFloor = function () {
 		this.recipes=[];
 		this.loot={};
@@ -665,28 +794,6 @@ sap.ui.define([], function () {
 		}
 	};
 
-	RPGGame.prototype.genBossEquip=function(floor,bossLevel,bSize,stat){
-		var equip=[];
-		var effects=["maxhp","patk","pdef","speed"];
-		var gemCount=floor;
-		while (gemCount>0) {
-			equip.push( "common_"+effects[Math.floor(Math.random()*4)] );
-			gemCount--;
-		}
-		return equip;
-	};
-	
-	RPGGame.prototype.adjustProfile=function(equip,template){
-		template.equip=equip;
-		var power={"common":1,"rare":2,"epic":3};
-		var effects={"maxhp":1,"patk":1,"pdef":1,"speed":1};
-		return equip.reduce(function(prev,cur){
-			var gem=cur.split("_");
-			if (effects[gem[1]] && power[gem[0]] )prev[gem[1]]+=power[gem[0]];
-			return prev;
-		},template);
-	};
-
 	RPGGame.prototype.startBattle = function () {
 		
 		this.inBattle=true;
@@ -696,13 +803,10 @@ sap.ui.define([], function () {
 		this.totalHp=0;
 	
 		for (var u in this.players){
-			var userProfile=this.adjustProfile(
-				this.profiles[u].equip||[],
-				{
-					"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":this.armorEndurance,
-					"level":8, "name":u, "livesLost":this.profiles[u].livesLost
-				}
-			);
+			var userProfile=this.actors[u].adjustProfile({
+				"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":this.armorEndurance,
+				"level":8, "name":u, "state":"active", "livesLost":this.profiles[u].livesLost
+			});
 			if (this.fledPreviousBattle) userProfile.pdef=this.profiles[u].pdef;
 			if (userProfile.livesLost<8) userProfile.hp=userProfile.level-userProfile.livesLost+userProfile.maxhp;
 			else userProfile.hp=0;
@@ -712,13 +816,13 @@ sap.ui.define([], function () {
 		
 		for (var p in this.profiles) if (!this.players[p]) delete this.profiles[p];
 		
-		var bossProfile=this.adjustProfile(
-			this.genBossEquip(this.floor,this.bossLevel,this.bSize,stat),
-			{
-				"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":this.armorEndurance,
-				"level":this.bossLevel, "mob":1
-			}
-		);
+		var rpg=RPGMechanics;
+		
+		this.actors.boss=new Player(this, rpg.genBossEquip(this.floor,this.bossLevel,this.bSize,stat) );
+		var bossProfile=this.actors.boss.adjustProfile({
+			"maxhp":0,"patk":0,"pdef":0,"speed":0,"armorEndurance":this.armorEndurance,
+			"level":this.bossLevel, "mob":1, "state":"active"
+		});
 		
 		var recipeChance=0.1;
 		var wiseBosses={ 
@@ -730,25 +834,19 @@ sap.ui.define([], function () {
 		var wiseFloors={small:3,medium:2,big:1};
 		if (this.fledPreviousBattle || this.floor<wiseFloors[this.bSize]) recipeChance=0;
 		this.fledPreviousBattle=false;
-		this.knowledgePresence=this.rollDice("recipeFind",recipeChance);
+		this.knowledgePresence=rpg.rollDice("recipeFind",recipeChance);
 	
 		var names=['angry','hungry','greedy','grumpy'];
 		bossProfile.name=(this.knowledgePresence?'wise':names[Math.floor(names.length*Math.random())])+' Phoenix';
 		bossProfile.hp=bossProfile.level+bossProfile.maxhp;
 		this.profiles.boss=bossProfile;
-		bossProfile.bossRatio=this.calcFloorCompleteRatio(this.bossLevel,this.bSize,stat);
+		bossProfile.bossRatio=rpg.calcFloorCompleteRatio(this.bossLevel,this.bSize,stat);
 		
 		this.emitEvent('party', this.id, 'system', 'Message', 'Start Battle vs '+ bossProfile.name);
 		this.emitEvent('party', this.id, 'game', 'StartBattleLocal', {
 			key:'startBattle',profiles:this.profiles,knowledgePresence:this.knowledgePresence,
 			time:stat.time, floor:this.floor, livesLost:this.livesLost, bossName:bossProfile.name
 		});
-	};
-	
-	RPGGame.prototype.rollDice = function (effect,chance,log) {
-		var rnd=Math.random();
-		if(log) console.log(effect,chance,rnd); //some logging or processing later maybe
-		return chance>rnd;
 	};
 	
 	RPGGame.prototype.onComplete = function (re) {
