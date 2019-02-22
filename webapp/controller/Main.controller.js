@@ -168,6 +168,9 @@ sap.ui.define([
 		rpgCmds:{
 			"/hit":'hitTarget',
 			"/assist":"assistAttack",
+			"/parry":"setParryState",
+			"/evade":"setEvadeState",
+			"/cancel":"cancelAction",
 			"/steal":'stealLoot',
 			"/flee":'fleeBattle',
 			"/ascend":'ascendToFloor1',
@@ -176,12 +179,10 @@ sap.ui.define([
 		},
 		
 		processCommand:function(s){
-			// var localGame=this.getView().getModel().getProperty('/offlineMode');
 			var me=this.getView().getModel().getProperty('/auth/user');
 			if (this.localGame){
 				var pars=s.split(" ");
 				var cmd=pars.shift();
-				// if (cmd=="/check") this.localGame.dispatchEvent({ user:me, command:"checkCell", pars:[cmd[0],cmd[1]] });
 				if (this.rpgCmds[cmd]) this.localGame.dispatchEvent({ user:me, command:this.rpgCmds[cmd], pars:pars });
 			} else if (this.nowReady) window.now.processCommand(s); 
 		},

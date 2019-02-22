@@ -24,7 +24,10 @@ sap.ui.define(["com/minesnf/ui5client/model/genericBoard",], function (Board) {
 
 	Game.prototype.dispatchEvent = function (e) {
 
-		var rpgCommands=['hitTarget','assistAttack','stealLoot','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'];
+		var rpgCommands=[
+			'hitTarget','assistAttack','cancelAction','setParryState','setEvadeState',
+			'stealLoot','equipGear','fleeBattle','ascendToFloor1','descendToNextFloor'
+		];
 		if (rpgCommands.indexOf(e.command)>-1 && this[e.command] && this.players[e.user]) this[e.command](e);
 
 		if (e.command == 'checkCell' && this.players[e.user])
@@ -100,12 +103,12 @@ sap.ui.define(["com/minesnf/ui5client/model/genericBoard",], function (Board) {
 	Game.prototype.checkCell = function (e) {
 		var x = parseInt(e.pars[0]) || 0;
 		var y = parseInt(e.pars[1]) || 0;
-
-		if (!(x < 1 || x > this.board.sizeX) && !(y < 1 || y > this.board.sizeY)) {
-			if (this.logStart == 0)
-				this.board.init(x, y, 2);
-			if (!this.pause && !this.penalty[e.user])
-				var re = this.board.checkCell(x, y, e.user);
+		var cellFits=!(x < 1 || x > this.board.sizeX) && !(y < 1 || y > this.board.sizeY);
+		var genericCheck=!this.pause && !this.penalty[e.user];
+		var customCheck=this.canCheckCell?this.canCheckCell(genericCheck,e.user,x,y):genericCheck;
+		if (cellFits && customCheck) {
+			if (this.logStart==0) this.board.init(x, y, 2);
+			var re = this.board.checkCell(x, y, e.user);
 		}
 		if (re) {
 			this.logEvent(re);

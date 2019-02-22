@@ -132,7 +132,7 @@ sap.ui.define([
 			var me=mdl.getProperty('/auth/user');
 			var modes={
 				solo:{constr:LocalGame.RankGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}},
-				soloRPG:{constr:LocalGame.RPGGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}}
+				soloRPG:{constr:LocalGame.RPGCoopGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}}
 			 };
 			 var boards={
 				 s:{bSize:'small',r:8,c:8,b:10},

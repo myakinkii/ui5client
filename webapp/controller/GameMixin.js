@@ -34,12 +34,19 @@ sap.ui.define([
 			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
 			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val/1000]);
 			
-			if (e.arg.state=="attack" && e.arg.user!=me) {
+			if (e.arg.state=="attack"){
 				var self=this;
 				var commander=function(cmd){ self.processCommand.call(self,cmd); };
-				e.arg.actions=[
-					{icon:"sap-icon://add",action:"",callback:function(){commander("/assist "+e.arg.user); }}
-				];
+				var actions=[];
+				if (e.arg.val==me){
+					actions=[
+						{_icon:"sap-icon://add",action:"~",callback:function(){commander("/evade"); }},
+						{_icon:"sap-icon://add",action:"/",callback:function(){commander("/parry"); }} 
+					];
+				} else if( e.arg.user!=me) {
+					actions=[ {icon:"sap-icon://add",action:"",callback:function(){commander("/assist "+e.arg.user); }} ];
+				}
+				e.arg.actions=actions;
 			}
 			this.addLogEntry(e.arg);
 		},
@@ -316,7 +323,7 @@ sap.ui.define([
 			} else {
 				msgs=[this.geti18n('gameResultLocalLose')];
 				prio="High";
-				if (e.arg.lostBeforeBossBattle) msgs.push(this.geti18n('gameResultTime',e.arg.time));
+				if (e.arg.eventKey=='endBattleLostAllLives') msgs.push(this.geti18n('gameResultTime',e.arg.time));
 				if (e.arg.floor>1) msgs.push(this.geti18n('gameResultLocalAscend'));
 			}
 			var msg=msgs.join('\n');
