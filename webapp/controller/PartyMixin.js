@@ -112,7 +112,7 @@ sap.ui.define([
 			var partyMdl=this.partyDlg.getModel().getData();
 			var mode=partyMdl.mode;
 			if (partyMdl.rpg) mode+='RPG';
-			if (partyMdl.online && mode=="solo") mode="rank";
+			if (mode=="solo") mode="rank";
 			this.partyDlg.close();
 			if (partyMdl.online) {
 				this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
