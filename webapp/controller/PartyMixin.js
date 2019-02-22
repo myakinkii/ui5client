@@ -24,10 +24,8 @@ sap.ui.define([
 			for (i in parties) {
 				p=parties[i];
 				p.rpg=false;
-				if (p.mode=="coopRPG"){
-					p.mode="coop";
-					p.rpg=true;
-				}
+				if (p.mode=="coopRPG"){ p.mode="coop"; p.rpg=true; }
+				if (p.mode=="versusRPG"){ p.mode="versus"; p.rpg=true; }				
 				partiesCount[p.bSize][p.mode]++;
 				for (u in p.users) p.users[u]={user:u};
 			}
@@ -74,7 +72,8 @@ sap.ui.define([
 				mode:mode,
 				iAmOnline:iAmOnline,
 				maxPlayers:2,
-				rpg:(mode=="versus"?false:true),
+				rpg:true,
+				// rpg:(mode=="versus"?false:true),
 				online:(mode=="solo"?false:iAmOnline)
 			};
 			if (!this.partyDlg) {
@@ -99,7 +98,7 @@ sap.ui.define([
 		onPartyRPGChange:function(e){
 			var rpg=e.getParameter("state");
 			var mode=this.partyDlg.getModel().getProperty("/mode");
-			if (rpg && mode=="versus") this.partyDlg.getModel().setProperty("/mode","coop");
+			// if (rpg && mode=="versus") this.partyDlg.getModel().setProperty("/mode","coop");
 		},		
 		
 		onPartyBsizeChange:function(e){

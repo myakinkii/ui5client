@@ -229,6 +229,7 @@ sap.ui.define([
 		handleForgeReset:function(e){ this.resetForge(e); },
 		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
+		handleHitTarget:function(e){ this.hitTarget(e); },
 		handleStealLoot:function(e){ this.stealLoot(e); },
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },

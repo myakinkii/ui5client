@@ -92,7 +92,7 @@ sap.ui.define([
 		},
 
 		onStartGame: function (e) {
-			if (e.arg.mode=="coopRPG") 
+			if (e.arg.mode=="coopRPG" || e.arg.mode=="versusRPG")
 				this.processCommand('/equip '+this.serializeEquip().join(" ")); // not so good, but will do for now
 			var self = this;
 			var cols=e.arg.c;
@@ -129,7 +129,7 @@ sap.ui.define([
 				mdl.setProperty('/gameStarted',true);
 				mdl.setProperty('/gameInfo',{ 
 					mode:e.arg.mode, 
-					rpg:(e.arg.mode=='soloRPG'||e.arg.mode=='coopRPG'), 
+					rpg:(e.arg.mode=='soloRPG' || e.arg.mode=='coopRPG'), 
 					floor:1, 
 					stash:null,
 					livesLost:{} 
@@ -148,6 +148,11 @@ sap.ui.define([
 			// var self=this;
 			// window.setTimeout(function(){ self.processCommand("/check "+cell.getCol()+" "+cell.getRow()); },0);
 			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
+		},
+
+		hitTarget:function(){
+			var tgt=this.getView().byId("gameTabBar").getSelectedKey();
+			this.processCommand("/hit "+tgt);
 		},
 		
 		hitMob:function(e){
@@ -185,7 +190,7 @@ sap.ui.define([
 		
 		onResultHitTarget:function(e){
 			var mdl=this.getView().getModel();
-			if (e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
+			if ( e.arg.profiles.boss && e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
 			this.addLogEntry({
 				eventKey:e.arg.eventKey,
 				title: this.geti18n('game_'+e.arg.eventKey,[e.arg[e.arg.dmg?"attack":"defense"],this.formatChance(e.arg.chance)]),
@@ -298,7 +303,7 @@ sap.ui.define([
 			this.showToast(msgs.join('\n'),2000);
 		},
 		
-		onShowResultLocal:function(e){
+		onShowResultRPGCoop:function(e){
 			var msgs,prio="None";
 			var mdl=this.getView().getModel();
 			var resetLostLives=true;
@@ -338,20 +343,43 @@ sap.ui.define([
 			mdl.setProperty('/gameInfo/floor',floor);
 		},
 		
-		onStartBattleLocal:function(e){
+		onStartBattle:function(e){
+
 			this.battleInfo=e.arg;
 			this.battleLog=[];
 			var mdl=this.getView().getModel();
 			mdl.setProperty( '/battleInfo',e.arg.profiles);
-			this.getView().byId("gameTabBar").setSelectedKey(e.arg.profiles.boss.name);
+
+			var key=mdl.getProperty('/auth/user');
+			if (e.arg.profiles.boss) key=e.arg.profiles.boss.name;
+
+			this.getView().byId("gameTabBar").setSelectedKey(key);
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
-			e.arg.title=this.geti18n('game_startBattle',[e.arg.floor,e.arg.time,e.arg.livesLost]);
-			e.arg.descr=this.geti18n('game_startBattle_text',e.arg.bossName);
-			if (e.arg.knowledgePresence) e.arg.descr+=this.geti18n('game_startBattle_text_knowledge');
+		},
+
+		onStartBattleCoop:function(e){
+			e.arg.title=this.geti18n('game_startBattleCoop',[e.arg.floor,e.arg.time,e.arg.livesLost]);
+			e.arg.descr=this.geti18n('game_startBattleCoop_text',e.arg.bossName);
+			if (e.arg.knowledgePresence) e.arg.descr+=this.geti18n('game_startBattleCoop_text_knowledge');
+			this.onStartBattle(e);
 			this.addLogEntry(e.arg);
 		},
+
+		onStartBattleVersus:function(e){
+			var names=[];
+			for (var p in e.arg.profiles) names.push(e.arg.profiles[p].name);
+			var stash=[],res=8;
+			while (res>0) {
+				if (e.arg.loot[res]) stash.push(res+': '+e.arg.loot[res]);
+				res--;
+			}
+			e.arg.title=this.geti18n('game_startBattleVersus',names.join(" "));
+			e.arg.descr=this.geti18n('game_startBattleVersus_text',stash.join("\n"));
+			this.onStartBattle(e);
+			this.addLogEntry(e.arg);
+		},				
 		
 		addLogEntry:function(e){
 			var log=this.getView().byId("battleLog")
