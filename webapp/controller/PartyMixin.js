@@ -144,7 +144,7 @@ sap.ui.define([
 			pars.profiles[me]={ "equip":this.serializeEquip() };
 			// this.runTest3(pars,16,8); return;
 			// this.runTest2(pars); return;
-			this.runTest(pars,8,8); return;
+			// this.runTest(pars,8,8); return;
 			this.localGame=new LocalGame.modes[mode].constr(pars);
 			this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
 				sap.ui.getCore().getEventBus().publish('message', {
