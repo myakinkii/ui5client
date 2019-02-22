@@ -29,8 +29,10 @@ sap.ui.define([
 	
 	Boss.prototype.onState_active=function(isitme,profile){
 		var tgt=this.getRandomTarget();
-		var self=this;
-		if (isitme && profile.hp>0 && tgt.profile.hp>0 ) setTimeout( function(){self.startAttack.call(self,tgt);},2000);
+		var me=this;
+		if (isitme) setTimeout( function(){
+			if( me.profile.hp>0 && tgt.profile.hp>0 ) me.startAttack.call(me,tgt);
+		},1000);
 	};
 	
 	Boss.prototype.onState_assist=function(isitme,profile,arg){

@@ -31,9 +31,10 @@ sap.ui.define(["com/minesnf/ui5client/model/rpgMechanics"], function (RPGMechani
 		applyCoolDown:function(players){
 			var self=this;
 			var game=this.game;
+			var avoidCooldownChance=0.5;
 			players.forEach(function(p){
 				var profile=game.profiles[p.name];
-				if (p.time>0) {
+				if (p.time>0 && Math.random()>avoidCooldownChance ) {
 					if (game.actors[p.name].timer) {
 						clearTimeout(game.actors[p.name].timer);
 						game.actors[p.name].timer=null;
@@ -98,7 +99,7 @@ sap.ui.define(["com/minesnf/ui5client/model/rpgMechanics"], function (RPGMechani
 			var chances=RPGMechanics.calcAtkChances.call(game,adjustedAtk,defProfile);
 				
 			if (atkProfile.hp==0) {
-				this.applyCoolDown(addCoolDown([],defProfile,noCooldown));
+				// this.applyCoolDown(addCoolDown([],defProfile,noCooldown));
 				return;
 			} else if (defProfile.hp==0) {
 				this.applyCoolDown(addCoolDown([],atkProfile,noCooldown,true));
@@ -159,8 +160,8 @@ sap.ui.define(["com/minesnf/ui5client/model/rpgMechanics"], function (RPGMechani
 			}
 	
 			if (resetCooldowns){
-				cooldowns=addCoolDown([],defProfile,noCooldown);
-				cooldowns=addCoolDown(cooldowns,atkProfile,noCooldown);
+				cooldowns=addCoolDown([],atkProfile,noCooldown,true);
+				cooldowns=addCoolDown(cooldowns,defProfile,noCooldown);
 			}
 	
 			this.applyCoolDown(cooldowns);
