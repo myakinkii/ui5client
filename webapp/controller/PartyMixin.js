@@ -129,23 +129,11 @@ sap.ui.define([
 		createLocalGame:function(mode,boardSize){
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
-			var modes={
-				solo:{constr:LocalGame.RankGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}},
-				soloRPG:{constr:LocalGame.RPGCoopGame,s:{min:1,max:1},m:{min:1,max:1},b:{min:1,max:1}}
-			 };
-			 var boards={
-				 s:{bSize:'small',r:8,c:8,b:10},
-				 m:{bSize:'medium',r:16,c:16,b:40},
-				 b:{bSize:'big',c:30,r:16,b:99}
-			};
-			// this.runTest3(boards[boardSize],16,8); return;
-			// this.runTest2(boards[boardSize]); return;
-			// this.runTest(boards[boardSize],8,8); return;
 			var pars={
 				multiThread:false,
 				id:"solo1",
 				name:"solo1",
-				board:boards[boardSize],
+				board:LocalGame.boards[boardSize],
 				mode:mode,
 				minPlayers:1,
 				users:{},
@@ -154,7 +142,10 @@ sap.ui.define([
 			};
 			pars.users[me]={name:me,id:me};
 			pars.profiles[me]={ "equip":this.serializeEquip() };
-			this.localGame=new modes[mode].constr(pars);
+			// this.runTest3(pars,16,8); return;
+			// this.runTest2(pars); return;
+			this.runTest(pars,8,8); return;
+			this.localGame=new LocalGame.modes[mode].constr(pars);
 			this.localGame.emitEvent = function (dst, dstId, contextId, func, arg) {
 				sap.ui.getCore().getEventBus().publish('message', {
 					dst: dst,
@@ -171,25 +162,25 @@ sap.ui.define([
 			});
 		},
 		
-		runTest:function(board,x,y){
+		runTest:function(pars,x,y){
 			var times=10000;
 			var res={};
 			var i,max,now=Date.now();
 			for (i=0;i<times;i++){
-				max=this.runBoard(board,x,y).maxDigit;
+				max=this.runBoard(pars,x,y).maxDigit;
 				if (!res[max]) res[max]=1;
 				else res[max]++;
 			}
 			console.log(Date.now()-now,res);
 		},
 		
-		runTest2:function(board){
+		runTest2:function(pars){
 			var times=10000;
 			var res={};
 			var i,b,now=Date.now();
 			for (i=0;i<times;i++){
 				// b=this.runBoard(board,board.c/2,board.r/2).board;
-				b=this.runBoard(board,1,1).board;
+				b=this.runBoard(pars,1,1).board;
 				b.forEach(function(row,indY){
 					if (indY==0 || indY==b.length-1) return;
 					row.forEach(function(val,indX){
@@ -204,15 +195,15 @@ sap.ui.define([
 			console.log(Date.now()-now,res);
 		},
 		
-		runTest3:function(board,x,y){
+		runTest3:function(pars,x,y){
 			var times=10000;
 			var res={};
 			var i,m,mines,now=Date.now();
 			var summer=function(prev,cur){ return cur==9?prev+1:prev; }
 			var reducer=function(prev,cur,i){ prev[i]=cur.reduce(summer,0); return prev;}
 			for (i=0;i<times;i++){
-				mines=this.runBoard(board,x,y).board.reduce(reducer,{});
-				for (m in mines ) if (m>0 && m<=board.r) {
+				mines=this.runBoard(pars,x,y).board.reduce(reducer,{});
+				for (m in mines ) if (m>0 && m<=pars.board.r) {
 					if (!res[m]) res[m]=0;
 					res[m]+=mines[m];
 				}
@@ -220,9 +211,11 @@ sap.ui.define([
 			console.log(Date.now()-now,res);
 		},		
 		
-		runBoard:function(board,x,y){
-			return LocalGame.Board.prototype.init.call({bombs:board.b,sizeX:board.c,sizeY:board.r},x,y,2);
-		},		
+		runBoard:function(pars,x,y){
+			var brd=new LocalGame.Board(pars.name,pars.board);
+			brd.init(x,y,2);
+			return {board:brd.board,maxDigit:brd.maxDigit};
+		},
 
 		kickUser:function(e){
 			var user=e.getParameter("listItem").getBindingContext().getProperty("user");
