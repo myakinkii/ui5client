@@ -1,10 +1,13 @@
-sap.ui.define([
-	"com/minesnf/ui5client/model/genericBoard",
-	"com/minesnf/ui5client/model/rankGame",
-	"com/minesnf/ui5client/model/rpgCoop"
-	], function (Board,RankGame,RPGCoopGame) {
+sap.ui.define([], function () {
 	"use strict";
 
-	return {Board:Board, RPGCoopGame:RPGCoopGame, RankGame:RankGame};
+	// wrapper for nodejs modules created with
+	// cd minesNF && browserify Modes.js --standalone minesNF > ../ui5client/webapp/lib/minesNF.js 
+	// and added to index.html <script src="lib/minesNF.js"></script>
+	return { 
+		Board:minesNF.Board,
+		RPGCoopGame:minesNF.modes.coopRPG.constr, 
+		RankGame:minesNF.modes.rank.constr
+	};
 
 });
