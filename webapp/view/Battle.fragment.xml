@@ -16,9 +16,21 @@
 									title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
 									intro="[{level}] {name}" >
 								</ObjectListItem>
+								<Toolbar content="{spells}">
+									<Button text="{spellName} +{eft}" press="handleCastSpell" />
+								</Toolbar>
 							</IconTabFilter>
 						</items>
 					</IconTabBar>
+					<Toolbar _visible="{= ${/gameInfo/mode}==='versusRPG' }">
+						<ToolbarSpacer />
+						<Button press="handleHitTarget" text="{i18n>gameHitTarget} (!)" enabled="{/canHit}" type="Reject" />
+						<ToolbarSpacer />						
+						<Button press="handleAssistAttack" text="{i18n>gameAssist} (+)" _enabled="{/canFlee}" _type="Emphasized" />
+						<ToolbarSpacer />
+						<Button press="handleDefendTarget" text="{i18n>gameDefend} (^)" _enabled="{/canFlee}" _type="Emphasized" />
+						<ToolbarSpacer />
+					</Toolbar>						
 					<Toolbar visible="{= ${/gameInfo/mode}!=='versusRPG' }">
 						<ToolbarSpacer />
 						<Button press="handleStealLoot" text="{i18n>gameStealLoot}" enabled="{/canSteal}" _type="Emphasized" />
@@ -32,11 +44,11 @@
 						<ToolbarSpacer />
 						<Button press="handleSetStateParry" text="{i18n>gameParry} (/)" _enabled="{/canSteal}" type="Emphasized" />
 						<ToolbarSpacer />
-						<Button press="handleHitTarget" text="{i18n>gameHitTarget} (!)" enabled="{/canHit}" type="Reject" />
-						<ToolbarSpacer />
 						<Button press="handleSetStateEvade" text="{i18n>gameEvade} (~)" _enabled="{/canFlee}" type="Emphasized" />
 						<ToolbarSpacer />
-					</Toolbar>					
+						<Button press="handleCancelAction" text="{i18n>gameCancel}" _enabled="{/canFlee}" _type="Emphasized" />
+						<ToolbarSpacer />
+					</Toolbar>									
 					<List id="battleLog" width="100%" />
 					<!--<List width="100%" items="{/battleLog}" >-->
 					<!--	<NotificationListItem buttons="{actions}"-->

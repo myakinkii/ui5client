@@ -168,6 +168,7 @@ sap.ui.define([
 		rpgCmds:{
 			"/hit":'hitTarget',
 			"/assist":"assistAttack",
+			"/defend":"defendPlayer",
 			"/parry":"setParryState",
 			"/evade":"setEvadeState",
 			"/cancel":"cancelAction",
@@ -175,6 +176,7 @@ sap.ui.define([
 			"/flee":'fleeBattle',
 			"/ascend":'ascendToFloor1',
 			"/descend":'descendToNextFloor',
+			"/equip":"equipGear",
 			"/check":"checkCell"
 		},
 		
@@ -230,6 +232,7 @@ sap.ui.define([
 		handleEquipGem:function(e){ this.equipGem(e); },
 		handleHitMob:function(e){ this.hitMob(e); },
 		handleHitTarget:function(e){ this.hitTarget(e); },
+		handleCastSpell:function(e){ this.castSpell(e); },
 		handleStealLoot:function(e){ this.stealLoot(e); },
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },
