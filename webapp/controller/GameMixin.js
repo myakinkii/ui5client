@@ -19,6 +19,8 @@ sap.ui.define([
 			return val;
 		},
 		
+		busyStates:["attack","cast","cooldown"],
+		
 		onChangeState:function(e){
 
 			var mdl=this.getView().getModel();
@@ -27,7 +29,10 @@ sap.ui.define([
 			var name=e.arg.profile.mob?"boss":e.arg.user;
 			mdl.setProperty("/battleInfo/"+name,e.arg.profile);
 
-			if (e.arg.user==me) mdl.setProperty('/canHit',e.arg.state=="active");
+			if (e.arg.user==me) {
+				var busy=this.busyStates.indexOf(e.arg.state)>-1
+				mdl.setProperty('/canHit',!busy);
+			}
 
 			if (e.arg.state=="active" || e.arg.state=="cooldown") return;
 			
@@ -132,7 +137,7 @@ sap.ui.define([
 				mdl.setProperty('/gameStarted',true);
 				mdl.setProperty('/gameInfo',{ 
 					mode:e.arg.mode, 
-					rpg:(e.arg.mode=='soloRPG' || e.arg.mode=='coopRPG'), 
+					coop:(e.arg.mode=='soloRPG' || e.arg.mode=='coopRPG'), 
 					floor:1, 
 					stash:null,
 					livesLost:{} 
@@ -152,20 +157,36 @@ sap.ui.define([
 			// window.setTimeout(function(){ self.processCommand("/check "+cell.getCol()+" "+cell.getRow()); },0);
 			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
 		},
+		
+		isPlayer:function(tgt){
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
+			var profiles=mdl.getProperty('/battleInfo');
+			return (tgt!=me && profiles[tgt]);
+		},
 
-		hitTarget:function(){
+		performAction:function(e){
+			var action=e.getSource().data().action;
+			var cmd="/"+action;
+			var mdl=this.getView().getModel();
 			var tgt=this.getView().byId("gameTabBar").getSelectedKey();
-			this.processCommand("/hit "+tgt);
+			if (action=='assist' || action=="defend" ) {
+				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
+				 else return;
+			}
+			var coopMode=mdl.getProperty('/gameInfo/coop');
+			if ( action=="hit" && !coopMode) cmd+=" "+tgt;
+			console.log(cmd);
+			this.processCommand(cmd);
 		},
 
 		castSpell:function(e){
 			var ctx=e.getSource().getBindingContext().getObject();
 			var cmd="/cast "+ctx.spell;
 			var mdl=this.getView().getModel();
-			var me=mdl.getProperty('/auth/user');
 			var tgt=this.getView().byId("gameTabBar").getSelectedKey();
-			var profiles=mdl.getProperty('/battleInfo');
-			if (tgt!=me && profiles[tgt]) cmd+=" "+tgt;
+			var me=mdl.getProperty('/auth/user');
+			if (tgt!=me) cmd+=" "+tgt;
 			this.processCommand(cmd);
 		},
 		
@@ -237,7 +258,10 @@ sap.ui.define([
 			var mySpells=profiles[mdl.getProperty('/auth/user')].spells;
 			var spells=[];
 			for (var s in mySpells) spells.push({spellName:this.geti18n('effect_'+s),spell:s,eft:mySpells[s]});
-			for (var p in profiles) profiles[p].spells=spells;
+			for (var p in profiles) {
+				profiles[p].spells=spells;
+				profiles[p].haveSpells=spells.length>0;
+			}
 			mdl.setProperty( '/battleInfo',profiles);
 		},
 

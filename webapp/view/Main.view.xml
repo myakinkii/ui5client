@@ -10,8 +10,8 @@
 	<u:Shell showPane="{/showPane}">
 		<u:headItems>
 			<u:ShellHeadItem visible="{= !${/gameStarted} }" icon="{parts: [{path:'/page'}],formatter:'.formatPageIcon'}" press="switchPage" />
-			<u:ShellHeadItem icon="sap-icon://menu2" visible="{= ${/gameStarted} &amp;&amp; ${/gameInfo/rpg} }" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />			
-			<u:ShellHeadItem visible="{= ${/gameStarted} &amp;&amp; !${/gameInfo/rpg} }" icon="sap-icon://decline"  press="handleQuitGame" />
+			<u:ShellHeadItem icon="sap-icon://menu2" visible="{= ${/gameStarted} &amp;&amp; ${/gameInfo/coop} }" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />			
+			<u:ShellHeadItem visible="{= ${/gameStarted} &amp;&amp; !${/gameInfo/coop} }" icon="sap-icon://decline"  press="handleQuitGame" />
 			<u:ShellHeadItem visible="{= ${device>/system/desktop} &amp;&amp; ${/gameStarted} }" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
 		</u:headItems>		
 		<u:headEndItems>
