@@ -224,6 +224,14 @@ sap.ui.define([
 		
 		formatChance:function(chance){ return (chance*100).toFixed(2)+"%"; },
 
+
+		onBattleLogEntry:function(e){
+			// e.arg.priority='None';
+			e.arg.title=this.geti18n('game_'+e.arg.eventKey,[e.arg.attack,e.arg.defense]);
+			e.arg.descr=this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]);
+			this.addLogEntry(e.arg);
+		},
+
 		onResultCastSpell:function(e){
 			this.addLogEntry({
 				eventKey:e.arg.eventKey,
@@ -449,7 +457,7 @@ sap.ui.define([
 			log.removeAllItems();
 			this.battleLog.push(e);
 			e.entryNumber=this.battleLog.length;
-			var lastN=[],N=6,i;
+			var lastN=[],N=66,i;
 			for (i=this.battleLog.length-1;i>=0;i--){
 				if (N==0) break;
 				// lastN.push(this.battleLog[i]);
