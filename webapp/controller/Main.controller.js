@@ -232,6 +232,7 @@ sap.ui.define([
 		handleEquipGem:function(e){ this.equipGem(e); },
 		// handleHitMob:function(e){ this.hitMob(e); },
 		// handleHitTarget:function(e){ this.hitTarget(e); },
+		handleChangeTaget:function(e){ this.changeTarget(e); },
 		handlePerformAction:function(e){ this.performAction(e); },
 		handleCastSpell:function(e){ this.castSpell(e); },
 		handleStealLoot:function(e){ this.stealLoot(e); },

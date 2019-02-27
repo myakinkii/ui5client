@@ -167,6 +167,20 @@ sap.ui.define([
 			// window.setTimeout(function(){ self.processCommand("/check "+cell.getCol()+" "+cell.getRow()); },0);
 			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
 		},
+
+		getTarget:function(){
+			var tgt=null,tabBar=this.getView().byId("gameTabBar");
+			if (tabBar) tgt=tabBar.getSelectedKey();
+			else tgt=this.getView().getModel().getProperty('/gameInfo/myTarget');
+			return tgt;
+		},
+
+		changeTarget:function(e){
+			if (e.getParameter("selected")) this.getView().getModel().setProperty(
+				'/gameInfo/myTarget',
+				e.getSource().getBindingContext().getProperty("name")
+			);
+		},		
 		
 		isPlayer:function(tgt){
 			if (!tgt) return false;
@@ -180,8 +194,7 @@ sap.ui.define([
 			var action=e.getSource().data().action;
 			var cmd="/"+action;
 			var mdl=this.getView().getModel();
-			var tgt=null,tabBar=this.getView().byId("gameTabBar");
-			if (tabBar) tgt=tabBar.getSelectedKey();
+			var tgt=this.getTarget();
 			if (action=='assist' || action=="defend" ) {
 				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
 				 else return;
@@ -196,7 +209,7 @@ sap.ui.define([
 			var ctx=e.getSource().getBindingContext().getObject();
 			var cmd="/cast "+ctx.spell;
 			var mdl=this.getView().getModel();
-			var tgt=this.getView().byId("gameTabBar").getSelectedKey();
+			var tgt=this.getTarget();
 			var me=mdl.getProperty('/auth/user');
 			if (tgt!=me) cmd+=" "+tgt;
 			this.processCommand(cmd);
@@ -446,7 +459,9 @@ sap.ui.define([
 			mdl.setProperty( '/battleInfo',profiles);
 			// this.refreshProfiles(e.arg.profiles);
 
-			// var key=mdl.getProperty('/auth/user');
+			var me=mdl.getProperty('/auth/user');
+			mdl.setProperty('/gameInfo/haveSpells',profiles[me].haveSpells||false);
+			mdl.setProperty('/gameInfo/mySpells',profiles[me].spells);
 			// if (profiles.boss) key=profiles.boss.name;
 			// this.getView().byId("gameTabBar").setSelectedKey(key);
 			

@@ -7,6 +7,12 @@
 			<!--<items>-->
 				<!--<l:VerticalLayout width="100%"> -->
 					<Table _mode="SingleSelectLeft" _fixedLayout="true" items="{/battleInfo}">
+					<headerToolbar>
+					<Toolbar content="{/gameInfo/mySpells}" visible="{/gameInfo/haveSpells}">
+						<Button text="{spell}:{mp}" press="handleCastSpell" />
+					</Toolbar>
+					</headerToolbar>
+
 						<columns> <Column /> <Column /> </columns>
 						<items> <core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> </items>
 					</Table>

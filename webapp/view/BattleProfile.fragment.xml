@@ -2,7 +2,7 @@
 	xmlns="sap.m"
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core">
-	<ColumnListItem>
+	<ColumnListItem highlight="{ path: 'state', formatter: '.handleFormatBattleState' }">
 		<cells>
 			<ObjectListItem
 				number="{hp}" numberUnit="{i18n>hp}" numberState="{= ${hp}&gt;3?'Success':${hp}&gt;0?'Warning':'None' }"
@@ -19,7 +19,7 @@
 					<Button _visible="{canAssist}"
 						visible="{parts:[{path:'state'},{path:'target'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatAssistButton'}"
 						icon="sap-icon://add" />
-					<RadioButton visible="{= !${/gameInfo/coop} || ${/gameInfo/haveSpells} }" />
+					<RadioButton select="handleChangeTaget" visible="{= !${/gameInfo/coop} || ${/gameInfo/haveSpells} }" />
 				</l:HorizontalLayout>
 				<ObjectStatus text="{event}" icon="{ path: 'eventKey', formatter: '.handleFormatBattleLogIcon'}" /> 
 			</l:VerticalLayout>
