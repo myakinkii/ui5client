@@ -12,20 +12,13 @@ sap.ui.define([
 	
 	return Controller.extend("GameMixin",{
 
-		formatBattleState:function(hp,state){
-			var val=hp;
-			var stateSymbols={attack:"!",cooldown:"x",evade:"~",parry:"/",assist:"+",defend:"^",active:""};
-			if (stateSymbols[state]) val+=stateSymbols[state];
-			return val;
-		},
-		
 		busyStates:["attack","cast","cooldown"],
 		
 		onChangeState:function(e){
 
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
-
+			
 			var name=e.arg.profile.mob?"boss":e.arg.user;
 			mdl.setProperty("/battleInfo/"+name,e.arg.profile);
 
@@ -38,6 +31,17 @@ sap.ui.define([
 			
 			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
 			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val]);
+			
+			mdl.setProperty("/battleInfo/"+name+"/event",e.arg.title);
+			mdl.setProperty("/battleInfo/"+name+"/eventKey",'userStateChange_'+e.arg.state);
+			
+			if (e.arg.state=="attack" && e.arg.user!=me){
+				if (this.isPlayer(e.arg.user)) mdl.setProperty("/battleInfo/"+e.arg.user+"/canAssist",true);
+				if (this.isPlayer(e.arg.val)) mdl.setProperty("/battleInfo/"+e.arg.val+"/canDefend",true);
+			} else {
+				mdl.setProperty("/battleInfo/"+name+"/canAssist",false);
+				mdl.setProperty("/battleInfo/"+name+"/canDefend",false);
+			}
 			
 			if (e.arg.state=="attack"){
 				var self=this;
@@ -138,6 +142,7 @@ sap.ui.define([
 				mdl.setProperty('/gameInfo',{ 
 					mode:e.arg.mode, 
 					coop:(e.arg.mode=='soloRPG' || e.arg.mode=='coopRPG'), 
+					haveSpells:false,
 					floor:1, 
 					stash:null,
 					livesLost:{} 
@@ -159,6 +164,7 @@ sap.ui.define([
 		},
 		
 		isPlayer:function(tgt){
+			if (!tgt) return false;
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			var profiles=mdl.getProperty('/battleInfo');
@@ -169,14 +175,15 @@ sap.ui.define([
 			var action=e.getSource().data().action;
 			var cmd="/"+action;
 			var mdl=this.getView().getModel();
-			var tgt=this.getView().byId("gameTabBar").getSelectedKey();
+			var tgt=null,tabBar=this.getView().byId("gameTabBar");
+			if (tabBar) tgt=tabBar.getSelectedKey();
 			if (action=='assist' || action=="defend" ) {
 				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
 				 else return;
 			}
 			var coopMode=mdl.getProperty('/gameInfo/coop');
 			if ( action=="hit" && !coopMode) cmd+=" "+tgt;
-			console.log(cmd);
+			// console.log(cmd);
 			this.processCommand(cmd);
 		},
 
@@ -207,8 +214,8 @@ sap.ui.define([
 				var mdl=this.getView().getModel();
 				mdl.setProperty('/canSteal',false);
 				mdl.setProperty('/canFlee',false);
-				// mdl.setProperty( '/battleInfo',e.arg.profiles);
-				this.refreshProfiles(e.arg.profiles);
+				mdl.setProperty( '/battleInfo',e.arg.profiles);
+				// this.refreshProfiles(e.arg.profiles);
 			}
 			e.arg.descr=this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user);
 			e.arg.title=this.geti18n('game_stealFailed',this.formatChance(e.arg.chance));
@@ -233,31 +240,42 @@ sap.ui.define([
 		},
 
 		onResultCastSpell:function(e){
-			this.addLogEntry({
+			var mdl=this.getView().getModel();
+			var entry={
 				eventKey:e.arg.eventKey,
 				title: this.geti18n('game_'+e.arg.eventKey,e.arg.spell),
 				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.source,e.arg.target,e.arg.spell]),
 				attack:e.arg.source, defense:e.arg.target,
 				priority:'Medium',
 				icon:this.formatLogIcon(e.arg.eventKey)
-			});
-			this.refreshProfiles(e.arg.profiles);
+			};
+			this.addLogEntry(entry);
+			mdl.setProperty( '/battleInfo',e.arg.profiles);
+			// this.refreshProfiles(e.arg.profiles);
 			this.battleInfo=e.arg;
 		},
 		
 		onResultHitTarget:function(e){
 			var mdl=this.getView().getModel();
 			if ( e.arg.profiles.boss && e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
-			this.addLogEntry({
+			var entry={
 				eventKey:e.arg.eventKey,
 				title: this.geti18n('game_'+e.arg.eventKey,[e.arg[e.arg.dmg?"attack":"defense"],this.formatChance(e.arg.chance)]),
 				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]),
 				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
 				priority:e.arg.dmg?'Medium':'None',
 				icon:this.formatLogIcon(e.arg.eventKey)
+			};
+			this.addLogEntry(entry);
+			var profiles=e.arg.profiles;
+			[e.arg.attack,e.arg.defense].forEach(function(name){
+				var profile=profiles[name];
+				if (!profile) profile=profiles.boss;
+				profile.event=entry.title;
+				profile.eventKey=entry.eventKey;
 			});
-			// mdl.setProperty( '/battleInfo',e.arg.profiles);
-			this.refreshProfiles(e.arg.profiles);
+			mdl.setProperty( '/battleInfo',profiles);
+			// this.refreshProfiles(e.arg.profiles);
 			this.battleInfo=e.arg;
 		},
 
@@ -418,13 +436,19 @@ sap.ui.define([
 			this.battleInfo=e.arg;
 			this.battleLog=[];
 			var mdl=this.getView().getModel();
-			// mdl.setProperty( '/battleInfo',e.arg.profiles);
-			this.refreshProfiles(e.arg.profiles);
+			
+			var profiles=e.arg.profiles;
+			for (var p in profiles){
+				profiles[p].canAssist=false;
+				profiles[p].canDefend=false;
+			}
+			mdl.setProperty( '/battleInfo',profiles);
+			// this.refreshProfiles(e.arg.profiles);
 
-			var key=mdl.getProperty('/auth/user');
-			if (e.arg.profiles.boss) key=e.arg.profiles.boss.name;
-
-			this.getView().byId("gameTabBar").setSelectedKey(key);
+			// var key=mdl.getProperty('/auth/user');
+			// if (profiles.boss) key=profiles.boss.name;
+			// this.getView().byId("gameTabBar").setSelectedKey(key);
+			
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
 			window.setTimeout(function(){ navContainer.to(battlePage,"flip"); }, 500);
@@ -485,6 +509,39 @@ sap.ui.define([
 			cb(battleEventCtx);
 		},
 		
+		_formatBattleState:function(hp,state){
+			var val=hp;
+			var stateSymbols={attack:"!",cooldown:"x",evade:"~",parry:"/",assist:"+",defend:"^",active:""};
+			if (stateSymbols[state]) val+=stateSymbols[state];
+			return val;
+		},
+		
+		formatBattleState:function(state){
+			var keys={
+				active:'Success',
+				cooldown:'None',
+				evade:'Warning',
+				parry:'Warning',
+				defend:'Success',
+				assist:'Success',
+				attack:'Error'
+			};
+			return keys[state];
+		},
+		
+		formatBattleStateIcon:function(state){
+			var keys={
+				active:'log',
+				cooldown:'pending',
+				evade:'physical-activity',
+				parry:'journey-change',
+				defend:'shield',
+				assist:'plus',
+				attack:'scissors'
+			};
+			return 'sap-icon://'+(keys[state]);
+		},
+		
 		formatLogIcon:function(eventKey){
 			var keys={
 				spellCast:'activate',
@@ -499,6 +556,7 @@ sap.ui.define([
 				endBattleWin:'lead',
 				completeFloorDescend:'thumb-up'
 			};
+			if (!keys[eventKey]) { console.log(eventKey); return '';}
 			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},	
 		

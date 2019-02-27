@@ -6,7 +6,11 @@
 		<!--<FlexBox justifyContent="Center">-->
 			<!--<items>-->
 				<!--<l:VerticalLayout width="100%"> -->
-					<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">
+					<Table _mode="SingleSelectLeft" _fixedLayout="true" items="{/battleInfo}">
+						<columns> <Column /> <Column /> </columns>
+						<items> <core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> </items>
+					</Table>
+					<!--<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">
 						<items>
 							<IconTabFilter text="{name}" key="{name}" count="{ parts:[{path:'hp'},{path:'state'}],formatter:'.handleFormatBattleState'}" _count="{hp}" _esign="Horizontal"
 								iconColor="{parts:[{path:'hp'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatBattleIconColor'}"
@@ -16,12 +20,12 @@
 									title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
 									intro="[{level}] {name}" >
 								</ObjectListItem>
-								<!-- <Toolbar content="{spells}" visible="{haveSpells}">
+								<Toolbar content="{spells}" visible="false" _visible="{haveSpells}">
 									<Button text="{spellName} +{eft}" press="handleCastSpell" />
-								</Toolbar> -->
+								</Toolbar>
 							</IconTabFilter>
 						</items>
-					</IconTabBar>
+					</IconTabBar>-->
 					<OverflowToolbar>
 						<ToolbarSpacer />
 						<Button press="handlePerformAction" text="{i18n>gameParry}" enabled="{/canHit}" type="Emphasized" >
@@ -36,14 +40,14 @@
 							<customData> <core:CustomData key="action" value="hit" /> </customData>
 						</Button>
 						<ToolbarSpacer />
-						<Button press="handlePerformAction" text="{i18n>gameAssist}" enabled="{/canHit}" >
-							<customData> <core:CustomData key="action" value="assist" /> </customData>
-						</Button>
-						<ToolbarSpacer />
-						<Button press="handlePerformAction" text="{i18n>gameDefend}" enabled="{/canHit}"  >
-							<customData> <core:CustomData key="action" value="defend" /> </customData>
-						</Button>
-						<ToolbarSpacer />
+						<!--<Button press="handlePerformAction" text="{i18n>gameAssist}" enabled="{/canHit}" >-->
+						<!--	<customData> <core:CustomData key="action" value="assist" /> </customData>-->
+						<!--</Button>-->
+						<!--<ToolbarSpacer />-->
+						<!--<Button press="handlePerformAction" text="{i18n>gameDefend}" enabled="{/canHit}"  >-->
+						<!--	<customData> <core:CustomData key="action" value="defend" /> </customData>-->
+						<!--</Button>-->
+						<!--<ToolbarSpacer />-->
 						<!--<Button press="handleCancelAction" text="{i18n>gameCancel}" _enabled="{/canFlee}" type="Reject" />-->
 						<!--<ToolbarSpacer />-->
 					</OverflowToolbar>						

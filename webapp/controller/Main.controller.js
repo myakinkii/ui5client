@@ -237,10 +237,11 @@ sap.ui.define([
 		handleStealLoot:function(e){ this.stealLoot(e); },
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },
+		handleFormatBattleState:function(){ return this.formatBattleState.apply(this,[].slice.call(arguments)); },
+		handleFormatBattleStateIcon:function(){ return this.formatBattleStateIcon.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleIconColor:function(){ return this.formatBattleIconColor.apply(this,[].slice.call(arguments)); },
 		handleGemEffectFormatter:function(){ return this.formatGemEffect.apply(this,[].slice.call(arguments)); },
-		handleFormatBattleState:function(){ return this.formatBattleState.apply(this,[].slice.call(arguments)); },
 		handleInvGroupHeader:function(oGroup){ return this.getInvGroupHeader(oGroup); },
 		handleInvTabChange:function(){ },
 		handleApplyRecipe:function(e){ this.applyKnownRecipe(e); }

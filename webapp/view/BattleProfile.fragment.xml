@@ -1,0 +1,24 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core">
+	<ColumnListItem>
+		<cells>
+			<ObjectListItem
+				number="{hp}" numberUnit="{i18n>hp}" numberState="{= ${hp}&gt;3?'Success':${hp}&gt;0?'Warning':'None' }"
+				title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
+				intro="[{level}] {name}" />
+			<l:VerticalLayout>
+				<l:HorizontalLayout>
+					<ObjectStatus text="{state}" class="sapUiSmallMarginTop"
+						state="{ path: 'state', formatter: '.handleFormatBattleState' }" 
+						icon="{ path: 'state', formatter: '.handleFormatBattleStateIcon'}" /> 
+					<Button visible="{canDefend}" icon="sap-icon://shield" /> 
+					<Button visible="{canAssist}" icon="sap-icon://add" />
+					<RadioButton visible="{= !${/gameInfo/coop} || ${/gameInfo/haveSpells} }" />
+				</l:HorizontalLayout>
+				<ObjectStatus text="{event}" icon="{ path: 'eventKey', formatter: '.handleFormatBattleLogIcon'}" /> 
+			</l:VerticalLayout>
+		</cells>
+	</ColumnListItem>
+</core:FragmentDefinition>	
