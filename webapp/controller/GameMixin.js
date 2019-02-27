@@ -13,14 +13,27 @@ sap.ui.define([
 	return Controller.extend("GameMixin",{
 
 		busyStates:["attack","cast","cooldown"],
+
+		formatAssistButton:function(state,target,name,me,mob){
+			// console.log("assist >> ",state,target,name,me,mob);
+			return (state=='attack' && !mob && name!=me && target!=me);
+		},
+
+		formatDefendButton:function(attackers,name,me,mob){
+			// console.log("defend >> ",attackers,name,me,mob);
+			return ( attackers>0 && name!=me && !mob );
+		},
 		
 		onChangeState:function(e){
 
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			
-			var name=e.arg.profile.mob?"boss":e.arg.user;
-			mdl.setProperty("/battleInfo/"+name,e.arg.profile);
+			
+			var profile=e.arg.profiles[e.arg.user],name=e.arg.user;
+			if (!profile) profile=e.arg.profiles.boss,name="boss";
+			mdl.setProperty("/battleInfo/"+name,profile);
+			// for (var p in e.arg.profiles) mdl.setProperty("/battleInfo/"+p+"/attackers",e.arg.profiles[p].attackers);
 
 			if (e.arg.user==me) {
 				var busy=this.busyStates.indexOf(e.arg.state)>-1
@@ -34,14 +47,6 @@ sap.ui.define([
 			
 			mdl.setProperty("/battleInfo/"+name+"/event",e.arg.title);
 			mdl.setProperty("/battleInfo/"+name+"/eventKey",'userStateChange_'+e.arg.state);
-			
-			if (e.arg.state=="attack" && e.arg.user!=me){
-				if (this.isPlayer(e.arg.user)) mdl.setProperty("/battleInfo/"+e.arg.user+"/canAssist",true);
-				if (this.isPlayer(e.arg.val)) mdl.setProperty("/battleInfo/"+e.arg.val+"/canDefend",true);
-			} else {
-				mdl.setProperty("/battleInfo/"+name+"/canAssist",false);
-				mdl.setProperty("/battleInfo/"+name+"/canDefend",false);
-			}
 			
 			if (e.arg.state=="attack"){
 				var self=this;
@@ -438,10 +443,6 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			
 			var profiles=e.arg.profiles;
-			for (var p in profiles){
-				profiles[p].canAssist=false;
-				profiles[p].canDefend=false;
-			}
 			mdl.setProperty( '/battleInfo',profiles);
 			// this.refreshProfiles(e.arg.profiles);
 
@@ -556,7 +557,10 @@ sap.ui.define([
 				endBattleWin:'lead',
 				completeFloorDescend:'thumb-up'
 			};
-			if (!keys[eventKey]) { console.log(eventKey); return '';}
+			if (!keys[eventKey]) { 
+				// console.log(eventKey); 
+				return '';
+			}
 			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},	
 		

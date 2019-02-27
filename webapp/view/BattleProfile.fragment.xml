@@ -10,11 +10,15 @@
 				intro="[{level}] {name}" />
 			<l:VerticalLayout>
 				<l:HorizontalLayout>
-					<ObjectStatus text="{state}" class="sapUiSmallMarginTop"
+					<ObjectStatus _text="{state}" class="sapUiSmallMarginTop"
 						state="{ path: 'state', formatter: '.handleFormatBattleState' }" 
 						icon="{ path: 'state', formatter: '.handleFormatBattleStateIcon'}" /> 
-					<Button visible="{canDefend}" icon="sap-icon://shield" /> 
-					<Button visible="{canAssist}" icon="sap-icon://add" />
+					<Button _visible="{canDefend}" 
+						visible="{parts:[{path:'attackers'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatDefendButton'}"
+						icon="sap-icon://shield" /> 
+					<Button _visible="{canAssist}"
+						visible="{parts:[{path:'state'},{path:'target'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatAssistButton'}"
+						icon="sap-icon://add" />
 					<RadioButton visible="{= !${/gameInfo/coop} || ${/gameInfo/haveSpells} }" />
 				</l:HorizontalLayout>
 				<ObjectStatus text="{event}" icon="{ path: 'eventKey', formatter: '.handleFormatBattleLogIcon'}" /> 

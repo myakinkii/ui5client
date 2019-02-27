@@ -237,6 +237,8 @@ sap.ui.define([
 		handleStealLoot:function(e){ this.stealLoot(e); },
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },
+		handleFormatDefendButton:function(){ return this.formatDefendButton.apply(this,[].slice.call(arguments)); },
+		handleFormatAssistButton:function(){ return this.formatAssistButton.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleState:function(){ return this.formatBattleState.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleStateIcon:function(){ return this.formatBattleStateIcon.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleLogIcon:function(){ return this.formatLogIcon.apply(this,[].slice.call(arguments)); },
