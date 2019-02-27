@@ -16,9 +16,9 @@
 									title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
 									intro="[{level}] {name}" >
 								</ObjectListItem>
-								<Toolbar content="{spells}" visible="{haveSpells}">
+								<!-- <Toolbar content="{spells}" visible="{haveSpells}">
 									<Button text="{spellName} +{eft}" press="handleCastSpell" />
-								</Toolbar>
+								</Toolbar> -->
 							</IconTabFilter>
 						</items>
 					</IconTabBar>
