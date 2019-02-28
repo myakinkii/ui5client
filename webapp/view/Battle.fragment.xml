@@ -6,7 +6,8 @@
 		<!--<FlexBox justifyContent="Center">-->
 			<!--<items>-->
 				<!--<l:VerticalLayout width="100%"> -->
-					<Table _mode="SingleSelectLeft" _fixedLayout="true" items="{/battleInfo}">
+
+					<!-- <Table _mode="SingleSelectLeft" _fixedLayout="true" items="{/battleInfo}">
 					<headerToolbar>
 					<Toolbar content="{/gameInfo/mySpells}" visible="{/gameInfo/haveSpells}">
 						<Button text="{spell}:{mp}" press="handleCastSpell" />
@@ -15,7 +16,16 @@
 
 						<columns> <Column /> <Column /> </columns>
 						<items> <core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> </items>
-					</Table>
+					</Table> -->
+					
+					<Panel content="{/battleInfo}">
+						<core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> 
+					</Panel>
+
+					<!-- <l:Grid content="{/battleInfo}" defaultSpan="L6 M6 S6" _class="sapUiSmallMarginTop" >
+						<core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> 
+					</l:Grid> -->
+
 					<!--<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">
 						<items>
 							<IconTabFilter text="{name}" key="{name}" count="{ parts:[{path:'hp'},{path:'state'}],formatter:'.handleFormatBattleState'}" _count="{hp}" _esign="Horizontal"

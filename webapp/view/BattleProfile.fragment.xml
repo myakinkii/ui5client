@@ -2,8 +2,13 @@
 	xmlns="sap.m"
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core">
-	<ColumnListItem highlight="{ path: 'state', formatter: '.handleFormatBattleState' }">
-		<cells>
+	<!-- <ColumnListItem highlight="{ path: 'state', formatter: '.handleFormatBattleState' }">
+		<cells> -->
+
+		<!-- <l:VerticalLayout> -->
+		<!-- <l:HorizontalLayout> -->
+		<l:Grid defaultSpan="L6 M6 S6" _class="sapUiSmallMarginTop" >
+
 			<ObjectListItem
 				number="{hp}" numberUnit="{i18n>hp}" numberState="{= ${hp}&gt;3?'Success':${hp}&gt;0?'Warning':'None' }"
 				title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
@@ -23,6 +28,15 @@
 				</l:HorizontalLayout>
 				<ObjectStatus text="{event}" icon="{ path: 'eventKey', formatter: '.handleFormatBattleLogIcon'}" /> 
 			</l:VerticalLayout>
-		</cells>
-	</ColumnListItem>
+
+			<!-- </l:HorizontalLayout> -->
+			<Toolbar enabled="{= ${name}===${/auth/user} }" content="{spells}" visible="{haveSpells}">
+				<Button text="{spell}:{mp}" press="handleCastSpell" />
+			</Toolbar>
+			<!-- </l:VerticalLayout> -->
+			
+			</l:Grid>
+
+		<!-- </cells>
+	</ColumnListItem> -->
 </core:FragmentDefinition>	
