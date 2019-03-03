@@ -167,6 +167,7 @@ sap.ui.define([
 		
 		rpgCmds:{
 			"/hit":'hitTarget',
+			"/cast":'castSpell',
 			"/assist":"assistAttack",
 			"/defend":"defendPlayer",
 			"/parry":"setParryState",
@@ -230,7 +231,7 @@ sap.ui.define([
 		handleForgeStart:function(e){ this.startForge(e); },
 		handleForgeReset:function(e){ this.resetForge(e); },
 		handleEquipGem:function(e){ this.equipGem(e); },
-		// handleHitMob:function(e){ this.hitMob(e); },
+		handleHitMob:function(e){ this.hitMob(e); },
 		// handleHitTarget:function(e){ this.hitTarget(e); },
 		handleChangeTaget:function(e){ this.changeTarget(e); },
 		handlePerformAction:function(e){ this.performAction(e); },
@@ -238,6 +239,7 @@ sap.ui.define([
 		handleStealLoot:function(e){ this.stealLoot(e); },
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },
+		handleSortProfiles:function(){ return this.sortProfiles.apply(this,[].slice.call(arguments)); },
 		handleFormatDefendButton:function(){ return this.formatDefendButton.apply(this,[].slice.call(arguments)); },
 		handleFormatAssistButton:function(){ return this.formatAssistButton.apply(this,[].slice.call(arguments)); },
 		handleFormatBattleState:function(){ return this.formatBattleState.apply(this,[].slice.call(arguments)); },

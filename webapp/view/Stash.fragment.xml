@@ -5,6 +5,10 @@
 	<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
 		<l:VerticalLayout width="100%">
 			<Button width="100%" text="{i18n>gameInfoQuitGame}" press="handleConfirmQuitGame" type="Reject" />
+			<Button width="100%" text="{i18n>gameVoteAscend}" press="handleAscend" visible="{/canContinue}" type="Emphasized" />
+			<Button width="100%" text="{i18n>gameVoteDescend}" press="handleDescend" visible="{/canContinue}" type="Emphasized" />
+			<Button width="100%" text="{i18n>gameVoteFlee}" press="handleFleeBattle" visible="{/canFlee}" type="Reject" />
+			<Button width="100%" text="{i18n>gameStealLoot}" press="handleStealLoot" visible="{/canSteal}" type="Accept" />
 			<List headerText="{i18n>gameInfoLivesLost}{/gameInfo/floor}" width="100%" items="{/gameInfo/livesLost}">
 				<ObjectListItem title="{user}" number="{livesLost}" />
 			</List>

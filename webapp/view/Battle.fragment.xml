@@ -3,93 +3,38 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core">
 	<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
-		<!--<FlexBox justifyContent="Center">-->
-			<!--<items>-->
-				<!--<l:VerticalLayout width="100%"> -->
-
-					<!-- <Table _mode="SingleSelectLeft" _fixedLayout="true" items="{/battleInfo}">
-					<headerToolbar>
-					<Toolbar content="{/gameInfo/mySpells}" visible="{/gameInfo/haveSpells}">
-						<Button text="{spell}:{mp}" press="handleCastSpell" />
-					</Toolbar>
-					</headerToolbar>
-
-						<columns> <Column /> <Column /> </columns>
-						<items> <core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> </items>
-					</Table> -->
-					
-					<Panel content="{/battleInfo}">
-						<core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> 
-					</Panel>
-
-					<!-- <l:Grid content="{/battleInfo}" defaultSpan="L6 M6 S6" _class="sapUiSmallMarginTop" >
-						<core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> 
-					</l:Grid> -->
-
-					<!--<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">
-						<items>
-							<IconTabFilter text="{name}" key="{name}" count="{ parts:[{path:'hp'},{path:'state'}],formatter:'.handleFormatBattleState'}" _count="{hp}" _esign="Horizontal"
-								iconColor="{parts:[{path:'hp'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatBattleIconColor'}"
-								icon="{= ${mob}?'sap-icon://sap-ui5':'sap-icon://employee' }">
-								<ObjectListItem 
-									number="{hp}" numberUnit="{i18n>hp}" numberState="{= ${hp}&gt;3?'Success':${hp}&gt;0?'Warning':'None' }"
-									title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"
-									intro="[{level}] {name}" >
-								</ObjectListItem>
-								<Toolbar content="{spells}" visible="false" _visible="{haveSpells}">
-									<Button text="{spellName} +{eft}" press="handleCastSpell" />
-								</Toolbar>
-							</IconTabFilter>
-						</items>
-					</IconTabBar>-->
-					<OverflowToolbar>
-						<ToolbarSpacer />
-						<Button press="handlePerformAction" text="{i18n>gameParry}" enabled="{/canHit}" type="Emphasized" >
-							<customData> <core:CustomData key="action" value="parry" /> </customData>
-						</Button>
-						<ToolbarSpacer />
-						<Button press="handlePerformAction" text="{i18n>gameEvade}" enabled="{/canHit}" type="Emphasized" >
-							<customData> <core:CustomData key="action" value="evade" /> </customData>
-						</Button>
-						<ToolbarSpacer />
-						<Button press="handlePerformAction" text="{i18n>gameHitTarget}" enabled="{/canHit}" type="Reject" >
-							<customData> <core:CustomData key="action" value="hit" /> </customData>
-						</Button>
-						<ToolbarSpacer />
-						<!--<Button press="handlePerformAction" text="{i18n>gameAssist}" enabled="{/canHit}" >-->
-						<!--	<customData> <core:CustomData key="action" value="assist" /> </customData>-->
-						<!--</Button>-->
-						<!--<ToolbarSpacer />-->
-						<!--<Button press="handlePerformAction" text="{i18n>gameDefend}" enabled="{/canHit}"  >-->
-						<!--	<customData> <core:CustomData key="action" value="defend" /> </customData>-->
-						<!--</Button>-->
-						<!--<ToolbarSpacer />-->
-						<!--<Button press="handleCancelAction" text="{i18n>gameCancel}" _enabled="{/canFlee}" type="Reject" />-->
-						<!--<ToolbarSpacer />-->
-					</OverflowToolbar>						
-					<Toolbar visible="false" _visible="{= ${/gameInfo/mode}!=='versusRPG' }">
-						<ToolbarSpacer />
-						<Button press="handleStealLoot" text="{i18n>gameStealLoot}" enabled="{/canSteal}" _type="Emphasized" />
-						<ToolbarSpacer />
-						<Button press="handleHitMob" text="{i18n>gameHitMob}" enabled="{/canHit}" type="Reject" />
-						<ToolbarSpacer />
-						<Button press="handleFleeBattle" text="{i18n>gameVoteFlee}" enabled="{/canFlee}" _type="Accept" />
-						<ToolbarSpacer />
-					</Toolbar>
-					<List id="battleLog" width="100%" />
-					<!--<List width="100%" items="{/battleLog}" >-->
-					<!--	<NotificationListItem buttons="{actions}"-->
-					<!--		showCloseButton="false" priority="{priority}" type="Inactive"-->
-					<!--		title="{entryNumber}: {title}" description="{descr}"-->
-					<!--		authorName="{attack}" datetime="{defense}"-->
-					<!--		authorPicture="{parts:[{path:'eventKey'}],formatter:'.handleFormatBattleLogIcon'}">-->
-					<!--		<buttons>-->
-					<!--			<Button text="{action}" press="handleBattleActionCb" />-->
-					<!--		</buttons>-->
-					<!--	</NotificationListItem>-->
-					<!--</List>-->
-				<!--</l:VerticalLayout>-->
-			<!--</items>-->
-		<!--</FlexBox>-->
+		
+		<Panel content="{ path:'/battleInfo', sorter:{path:'name',comparator:'.handleSortProfiles'}}" >
+			<core:Fragment fragmentName="com.minesnf.ui5client.view.BattleProfile" type="XML" /> 
+		</Panel>
+		
+		<!--<IconTabBar id="gameTabBar" expandable="false" items="{/battleInfo}">-->
+		<!--	<items>-->
+		<!--		<IconTabFilter text="{name}" key="{name}" count="{ parts:[{path:'hp'},{path:'state'}],formatter:'.handleFormatBattleState'}" _count="{hp}" _esign="Horizontal"-->
+		<!--			iconColor="{parts:[{path:'hp'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatBattleIconColor'}"-->
+		<!--			icon="{= ${mob}?'sap-icon://sap-ui5':'sap-icon://employee' }">-->
+		<!--			<ObjectListItem -->
+		<!--				number="{hp}" numberUnit="{i18n>hp}" numberState="{= ${hp}&gt;3?'Success':${hp}&gt;0?'Warning':'None' }"-->
+		<!--				title="{i18n>patk}: +{patk} {i18n>pdef}: +{pdef} &#10;&#13; {i18n>maxhp}: +{maxhp} {i18n>speed}: +{speed}"-->
+		<!--				intro="[{level}] {name}" >-->
+		<!--			</ObjectListItem>-->
+		<!--			<Toolbar content="{spells}" visible="false" _visible="{haveSpells}">-->
+		<!--				<Button text="{spellName} +{eft}" press="handleCastSpell" />-->
+		<!--			</Toolbar>-->
+		<!--		</IconTabFilter>-->
+		<!--	</items>-->
+		<!--</IconTabBar>-->
+		<!--<Toolbar visible="{= ${/gameInfo/mode}!=='versusRPG' }">-->
+		<!--	<ToolbarSpacer />-->
+		<!--	<Button press="handleStealLoot" text="{i18n>gameStealLoot}" enabled="{/canSteal}" _type="Emphasized" />-->
+		<!--	<ToolbarSpacer />-->
+		<!--	<Button press="handleHitMob" text="{i18n>gameHitMob}" enabled="{/canHit}" type="Reject" />-->
+		<!--	<ToolbarSpacer />-->
+		<!--	<Button press="handleFleeBattle" text="{i18n>gameVoteFlee}" enabled="{/canFlee}" _type="Accept" />-->
+		<!--	<ToolbarSpacer />-->
+		<!--</Toolbar>-->
+		
+		<List id="battleLog" width="100%" />
+		
 	</ScrollContainer>	
 </core:FragmentDefinition>	

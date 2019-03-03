@@ -11,6 +11,18 @@ sap.ui.define([
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
 	
 	return Controller.extend("GameMixin",{
+		
+		sortProfiles:function(n1,n2){
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
+			var profiles=mdl.getProperty('/battleInfo');
+			var p1=profiles[n1.toLowerCase()]||profiles.boss;
+			var p2=profiles[n2.toLowerCase()]||profiles.boss;
+			if (p2.mob) return -1;
+			if (p2.name==me) return 1;
+			if (p1.name < p2.name) return 1;
+			return 0;
+		},
 
 		busyStates:["attack","cast","cooldown"],
 
@@ -25,15 +37,16 @@ sap.ui.define([
 		},
 		
 		onChangeState:function(e){
-
+			
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			
-			
-			var profile=e.arg.profiles[e.arg.user],name=e.arg.user;
-			if (!profile) profile=e.arg.profiles.boss,name="boss";
-			mdl.setProperty("/battleInfo/"+name,profile);
-			// for (var p in e.arg.profiles) mdl.setProperty("/battleInfo/"+p+"/attackers",e.arg.profiles[p].attackers);
+			for (var p in e.arg.profiles) {
+				// if (e.arg.profiles[p].attackers>0) console.log(p,e.arg.profiles[p].attackers);
+				mdl.setProperty("/battleInfo/"+p+"/attackers",e.arg.profiles[p].attackers);
+			}
+			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
+			mdl.setProperty("/battleInfo/"+name,e.arg.profiles[name]);
 
 			if (e.arg.user==me) {
 				var busy=this.busyStates.indexOf(e.arg.state)>-1
@@ -43,7 +56,7 @@ sap.ui.define([
 			if (e.arg.state=="active" || e.arg.state=="cooldown") return;
 			
 			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
-			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val]);
+			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,e.arg.profiles[name].target||"self"]);
 			
 			mdl.setProperty("/battleInfo/"+name+"/event",e.arg.title);
 			mdl.setProperty("/battleInfo/"+name+"/eventKey",'userStateChange_'+e.arg.state);
@@ -101,7 +114,12 @@ sap.ui.define([
 				if (e.arg.loot[res]) stash.push({key:res, val:e.arg.loot[res], text:res+': '+e.arg.loot[res]});
 				res--;
 			}
-			this.getView().getModel().setProperty('/gameInfo/stash',stash);
+			
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/canFlee',false);
+			mdl.setProperty('/canContinue',true);
+			mdl.setProperty('/gameInfo/stash',stash);
+			
 			e.arg.descr=this.geti18n("game_completeFloor_text",stash.map(function(s){return s.text; }).join("\n"));
 			if (e.arg.effect) e.arg.descr+=this.geti18n( 'game_completeFloor_text_recipe',this.geti18n('effect_'+e.arg.effect));
 			e.arg.descr+=this.geti18n("game_completeFloor_text_ascend");
@@ -153,9 +171,10 @@ sap.ui.define([
 					livesLost:{} 
 				});
 			}
-			mdl.setProperty('/canSteal',true);
-			mdl.setProperty('/canFlee',true);
-			mdl.setProperty('/canHit',true);
+			mdl.setProperty('/canSteal',false);
+			mdl.setProperty('/canFlee',false);
+			mdl.setProperty('/canContinue',false);
+			mdl.setProperty('/canHit',false);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
@@ -168,10 +187,14 @@ sap.ui.define([
 			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
 		},
 
-		getTarget:function(){
+		getTarget:function(e){
 			var tgt=null,tabBar=this.getView().byId("gameTabBar");
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
+			var ctx=e&&e.getSource().getBindingContext().getObject();
 			if (tabBar) tgt=tabBar.getSelectedKey();
-			else tgt=this.getView().getModel().getProperty('/gameInfo/myTarget');
+			else if(ctx && ctx.name!=me) tgt=ctx.name;
+			else tgt=mdl.getProperty('/gameInfo/myTarget');
 			return tgt;
 		},
 
@@ -194,7 +217,7 @@ sap.ui.define([
 			var action=e.getSource().data().action;
 			var cmd="/"+action;
 			var mdl=this.getView().getModel();
-			var tgt=this.getTarget();
+			var tgt=this.getTarget(e);
 			if (action=='assist' || action=="defend" ) {
 				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
 				 else return;
@@ -211,7 +234,7 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			var tgt=this.getTarget();
 			var me=mdl.getProperty('/auth/user');
-			if (tgt!=me) cmd+=" "+tgt;
+			if (tgt && tgt!=me) cmd+=" "+tgt;
 			this.processCommand(cmd);
 		},
 		
@@ -232,8 +255,7 @@ sap.ui.define([
 				var mdl=this.getView().getModel();
 				mdl.setProperty('/canSteal',false);
 				mdl.setProperty('/canFlee',false);
-				mdl.setProperty( '/battleInfo',e.arg.profiles);
-				// this.refreshProfiles(e.arg.profiles);
+				mdl.setProperty( '/battleInfo/boss',e.arg.profiles.boss);
 			}
 			e.arg.descr=this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user);
 			e.arg.title=this.geti18n('game_stealFailed',this.formatChance(e.arg.chance));
@@ -261,15 +283,24 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			var entry={
 				eventKey:e.arg.eventKey,
-				title: this.geti18n('game_'+e.arg.eventKey,e.arg.spell),
+				title: this.geti18n('game_'+e.arg.eventKey,[e.arg.source,e.arg.spell]),
 				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.source,e.arg.target,e.arg.spell]),
 				attack:e.arg.source, defense:e.arg.target,
 				priority:'Medium',
 				icon:this.formatLogIcon(e.arg.eventKey)
 			};
 			this.addLogEntry(entry);
-			mdl.setProperty( '/battleInfo',e.arg.profiles);
-			// this.refreshProfiles(e.arg.profiles);
+			// mdl.setProperty( '/battleInfo',e.arg.profiles);
+			var profiles=e.arg.profiles;
+			var tgtsArr=[e.arg.source];
+			if (e.arg.target) tgtsArr.push(e.arg.target);
+			tgtsArr.forEach(function(name){
+				if (!profiles[name]) name='boss';
+				var profile=profiles[name];
+				profile.event=entry.title;
+				profile.eventKey=entry.eventKey;
+				mdl.setProperty( '/battleInfo/'+name,profile);
+			});
 			this.battleInfo=e.arg;
 		},
 		
@@ -285,15 +316,15 @@ sap.ui.define([
 				icon:this.formatLogIcon(e.arg.eventKey)
 			};
 			this.addLogEntry(entry);
+			// mdl.setProperty( '/battleInfo',e.arg.profiles);
 			var profiles=e.arg.profiles;
 			[e.arg.attack,e.arg.defense].forEach(function(name){
+				if (!profiles[name]) name='boss';
 				var profile=profiles[name];
-				if (!profile) profile=profiles.boss;
 				profile.event=entry.title;
 				profile.eventKey=entry.eventKey;
+				mdl.setProperty( '/battleInfo/'+name,profile);
 			});
-			mdl.setProperty( '/battleInfo',profiles);
-			// this.refreshProfiles(e.arg.profiles);
 			this.battleInfo=e.arg;
 		},
 
@@ -460,6 +491,9 @@ sap.ui.define([
 			// this.refreshProfiles(e.arg.profiles);
 
 			var me=mdl.getProperty('/auth/user');
+			mdl.setProperty('/canSteal',true);
+			mdl.setProperty('/canFlee',true);
+			mdl.setProperty('/canHit',true);
 			mdl.setProperty('/gameInfo/haveSpells',profiles[me].haveSpells||false);
 			mdl.setProperty('/gameInfo/mySpells',profiles[me].spells);
 			// if (profiles.boss) key=profiles.boss.name;
