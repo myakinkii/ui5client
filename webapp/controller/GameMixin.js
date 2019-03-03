@@ -18,9 +18,11 @@ sap.ui.define([
 			var profiles=mdl.getProperty('/battleInfo');
 			var p1=profiles[n1.toLowerCase()]||profiles.boss;
 			var p2=profiles[n2.toLowerCase()]||profiles.boss;
-			if (p2.mob) return -1;
+			if (p1.mob) return 1;
+            if (p2.mob) return -1;
 			if (p2.name==me) return 1;
-			if (p1.name < p2.name) return 1;
+            if (p1.name==me) return -1;
+			if (p1.name!=me && p2.name < p1.name) return 1;
 			return 0;
 		},
 
