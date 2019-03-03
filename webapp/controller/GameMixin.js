@@ -23,6 +23,7 @@ sap.ui.define([
 			if (p2.name==me) return 1;
             if (p1.name==me) return -1;
 			if (p1.name!=me && p2.name < p1.name) return 1;
+			if (p1.name!=me && p1.name < p2.name) return -1;
 			return 0;
 		},
 
