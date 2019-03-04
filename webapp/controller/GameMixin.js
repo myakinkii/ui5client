@@ -198,7 +198,7 @@ sap.ui.define([
 			var tgt=null,tabBar=this.getView().byId("gameTabBar");
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
-			var ctx=e&&e.getSource().getBindingContext().getObject();
+			var ctx=e && e.getSource().getBindingContext() && e.getSource().getBindingContext().getObject();
 			if (tabBar) tgt=tabBar.getSelectedKey();
 			else if(ctx && ctx.name!=me) tgt=ctx.name;
 			else tgt=mdl.getProperty('/gameInfo/myTarget');
