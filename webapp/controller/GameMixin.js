@@ -446,6 +446,16 @@ sap.ui.define([
 			msgs=msgs.concat(scores.map(function(s){ return s.user+":"+s.score; }));
 			this.showToast(msgs.join('\n'),2000);
 		},
+
+		onShowResultRPGVersus:function(e){
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
+			var won=e.arg.won==me;
+			if (won) this.mergeResultToInventory(e.arg.loot);
+			var msgs=[this.geti18n('gameResultVersus'+(won?'Win':'Lose'))];
+			if (won) msgs.push(this.geti18n('gameResultLocalWin')); 
+			this.showToast(msgs.join('\n'));
+		},
 		
 		onShowResultRPGCoop:function(e){
 			var msgs,prio="None";
