@@ -25,23 +25,23 @@
 			<l:HorizontalLayout>
 				<RadioButton select="handleChangeTaget" visible="{/gameInfo/haveSpells}" />
 				<Button visible="{= ${/gameInfo/coop} ? ( ${mob} ? true : ${/auth/user}===${name} ) : ${/auth/user}!==${name} }"
-						press="handlePerformAction" icon="sap-icon://scissors" _text="{i18n>gameHitTarget}" enabled="{/canHit}" type="Reject" >
+						press="handlePerformAction" icon="sap-icon://scissors" enabled="{/canHit}" type="Reject" >
 					<customData> <core:CustomData key="action" value="hit" /> </customData>
 				</Button>				
 				<Button visible="{= ${/auth/user}===${name} &amp;&amp; ${attackers}>0 }"
-						press="handlePerformAction" icon="sap-icon://journey-change" _text="{i18n>gameParry}" enabled="{/canHit}" type="Emphasized" >
+						press="handlePerformAction" icon="sap-icon://journey-change" enabled="{/canHit}" type="Emphasized" >
 					<customData> <core:CustomData key="action" value="parry" /> </customData>
 				</Button>
 				<Button visible="{= ${/auth/user}===${name} &amp;&amp; ${attackers}>0 }"
-						press="handlePerformAction" icon="sap-icon://physical-activity" _text="{i18n>gameEvade}" enabled="{/canHit}" type="Emphasized" >
+						press="handlePerformAction" icon="sap-icon://physical-activity" enabled="{/canHit}" type="Emphasized" >
 					<customData> <core:CustomData key="action" value="evade" /> </customData>
 				</Button>
 				<Button visible="{parts:[{path:'attackers'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatDefendButton'}"
-						icon="sap-icon://shield" > 
+						press="handlePerformAction" icon="sap-icon://shield" type="None" > 
 					<customData> <core:CustomData key="action" value="defend" /> </customData>
 				</Button>
 				<Button visible="{parts:[{path:'state'},{path:'target'},{path:'name'},{path:'/auth/user'},{path:'mob'}],formatter:'.handleFormatAssistButton'}"
-						press="handlePerformAction" icon="sap-icon://add" >
+						press="handlePerformAction" icon="sap-icon://add" type="None" >
 					<customData> <core:CustomData key="action" value="assist" /> </customData>
 				</Button>
 			</l:HorizontalLayout>
