@@ -1,9 +1,10 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
+	"com/minesnf/ui5client/model/localGame",
 	"sap/m/MessageBox",
 	"sap/m/Dialog","sap/m/Button","sap/ui/model/Sorter","sap/ui/model/Filter","sap/ui/model/FilterOperator",
 	"sap/m/List","sap/m/ObjectListItem","sap/m/GroupHeaderListItem"
-	], function (Controller,MessageBox,Dialog,Button,Sorter,Filter,FilterOperator,List,ObjectListItem,GroupHeaderListItem){
+	], function (Controller,LocalGame,MessageBox,Dialog,Button,Sorter,Filter,FilterOperator,List,ObjectListItem,GroupHeaderListItem){
 	"use strict";
 	
 	return Controller.extend("InventoryMixin",{
@@ -16,16 +17,8 @@ sap.ui.define([
 			},{});
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/inv',inv);
-			
-			// this.recipes={
-			// 	'22222222':{effect:'speed',recipe:'22222222'},
-			// 	'33333333':{effect:'maxhp',recipe:'33333333'},
-			// 	'44444444':{effect:'pdef',recipe:'44444444'},
-			// 	'55555555':{effect:'patk',recipe:'55555555'},
-			// };
-			var recipes=JSON.parse(window.localStorage.getItem("gameRecipes")||"[]");
-			if (recipes.length==0) recipes=this.seedRecipes();
-			this.recipes=recipes.reduce(function(prev,cur){
+
+			this.recipes=this.checkSeedRecipes().reduce(function(prev,cur){
 				var rec=cur.split("_");
 				prev[rec[1]]={effect:rec[0],recipe:rec[1]};
 				return prev;
@@ -68,18 +61,32 @@ sap.ui.define([
 			this.refreshKnownRecipes(effect);
 		},
 		
-		seedRecipes:function(){
+		checkSeedRecipes:function(){
+			
+			var gems=LocalGame.RPGMechanics.gems;
+			var seededRecipes=JSON.parse(window.localStorage.getItem("gameRecipes")||"[]");
+			if (seededRecipes.length==gems.length) return seededRecipes;
+			
+			var seededHash=seededRecipes.reduce(function(prev,cur){ 
+				var arr=cur.split("_"),eft=arr[0],rec=arr[1];
+				prev[eft]=rec;
+				return prev;
+			},{});
+			var recipesMaxDigit=gems.reduce(function(prev,cur){ prev[cur.eft]=cur.rarity+3; return prev; },{});
+			
 			var uniq={};
-			function genRecipe(index){
+			function genRecipe(eft,index){
+				if (seededHash[eft]) {
+					uniq[seededHash[eft]]=seededHash[eft];
+					return seededHash[eft];
+				}
 				var recipe='';
-				for (var i=0;i<8;i++) recipe+=(Math.floor(Math.random()*5)+1);
-				if (uniq[recipe]) return genRecipe(index);
+				for (var i=0;i<8;i++) recipe+=(Math.floor(Math.random()*recipesMaxDigit[eft])+1);
+				if (uniq[recipe]) return genRecipe(eft,index);
 				uniq[recipe]=recipe;
 				return recipe;
 			}
-			var recipes=['speed','maxhp','pdef','patk'].map(function(eft,index){
-				return eft+"_"+genRecipe(index);
-			});
+			var recipes=gems.map(function(gem,index){ return gem.eft+"_"+genRecipe(gem.eft,index); });
 			window.localStorage.setItem("gameRecipes",JSON.stringify(recipes));
 			return recipes;
 		},

@@ -12,6 +12,10 @@ sap.ui.define([
 	
 	return Controller.extend("GameMixin",{
 		
+		formatSpellButton:function(spell,mp){
+			return this.geti18n(spell)+' '+mp;
+		},
+		
 		sortProfiles:function(n1,n2){
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');

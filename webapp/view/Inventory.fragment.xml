@@ -48,8 +48,8 @@
 								</List>
 							</IconTabFilter>
 							<IconTabFilter text="Equip" key="equip" >
-								<List width="100%" items="{ path:'/equip', sorter:[{path:'rarity',group:true},{path:'effect'}], groupHeaderFactory: '.handleInvGroupHeader' }">
-									<InputListItem _label="{effect}" label="{parts:[{path:'effect'}],formatter:'.handleGemEffectFormatter'}" >
+								<List width="100%" items="{ path:'/equip', sorter:[{path:'rarity',group:true,descending:true},{path:'effect'}], groupHeaderFactory: '.handleInvGroupHeader' }">
+									<InputListItem label="{parts:[{path:'effect'}],formatter:'.handleGemEffectFormatter'}" >
 										<Switch state="{equipped}" change="handleEquipGem" />
 									</InputListItem>
 								</List>
