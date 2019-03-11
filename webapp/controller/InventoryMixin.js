@@ -267,7 +267,10 @@ sap.ui.define([
 		
 		formatGemEffect:function(eff){
 			return this.geti18n('effect_'+eff);
-		}
+		},
+		
+		equipSorter:{COMMON:1,RARE:2,EPIC:3},
+		sortEquip:function(r1,r2){ return this.equipSorter[r2]-this.equipSorter[r1]; }
 
 	});
 });

@@ -113,7 +113,8 @@ sap.ui.define([
 			var commander=function(cmd){ self.processCommand.call(self,cmd); };
 			e.arg.actions=[
 				{icon:"sap-icon://refresh",action:"1",callback:function(){commander("/ascend"); }},
-				{icon:"sap-icon://navigation-down-arrow",action:e.arg.floor+1,callback:function(){ commander("/descend"); }}
+				{icon:"sap-icon://navigation-down-arrow",action:e.arg.floor+1,callback:function(){ commander("/descend"); }},
+				{icon:"sap-icon://drop-down-list",action:"",callback:function(){ self.renderLog(self.battleLog); }}
 				];
 			e.arg.title=this.geti18n("game_completeFloor",e.arg.floor);
 			var stash=[],res=8;
@@ -130,6 +131,7 @@ sap.ui.define([
 			e.arg.descr=this.geti18n("game_completeFloor_text",stash.map(function(s){return s.text; }).join("\n"));
 			if (e.arg.effect) e.arg.descr+=this.geti18n( 'game_completeFloor_text_recipe',this.geti18n('effect_'+e.arg.effect));
 			e.arg.descr+=this.geti18n("game_completeFloor_text_ascend");
+
 			this.addLogEntry(e.arg);
 		},
 
@@ -544,18 +546,21 @@ sap.ui.define([
 		},				
 		
 		addLogEntry:function(e){
-			var log=this.getView().byId("battleLog")
-			log.removeAllItems();
 			this.battleLog.push(e);
 			e.entryNumber=this.battleLog.length;
-			var lastN=[],N=66,i;
-			for (i=this.battleLog.length-1;i>=0;i--){
+			var N=10;
+			var lastN=[];
+			for ( var i=this.battleLog.length-1; i>=0; i--,N--){
 				if (N==0) break;
-				// lastN.push(this.battleLog[i]);
-				log.addItem(this.createLogItem(this.battleLog[i]));
-				N--;
+				lastN.push(this.battleLog[i]);
 			}
-			// this.getView().getModel().setProperty("/battleLog",lastN);
+			this.renderLog(lastN);
+		},
+		
+		renderLog:function(lastN){
+			var log=this.getView().byId("battleLog");
+			log.removeAllItems();
+			lastN.forEach(function(item){ log.addItem(this.createLogItem(item)); }.bind(this));
 		},
 		
 		createLogItem:function(e){

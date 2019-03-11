@@ -240,6 +240,7 @@ sap.ui.define([
 		handleFleeBattle:function(e){ this.fleeBattle(e); },
 		handleBattleActionCb:function(e){ this.callBattleActionCb(e); },
 		handleSortProfiles:function(){ return this.sortProfiles.apply(this,[].slice.call(arguments)); },
+		handleSortEquip:function(){ return this.sortEquip.apply(this,[].slice.call(arguments)); },
 		handleFormatSpellButton:function(){ return this.formatSpellButton.apply(this,[].slice.call(arguments)); },
 		handleFormatDefendButton:function(){ return this.formatDefendButton.apply(this,[].slice.call(arguments)); },
 		handleFormatAssistButton:function(){ return this.formatAssistButton.apply(this,[].slice.call(arguments)); },
