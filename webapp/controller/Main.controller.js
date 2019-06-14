@@ -1,13 +1,15 @@
 sap.ui.define([
-	"libs/nowjs/now",
+	"sap/ui/core/ws/WebSocket",
 	"com/minesnf/ui5client/controller/BaseController",
 	"com/minesnf/ui5client/controller/GameMixin",
 	"com/minesnf/ui5client/controller/InventoryMixin",
 	"com/minesnf/ui5client/controller/UserMixin",
 	"com/minesnf/ui5client/controller/PartyMixin",
 	"sap/ui/model/json/JSONModel"
-], function (now, BaseController, GameMixin, InventoryMixin, UserMixin, PartyMixin, JSONModel) {
+], function (WebSocket, BaseController, GameMixin, InventoryMixin, UserMixin, PartyMixin, JSONModel) {
 	"use strict";
+
+	var ws;
 
 	return BaseController.extend("com.minesnf.ui5client.controller.Main", {
 
@@ -38,6 +40,7 @@ sap.ui.define([
 				}
 			}
 			var srv=window.localStorage.getItem("srv")||'global.minesnf.com';
+			if (initData && initData.localSrv) srv="/";
 			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
 			
@@ -136,21 +139,20 @@ sap.ui.define([
 		handleShowPane:function(e){
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/showPane',!mdl.getProperty('/showPane'));
-		},		
-		
+		},
+
 		initNow:function(defSrv){
 			var self=this;
-			var srv="http://"+(defSrv||this.getView().getModel().getProperty("/srv"));
+			var srv="wss://"+(defSrv||this.getView().getModel().getProperty("/srv"));
+			if (defSrv=="/") srv=defSrv+"be";
 			this.setBusy(this.geti18n("initClient"));
-			if (!window.now) {
-				$.ajax({ type: "GET", url: srv, async: false }); // just to init session
-				window.now = nowInitialize(srv);
-			}
-			window.now.dispatchEvent=function(e){ self.processEvent.call(self,e) };
-			window.now.ready(function(){
-				self.clearBusy();
-				self.nowReady=true;
+			ws = new WebSocket(srv);
+			ws.attachMessage(function(e) { 
+				var json=JSON.parse(e.getParameter("data"));
+				// console.log(json);
+				self.processEvent.call(self,json);
 			});
+			self.clearBusy();
 		},
 		
 		changeSrv:function(e){
@@ -187,7 +189,8 @@ sap.ui.define([
 				var pars=s.split(" ");
 				var cmd=pars.shift();
 				if (this.rpgCmds[cmd]) this.localGame.dispatchEvent({ user:me, command:this.rpgCmds[cmd], pars:pars });
-			} else if (this.nowReady) window.now.processCommand(s); 
+			} else ws.send(s);
+			// } else if (this.nowReady) window.now.processCommand(s); 
 		},
 
 		processEvent:function(e){

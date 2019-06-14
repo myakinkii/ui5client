@@ -8,7 +8,6 @@
 		<title>ui5client</title>
 
 		<script id="sap-ui-bootstrap"
-			_src="../../resources/sap-ui-core.js"
 			src='https://openui5.hana.ondemand.com/resources/sap-ui-core.js'
 			data-sap-ui-libs="sap.m"
 			data-sap-ui-theme="sap_belize"
@@ -21,12 +20,14 @@
 		<link rel="stylesheet" type="text/css" href="css/style.css">
 
 		<script>
-			jQuery.sap.registerModulePath("libs", "../../");
 			sap.ui.getCore().attachInit(function() {
 				new sap.m.Shell({
 					app: new sap.ui.core.ComponentContainer({
-						height : "100%",
-						name : "com.minesnf.ui5client"
+						height:"100%", 
+						component:sap.ui.getCore().createComponent({
+							name: "com.minesnf.ui5client",
+							componentData:{localSrv:true,offlineMode:false}
+						})
 					})
 				}).placeAt("content");
 			});
