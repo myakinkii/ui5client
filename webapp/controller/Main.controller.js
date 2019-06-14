@@ -143,7 +143,7 @@ sap.ui.define([
 
 		initNow:function(defSrv){
 			var self=this;
-			var srv="wss://"+(defSrv||this.getView().getModel().getProperty("/srv"));
+			var srv="ws://"+(defSrv||this.getView().getModel().getProperty("/srv"));
 			if (defSrv=="/") srv=defSrv+"be";
 			this.setBusy(this.geti18n("initClient"));
 			ws = new WebSocket(srv);
