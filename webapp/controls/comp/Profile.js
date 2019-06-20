@@ -95,7 +95,7 @@ sap.ui.define(['sap/ui/core/XMLComposite'], function(XMLComposite) {
 			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},
 		_geti18n: function(prop, arr) {
-			return this.getResourceBundle ? this.getResourceBundle().then(function(bndl){ return bndl.getText(prop, arr); }) : prop;
+			return this.getResourceBundle().then(function(bndl){ return bndl.getText(prop, arr); });
 		},
 	});
 	return myProfile;
