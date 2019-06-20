@@ -1,4 +1,4 @@
-sap.ui.define(['sap/ui/core/XMLComposite','sap/base/i18n/ResourceBundle'], function(XMLComposite, ResourceBundle) {
+sap.ui.define(['sap/ui/core/XMLComposite'], function(XMLComposite) {
 	"use strict";
 	var myProfile = XMLComposite.extend("com.minesnf.ui5client.controls.comp.Profile", {
 		metadata: {
@@ -95,7 +95,7 @@ sap.ui.define(['sap/ui/core/XMLComposite','sap/base/i18n/ResourceBundle'], funct
 			return 'sap-icon://'+(keys[eventKey]||'employee');
 		},
 		_geti18n: function(prop, arr) {
-			return this.getResourceBundle().then(function(bndl){ return bndl.getText(prop, arr); });
+			return this.getResourceBundle ? this.getResourceBundle().then(function(bndl){ return bndl.getText(prop, arr); }) : prop;
 		},
 	});
 	return myProfile;
