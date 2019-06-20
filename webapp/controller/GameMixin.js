@@ -223,10 +223,12 @@ sap.ui.define([
 		},
 
 		performAction:function(e){
-			var action=e.getSource().data().action;
+			// var action=e.getSource().data().action;
+			var action=e.getParameter("action");
+			var tgt=e.getParameter("action");
 			var cmd="/"+action;
 			var mdl=this.getView().getModel();
-			var tgt=this.getTarget(e);
+			// var tgt=this.getTarget(e);
 			if (action=='assist' || action=="defend" ) {
 				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
 				 else return;
