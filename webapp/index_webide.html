@@ -8,7 +8,8 @@
 		<title>ui5client</title>
 
 		<script id="sap-ui-bootstrap"
-			src="{{{sapui5_sb.url}}}/resources/sap-ui-core.js"
+			src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js"
+			_src="{{{sapui5_sb.url}}}/resources/sap-ui-core.js"
 			data-sap-ui-libs="sap.m"
 			data-sap-ui-theme="sap_belize"
 			data-sap-ui-compatVersion="edge"
@@ -27,7 +28,7 @@
 						height:"100%", 
 						component:sap.ui.getCore().createComponent({
 							name: "com.minesnf.ui5client",
-							componentData:{localSrv:true,offlineMode:false}
+							componentData:{localSrv:true,offlineMode:true}
 						})
 					})
 				}).placeAt("content");
