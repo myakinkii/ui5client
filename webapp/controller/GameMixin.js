@@ -18,16 +18,18 @@ sap.ui.define([
 		
 		sortProfiles:function(n1,n2){
 			var mdl=this.getView().getModel();
-			var me=mdl.getProperty('/auth/user');
 			var profiles=mdl.getProperty('/battleInfo');
+			var me=mdl.getProperty('/auth/user');
+			if (n1==me.toUpperCase()) n1="ME";
+			if (n2==me.toUpperCase()) n2="ME";
 			var p1=profiles[n1.toLowerCase()]||profiles.boss;
 			var p2=profiles[n2.toLowerCase()]||profiles.boss;
 			if (p1.mob) return 1;
             if (p2.mob) return -1;
-			if (p2.name==me) return 1;
             if (p1.name==me) return -1;
-			if (p1.name!=me && p2.name < p1.name) return 1;
-			if (p1.name!=me && p1.name < p2.name) return -1;
+            if (p2.name==me) return -1;
+            if (p1.name!=me && p1.name < p2.name) return -1;
+			if (p1.name!=me && p2.name < p1.name) return -1;
 			return 0;
 		},
 
@@ -43,27 +45,35 @@ sap.ui.define([
 			return ( attackers>0 && name!=me && !mob );
 		},
 		
+		onChangePlayerAP:function(e){
+			var mdl=this.getView().getModel();
+			var me=mdl.getProperty('/auth/user');
+			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
+			var profile=e.arg.profiles[name];
+			if (name==me) name='me';
+			mdl.setProperty("/battleInfo/"+name,profile);
+		},
+		
 		onChangeState:function(e){
 			
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			
-			for (var p in e.arg.profiles) {
-				// if (e.arg.profiles[p].attackers>0) console.log(p,e.arg.profiles[p].attackers);
-				mdl.setProperty("/battleInfo/"+p+"/attackers",e.arg.profiles[p].attackers);
+			var p,profile;
+			for (p in e.arg.profiles) {
+				profile=e.arg.profiles[p];
+				if (p==me) p="me";
+				mdl.setProperty("/battleInfo/"+p+"/attackers",profile.attackers);
 			}
 			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
-			mdl.setProperty("/battleInfo/"+name,e.arg.profiles[name]);
-
-			if (e.arg.user==me) {
-				var busy=this.busyStates.indexOf(e.arg.state)>-1
-				mdl.setProperty('/canHit',!busy);
-			}
+			profile=e.arg.profiles[name];
+			if (name==me) name="me";
+			mdl.setProperty("/battleInfo/"+name,profile);
 
 			if (e.arg.state=="active" || e.arg.state=="cooldown") return;
 			
 			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
-			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,e.arg.profiles[name].target||"self"]);
+			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,profile.target||"self"]);
 			
 			mdl.setProperty("/battleInfo/"+name+"/event",e.arg.title);
 			mdl.setProperty("/battleInfo/"+name+"/eventKey",'userStateChange_'+e.arg.state);
@@ -78,7 +88,7 @@ sap.ui.define([
 						{_icon:"sap-icon://add",action:"/",callback:function(){commander("/parry"); }} 
 					];
 				} else if( e.arg.user!=me) {
-					if (e.arg.profile.mob) 
+					if (profile.mob) 
 						actions.push({icon:"sap-icon://shield",action:"",callback:function(){commander("/defend "+e.arg.val); }}); 
 					else 
 						actions.push({icon:"sap-icon://add",action:"",callback:function(){commander("/assist "+e.arg.user); }});
@@ -223,10 +233,12 @@ sap.ui.define([
 		},
 
 		performAction:function(e){
-			var action=e.getSource().data().action;
+			var action=e.getParameter("action");
+			if (!action) action=e.getSource().data().action; //side pane actions
+			var tgt=e.getParameter("target");
 			var cmd="/"+action;
 			var mdl=this.getView().getModel();
-			var tgt=this.getTarget(e);
+			// var tgt=this.getTarget(e);
 			if (action=='assist' || action=="defend" ) {
 				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
 				 else return;
@@ -327,9 +339,11 @@ sap.ui.define([
 			this.addLogEntry(entry);
 			// mdl.setProperty( '/battleInfo',e.arg.profiles);
 			var profiles=e.arg.profiles;
+			var me=mdl.getProperty('/auth/user');
 			[e.arg.attack,e.arg.defense].forEach(function(name){
 				if (!profiles[name]) name='boss';
 				var profile=profiles[name];
+				if (name==me) name="me";
 				profile.event=entry.title;
 				profile.eventKey=entry.eventKey;
 				mdl.setProperty( '/battleInfo/'+name,profile);
@@ -505,16 +519,19 @@ sap.ui.define([
 			this.battleLog=[];
 			var mdl=this.getView().getModel();
 			
+			var me=mdl.getProperty('/auth/user');
+			
 			var profiles=e.arg.profiles;
+			profiles['me']=profiles[me];
+			delete profiles[me];
 			mdl.setProperty( '/battleInfo',profiles);
 			// this.refreshProfiles(e.arg.profiles);
-
-			var me=mdl.getProperty('/auth/user');
+			
 			mdl.setProperty('/canSteal',true);
 			mdl.setProperty('/canFlee',true);
 			mdl.setProperty('/canHit',true);
-			mdl.setProperty('/gameInfo/haveSpells',profiles[me].haveSpells||false);
-			mdl.setProperty('/gameInfo/mySpells',profiles[me].spells);
+			mdl.setProperty('/gameInfo/haveSpells',profiles['me'].haveSpells||false);
+			mdl.setProperty('/gameInfo/mySpells',profiles['me'].spells);
 			// if (profiles.boss) key=profiles.boss.name;
 			// this.getView().byId("gameTabBar").setSelectedKey(key);
 			

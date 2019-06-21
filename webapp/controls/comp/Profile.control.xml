@@ -1,0 +1,65 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core">
+	<l:Grid containerQuery="true" hSpacing="0" vSpacing="0" defaultSpan="L6 M6 S12" >
+
+		<FlexBox alignItems="Start" justifyContent="SpaceBetween" >
+			<VBox>
+				<ObjectStatus text="[{$this>level}] {$this>name}" class="sapUiSmallMarginBegin sapUiSmallMarginTop" />
+				<ObjectIdentifier class="sapUiSmallMarginBegin"
+					text="{i18n>patk}: +{$this>patk} {i18n>pdef}: +{$this>pdef} &#10;&#13; {i18n>maxhp}: +{$this>maxhp} {i18n>speed}: +{$this>speed}" />
+			</VBox>
+			<HBox>
+				<VBox>
+					<ObjectStatus class="sapUiSmallMarginBegin sapUiSmallMarginTop"
+						text="{ path: '$this>state', formatter: '.formatBattleStateText' }"
+						state="{ path: '$this>state', formatter: '.formatBattleState' }" 
+						icon="{ path: '$this>state', formatter: '.formatBattleStateIcon'}" />
+					<RatingIndicator class="sapUiSmallMarginBegin" enabled="false" 
+						iconSize="12px" maxValue="{$this>maxAP}" value="{$this>curAP}"
+						iconSelected="sap-icon://rhombus-milestone-2" iconUnselected="sap-icon://rhombus-milestone" />
+				</VBox>
+			<ObjectNumber class="sapUiSmallMargin hpFontSizeBig"
+				number="{$this>hp}" unit="{i18n>hp}" state="{ path: '$this>hp', formatter: '.formatHP'}" />
+			</HBox>	
+		</FlexBox>
+
+		<l:VerticalLayout class="sapUiSmallMarginBegin"> 
+			<l:HorizontalLayout>
+				<!--<RadioButton select="handleChangeTaget" visible="{/gameInfo/haveSpells}" />-->
+				<Button visible="{parts:[{path:'$this>coopFlag'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatHitButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanHit'}"
+						press="performAction" icon="sap-icon://scissors" type="Reject" >
+					<customData> <core:CustomData key="action" value="hit" /> </customData>
+				</Button>
+				<Button visible="{parts:[{path:'$this>attackers'},{path:'$this>self'},{path:'$this>name'}],formatter:'.formatParryEvadeButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanParryEvade'}"
+						press="performAction" icon="sap-icon://journey-change" type="Emphasized" >
+					<customData> <core:CustomData key="action" value="parry" /> </customData>
+				</Button>
+				<Button visible="{parts:[{path:'$this>attackers'},{path:'$this>self'},{path:'$this>name'}],formatter:'.formatParryEvadeButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanParryEvade'}"
+						press="performAction" icon="sap-icon://physical-activity" type="Emphasized" >
+					<customData> <core:CustomData key="action" value="evade" /> </customData>
+				</Button>
+				<Button visible="{parts:[{path:'$this>attackers'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'},{path:'$this>selfTarget'}],formatter:'.formatDefendButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanDefend'}"
+						press="performAction" icon="sap-icon://shield" type="Default" > 
+					<customData> <core:CustomData key="action" value="defend" /> </customData>
+				</Button>
+				<Button visible="{parts:[{path:'$this>state'},{path:'$this>target'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatAssistButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanAssist'}"
+						press="performAction" icon="sap-icon://add" type="Default" >
+					<customData> <core:CustomData key="action" value="assist" /> </customData>
+				</Button>
+			</l:HorizontalLayout>
+			<!--<Toolbar enabled="{= ${name}===${/auth/user} }" content="{spells}" visible="{haveSpells}">-->
+			<!--	<Button text="{parts:[{path:'spell'},{path:'mp'}],formatter:'.handleFormatSpellButton'}"-->
+			<!--		_text="{spell}:{mp}" enabled="{= ${mp}>0 }" press="handleCastSpell" />-->
+			<!--</Toolbar>-->
+			<ObjectStatus text="{$this>currentEventText}" icon="{ path: '$this>currentEventKey', formatter: '.formatBattleLogIcon'}" /> 
+		</l:VerticalLayout>
+
+	</l:Grid>
+</core:FragmentDefinition>	
