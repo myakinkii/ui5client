@@ -521,7 +521,7 @@ sap.ui.define([
 			
 			var me=mdl.getProperty('/auth/user');
 			
-			var profiles=e.arg.profiles;
+			var profiles=JSON.parse(JSON.stringify(e.arg.profiles)); // fix for local game
 			profiles['me']=profiles[me];
 			delete profiles[me];
 			mdl.setProperty( '/battleInfo',profiles);
