@@ -44,14 +44,13 @@ sap.ui.define([
 			var me=mdl.getProperty('/auth/user');
 			
 			for (var p in e.arg.profiles) {
-				if (p==me) continue;
-				mdl.setProperty('/battleInfo/'+p+'/attackers',e.arg.profiles[p].attackers);
+				mdl.setProperty('/battleInfo/'+(p==me?"me":p)+'/attackers',e.arg.profiles[p].attackers);
 			}
 			
 			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
 			var profile=e.arg.profiles[name];
 			if (name==me) name="me";
-			
+
 			if (e.arg.state=="attack"){
 				var self=this;
 				var commander=function(cmd){ self.processCommand.call(self,cmd); };
