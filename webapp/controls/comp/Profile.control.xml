@@ -25,9 +25,34 @@
 			</HBox>	
 		</FlexBox>
 
-		<l:VerticalLayout class="sapUiSmallMarginBegin"> 
-			<l:HorizontalLayout>
-				<!--<RadioButton select="handleChangeTaget" visible="{/gameInfo/haveSpells}" />-->
+		<l:VerticalLayout class="sapUiSmallMarginBegin">
+			<l:HorizontalLayout visible="{$this>castMode}" class="sapUiSizeCompact">
+				<Button text="+{i18n>patk}" press=".performCast" type="Accept">
+					<customData> <core:CustomData key="spell" value="patkinc" /> </customData>
+				</Button>
+				<Button text="+{i18n>pdef}" press=".performCast" type="Accept">
+					<customData> <core:CustomData key="spell" value="pdefinc" /> </customData>
+				</Button>
+				<Button text="+{i18n>speed}" press=".performCast" type="Accept">
+					<customData> <core:CustomData key="spell" value="speedinc" /> </customData>
+				</Button>
+				
+				<Button text="-{i18n>patk}" press=".performCast" type="Reject">
+					<customData> <core:CustomData key="spell" value="patkdec" /> </customData>
+				</Button>
+				<Button text="-{i18n>pdef}" press=".performCast" type="Reject">
+					<customData> <core:CustomData key="spell" value="pdefdec" /> </customData>
+				</Button>
+				<Button text="-{i18n>speed}" press=".performCast" type="Reject">
+					<customData> <core:CustomData key="spell" value="speeddec" /> </customData>
+				</Button>
+			</l:HorizontalLayout>
+			<l:HorizontalLayout visible="{= !${$this>castMode}}">
+				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'}],formatter:'.formatCastButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfMP'}],formatter:'.formatCanCast'}"
+						press="performAction" icon="sap-icon://activate" type="Accept" >
+					<customData> <core:CustomData key="action" value="cast" /> </customData>
+				</Button>
 				<Button visible="{parts:[{path:'$this>coopFlag'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatHitButton'}"
 						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanHit'}"
 						press="performAction" icon="sap-icon://scissors" type="Reject" >
@@ -54,11 +79,7 @@
 					<customData> <core:CustomData key="action" value="assist" /> </customData>
 				</Button>
 			</l:HorizontalLayout>
-			<!--<Toolbar enabled="{= ${name}===${/auth/user} }" content="{spells}" visible="{haveSpells}">-->
-			<!--	<Button text="{parts:[{path:'spell'},{path:'mp'}],formatter:'.handleFormatSpellButton'}"-->
-			<!--		_text="{spell}:{mp}" enabled="{= ${mp}>0 }" press="handleCastSpell" />-->
-			<!--</Toolbar>-->
-			<ObjectStatus text="{$this>currentEventText}" icon="{ path: '$this>currentEventKey', formatter: '.formatBattleLogIcon'}" /> 
+			<ObjectStatus text="{$this>currentEventText}" state="{ parts:[{path:'$this>state'},{path:'$this>target'},{path:'$this>self'},{path:'$this>currentEventKey'}], formatter: '.formatBattleEventState'}" /> 
 		</l:VerticalLayout>
 
 	</l:Grid>

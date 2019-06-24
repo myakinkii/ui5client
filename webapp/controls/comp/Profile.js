@@ -3,6 +3,7 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 	var myProfile = XMLComposite.extend("com.minesnf.ui5client.controls.comp.Profile", {
 		metadata: {
 			properties: {
+				castMode:{ type: "boolean", defaultValue: false },
 				level: { type: "string", defaultValue: "0" },
 				curAP: { type: "int", defaultValue: 0 },
 				maxAP: { type: "int", defaultValue: 0 },
@@ -15,8 +16,9 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 				name: { type: "string", defaultValue: "me" },
 				self: { type: "string", defaultValue: "me" },
 				selfAP: { type: "int", defaultValue: 0 },
-				selfState: { type: "string", defaultValue: "cool" },
-				state: { type: "string", defaultValue: "cool" },
+				selfMP: { type: "int", defaultValue: 0 },
+				selfState: { type: "string", defaultValue: "active" },
+				state: { type: "string", defaultValue: "active" },
 				selfTarget: { type: "string", defaultValue: "boss" },
 				target: { type: "string", defaultValue: "boss" },
 				currentEventKey: { type: "string", defaultValue: "" },
@@ -26,14 +28,24 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 				mobFlag: { type: "boolean", defaultValue: false }
 			},
 			events: {
-				performAction: { parameters: { action: {type: "string"}, target: {type:"string"} }}
+				performAction: { parameters: { action: {type: "string"}, target: {type:"string"}, arg: {type:"string"} }}
 			}
 		},
 		performAction:function(e){
 			var action=e.getSource().data().action;
 			var ctx=e.getSource().getBindingContext().getObject();
-			this.fireEvent("performAction", {action: action, target: ctx.name});
+			if (action=="cast") this.setCastMode(true);
+			else this.fireEvent("performAction", {action: action, target: ctx.name});
 		},
+		performCast:function(e){
+			this.setCastMode(false);
+			var spell=e.getSource().data().spell;
+			var ctx=e.getSource().getBindingContext().getObject();
+			this.fireEvent("performAction", {action: "cast", target: ctx.name, arg: spell});
+		},
+		formatCanCast:function(selfState,selfMP){
+			return this.formatNotBusy(selfState) && selfMP>0;
+		},		
 		formatCanHit:function(selfState,selfAP){
 			return this.formatNotBusy(selfState) && selfAP>=LocalGame.RPGMechanics.actionCostAP.hit;
 		},
@@ -47,7 +59,10 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 			return this.formatNotBusy(selfState) && selfAP>=LocalGame.RPGMechanics.actionCostAP.assist;
 		},
 		formatNotBusy:function(state){
-			return ["attack","assist","cast","cooldown"].indexOf(state)<0;
+			return ["attack","assist","defend","cast"].indexOf(state)<0;
+		},
+		formatCastButton:function(self,name){
+			return self==name;
 		},
 		formatHitButton:function(coopFlag,self,name,mobFlag){
 			return coopFlag ? mobFlag : self!=name;
@@ -83,29 +98,14 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 				parry:'journey-change',
 				defend:'shield',
 				assist:'plus',
-				attack:'scissors'
+				attack:'scissors',
+				cast:'activate',
 			};
 			return 'sap-icon://'+(keys[state]);
 		},
-		formatBattleLogIcon:function(eventKey){
-			var keys={
-				spellCast:'activate',
-				hitDamage:'accept',
-				hitDamageCrit:'warning',
-				hitBlocked:'decline',
-				hitPdefDecrease:'trend-down',
-				hitEvaded:'move',
-				hitParried:'move',
-				startBattle:'scissors',
-				endBattleLose:'unpaid-leave',
-				endBattleWin:'lead',
-				completeFloorDescend:'thumb-up'
-			};
-			if (!keys[eventKey]) { 
-				// console.log(eventKey); 
-				return '';
-			}
-			return 'sap-icon://'+(keys[eventKey]||'employee');
+		formatBattleEventState:function(state,target,self,eventKey){
+			if (eventKey=='userStateChange_attack' && target==self) return 'Warning';
+			return 'None';
 		},
 		_geti18n: function(prop, arr) {
 			return this.getResourceBundle().then(function(bndl){ return bndl.getText(prop, arr); });

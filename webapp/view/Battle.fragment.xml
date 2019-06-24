@@ -8,9 +8,9 @@
 			<my:Profile
 				level="{level}" name="{name}" hp="{hp}" patk="{patk}" pdef="{pdef}" maxhp="{maxhp}" speed="{speed}"
 				state="{state}" target="{target}" attackers="{attackers}" curAP="{curAP}" maxAP="{maxAP}"
-				self="{/battleInfo/me/name}" selfAP="{/battleInfo/me/curAP}" 
+				self="{/battleInfo/me/name}" selfAP="{/battleInfo/me/curAP}" selfMP="{/battleInfo/me/mana}" 
 				selfState="{/battleInfo/me/state}" selfTarget="{/battleInfo/me/target}"
-				coopFlag="{/gameInfo/coop}" mobFlag="{= !!${mob} }"
+				coopFlag="{/gameInfo/coop}" mobFlag="{= !!${mob} }" castMode="{/castMode}"
 				currentEventKey="{eventKey}" currentEventText="{event}"
 				performAction="handlePerformAction" />
 		</Panel>

@@ -11,11 +11,7 @@ sap.ui.define([
 	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
 	
 	return Controller.extend("GameMixin",{
-		
-		formatSpellButton:function(spell,mp){
-			return this.geti18n(spell)+' '+mp;
-		},
-		
+
 		sortProfiles:function(n1,n2){
 			var mdl=this.getView().getModel();
 			var profiles=mdl.getProperty('/battleInfo');
@@ -33,25 +29,13 @@ sap.ui.define([
 			return 0;
 		},
 
-		busyStates:["attack","cast","cooldown"],
-
-		formatAssistButton:function(state,target,name,me,mob){
-			// console.log("assist >> ",state,target,name,me,mob);
-			return (state=='attack' && !mob && name!=me && target!=me);
-		},
-
-		formatDefendButton:function(attackers,name,me,mob){
-			// console.log("defend >> ",attackers,name,me,mob);
-			return ( attackers>0 && name!=me && !mob );
-		},
-		
 		onChangePlayerAP:function(e){
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
 			var profile=e.arg.profiles[name];
 			if (name==me) name='me';
-			mdl.setProperty("/battleInfo/"+name,profile);
+			mdl.setProperty('/battleInfo/'+name+"/curAP",profile.curAP);
 		},
 		
 		onChangeState:function(e){
@@ -59,24 +43,14 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			var me=mdl.getProperty('/auth/user');
 			
-			var p,profile;
-			for (p in e.arg.profiles) {
-				profile=e.arg.profiles[p];
-				if (p==me) p="me";
-				mdl.setProperty("/battleInfo/"+p+"/attackers",profile.attackers);
+			for (var p in e.arg.profiles) {
+				if (p==me) continue;
+				mdl.setProperty('/battleInfo/'+p+'/attackers',e.arg.profiles[p].attackers);
 			}
+			
 			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
-			profile=e.arg.profiles[name];
+			var profile=e.arg.profiles[name];
 			if (name==me) name="me";
-			mdl.setProperty("/battleInfo/"+name,profile);
-
-			if (e.arg.state=="active" || e.arg.state=="cooldown") return;
-			
-			e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
-			e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,profile.target||"self"]);
-			
-			mdl.setProperty("/battleInfo/"+name+"/event",e.arg.title);
-			mdl.setProperty("/battleInfo/"+name+"/eventKey",'userStateChange_'+e.arg.state);
 			
 			if (e.arg.state=="attack"){
 				var self=this;
@@ -95,7 +69,20 @@ sap.ui.define([
 				}
 				e.arg.actions=actions;
 			}
-			this.addLogEntry(e.arg);
+			if (e.arg.state!="active") {
+				if (e.arg.state=="cast") e.arg.val=this.geti18n('effect_'+e.arg.val);
+				e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
+				e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,profile.target||"self"]);
+				profile.event=e.arg.title;
+				profile.eventKey='userStateChange_'+e.arg.state;
+				this.addLogEntry(e.arg);
+			} else {
+				var prevEvent=mdl.getProperty('/battleInfo/'+name+'/event');
+				var prevEventKey=mdl.getProperty('/battleInfo/'+name+'/eventKey');
+				profile.event=prevEvent;
+				profile.eventKey=prevEventKey;
+			}
+			mdl.setProperty('/battleInfo/'+name,profile);
 		},
 		
 		onUserDied:function(e){
@@ -181,7 +168,7 @@ sap.ui.define([
 				boardPage.destroyContent();
 				boardPage.addContent(this.gameDialog);
 				mdl.setProperty('/gameStarted',true);
-				mdl.setProperty('/gameInfo',{ 
+				mdl.setProperty('/gameInfo',{
 					mode:e.arg.mode, 
 					coop:(e.arg.mode=='soloRPG' || e.arg.mode=='coopRPG'), 
 					haveSpells:false,
@@ -193,36 +180,13 @@ sap.ui.define([
 			mdl.setProperty('/canSteal',false);
 			mdl.setProperty('/canFlee',false);
 			mdl.setProperty('/canContinue',false);
-			mdl.setProperty('/canHit',false);
 			this.getView().byId("app").to(boardPage,"flip");
 			this.gameDialog.setModel(new JSONModel(mdlData),"board");
 		},
 		
 		checkCell:function(cell){
-			// if (cell.getChecked()) return;
-			// cell.setChecked(true);
-			// var self=this;
-			// window.setTimeout(function(){ self.processCommand("/check "+cell.getCol()+" "+cell.getRow()); },0);
 			this.processCommand("/check "+cell.getCol()+" "+cell.getRow());
 		},
-
-		getTarget:function(e){
-			var tgt=null,tabBar=this.getView().byId("gameTabBar");
-			var mdl=this.getView().getModel();
-			var me=mdl.getProperty('/auth/user');
-			var ctx=e && e.getSource().getBindingContext() && e.getSource().getBindingContext().getObject();
-			if (tabBar) tgt=tabBar.getSelectedKey();
-			else if(ctx && ctx.name!=me) tgt=ctx.name;
-			else tgt=mdl.getProperty('/gameInfo/myTarget');
-			return tgt;
-		},
-
-		changeTarget:function(e){
-			if (e.getParameter("selected")) this.getView().getModel().setProperty(
-				'/gameInfo/myTarget',
-				e.getSource().getBindingContext().getProperty("name")
-			);
-		},		
 		
 		isPlayer:function(tgt){
 			if (!tgt) return false;
@@ -232,51 +196,32 @@ sap.ui.define([
 			return (tgt!=me && profiles[tgt]);
 		},
 
-		performAction:function(e){
+		performAction:function(e){ // can be called with either regular of custom event from Profile composite control
 			var action=e.getParameter("action");
 			if (!action) action=e.getSource().data().action; //side pane actions
 			var tgt=e.getParameter("target");
-			var cmd="/"+action;
 			var mdl=this.getView().getModel();
-			// var tgt=this.getTarget(e);
+			var me=mdl.getProperty('/auth/user');
+			var profiles=mdl.getProperty('/battleInfo');
+			var coopMode=mdl.getProperty('/gameInfo/coop');
+			var cmd="/"+action;
 			if (action=='assist' || action=="defend" ) {
 				 if (this.isPlayer(tgt)) cmd+=" "+tgt;
 				 else return;
-			}
-			var coopMode=mdl.getProperty('/gameInfo/coop');
-			if ( action=="hit" && !coopMode) cmd+=" "+tgt;
+			} else if (action=="cast"){
+				cmd+=" "+e.getParameter("arg");
+				cmd+=( tgt==me ? "" : profiles[tgt] ? " "+tgt : " boss");
+			} else if ( action=="hit" && !coopMode) cmd+=" "+tgt;
 			// console.log(cmd);
 			this.processCommand(cmd);
 		},
 
-		castSpell:function(e){
-			var ctx=e.getSource().getBindingContext().getObject();
-			var cmd="/cast "+ctx.spell;
-			var mdl=this.getView().getModel();
-			var tgt=this.getTarget();
-			var me=mdl.getProperty('/auth/user');
-			if (tgt && tgt!=me) cmd+=" "+tgt;
-			this.processCommand(cmd);
-		},
-		
-		hitMob:function(e){
-			this.processCommand("/hit");
-		},
-		
-		stealLoot:function(e){
-			this.processCommand("/steal");
-		},
-		
-		fleeBattle:function(e){
-			this.processCommand("/flee");
-		},
-		
 		onStealFailed:function(e){
 			if (e.arg.spotted){
 				var mdl=this.getView().getModel();
 				mdl.setProperty('/canSteal',false);
 				mdl.setProperty('/canFlee',false);
-				mdl.setProperty( '/battleInfo/boss',e.arg.profiles.boss);
+				mdl.setProperty('/battleInfo/boss',e.arg.profiles.boss);
 			}
 			e.arg.descr=this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user);
 			e.arg.title=this.geti18n('game_stealFailed',this.formatChance(e.arg.chance));
@@ -291,8 +236,7 @@ sap.ui.define([
 		},	
 		
 		formatChance:function(chance){ return (chance*100).toFixed(2)+"%"; },
-
-
+		
 		onBattleLogEntry:function(e){
 			// e.arg.priority='None';
 			e.arg.title=this.geti18n('game_'+e.arg.eventKey,[e.arg.attack,e.arg.defense]);
@@ -302,25 +246,28 @@ sap.ui.define([
 
 		onResultCastSpell:function(e){
 			var mdl=this.getView().getModel();
+			var spell=this.geti18n('effect_'+e.arg.spell);
 			var entry={
 				eventKey:e.arg.eventKey,
-				title: this.geti18n('game_'+e.arg.eventKey,[e.arg.source,e.arg.spell]),
-				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.source,e.arg.target,e.arg.spell]),
+				title: this.geti18n('game_'+e.arg.eventKey,[e.arg.source,spell]),
+				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.source,e.arg.target,spell]),
 				attack:e.arg.source, defense:e.arg.target,
 				priority:'Medium',
 				icon:this.formatLogIcon(e.arg.eventKey)
 			};
 			this.addLogEntry(entry);
-			// mdl.setProperty( '/battleInfo',e.arg.profiles);
+			// mdl.setProperty('/battleInfo',e.arg.profiles);
 			var profiles=e.arg.profiles;
+			var me=mdl.getProperty('/auth/user');
 			var tgtsArr=[e.arg.source];
 			if (e.arg.target) tgtsArr.push(e.arg.target);
 			tgtsArr.forEach(function(name){
 				if (!profiles[name]) name='boss';
 				var profile=profiles[name];
+				if (name==me) name="me";
 				profile.event=entry.title;
 				profile.eventKey=entry.eventKey;
-				mdl.setProperty( '/battleInfo/'+name,profile);
+				mdl.setProperty('/battleInfo/'+name,profile);
 			});
 			this.battleInfo=e.arg;
 		},
@@ -337,7 +284,7 @@ sap.ui.define([
 				icon:this.formatLogIcon(e.arg.eventKey)
 			};
 			this.addLogEntry(entry);
-			// mdl.setProperty( '/battleInfo',e.arg.profiles);
+			// mdl.setProperty('/battleInfo',e.arg.profiles);
 			var profiles=e.arg.profiles;
 			var me=mdl.getProperty('/auth/user');
 			[e.arg.attack,e.arg.defense].forEach(function(name){
@@ -346,21 +293,9 @@ sap.ui.define([
 				if (name==me) name="me";
 				profile.event=entry.title;
 				profile.eventKey=entry.eventKey;
-				mdl.setProperty( '/battleInfo/'+name,profile);
+				mdl.setProperty('/battleInfo/'+name,profile);
 			});
 			this.battleInfo=e.arg;
-		},
-
-		refreshProfiles:function(profiles){
-			var mdl=this.getView().getModel();
-			var mySpells=profiles[mdl.getProperty('/auth/user')].spells;
-			var spells=[];
-			for (var s in mySpells) spells.push({spellName:this.geti18n('effect_'+s),spell:s,eft:mySpells[s]});
-			for (var p in profiles) {
-				profiles[p].spells=spells;
-				profiles[p].haveSpells=spells.length>0;
-			}
-			mdl.setProperty( '/battleInfo',profiles);
 		},
 
 		onEndGame:function(){
@@ -514,26 +449,18 @@ sap.ui.define([
 		},
 		
 		onStartBattle:function(e){
-
 			this.battleInfo=e.arg;
 			this.battleLog=[];
 			var mdl=this.getView().getModel();
-			
 			var me=mdl.getProperty('/auth/user');
 			
 			var profiles=JSON.parse(JSON.stringify(e.arg.profiles)); // fix for local game
 			profiles['me']=profiles[me];
 			delete profiles[me];
 			mdl.setProperty( '/battleInfo',profiles);
-			// this.refreshProfiles(e.arg.profiles);
-			
 			mdl.setProperty('/canSteal',true);
 			mdl.setProperty('/canFlee',true);
-			mdl.setProperty('/canHit',true);
-			mdl.setProperty('/gameInfo/haveSpells',profiles['me'].haveSpells||false);
-			mdl.setProperty('/gameInfo/mySpells',profiles['me'].spells);
-			// if (profiles.boss) key=profiles.boss.name;
-			// this.getView().byId("gameTabBar").setSelectedKey(key);
+			mdl.setProperty('/castMode',false);
 			
 			var battlePage=this.getView().byId("battle");
 			var navContainer=this.getView().byId("app");
@@ -591,46 +518,6 @@ sap.ui.define([
 			return item;
 		},
 		
-		callBattleActionCb:function(e){
-			var src=e.getSource();
-			var battleEventCtx=src.getParent().getBindingContext().getObject();
-			var cb=src.getBindingContext().getProperty("callback");
-			cb(battleEventCtx);
-		},
-		
-		_formatBattleState:function(hp,state){
-			var val=hp;
-			var stateSymbols={attack:"!",cooldown:"x",evade:"~",parry:"/",assist:"+",defend:"^",active:""};
-			if (stateSymbols[state]) val+=stateSymbols[state];
-			return val;
-		},
-		
-		formatBattleState:function(state){
-			var keys={
-				active:'Success',
-				cooldown:'None',
-				evade:'Warning',
-				parry:'Warning',
-				defend:'Success',
-				assist:'Success',
-				attack:'Error'
-			};
-			return keys[state];
-		},
-		
-		formatBattleStateIcon:function(state){
-			var keys={
-				active:'log',
-				cooldown:'pending',
-				evade:'physical-activity',
-				parry:'journey-change',
-				defend:'shield',
-				assist:'plus',
-				attack:'scissors'
-			};
-			return 'sap-icon://'+(keys[state]);
-		},
-		
 		formatLogIcon:function(eventKey){
 			var keys={
 				spellCast:'activate',
@@ -645,19 +532,11 @@ sap.ui.define([
 				endBattleWin:'lead',
 				completeFloorDescend:'thumb-up'
 			};
-			if (!keys[eventKey]) { 
+			if (!keys[eventKey]) {
 				// console.log(eventKey); 
 				return '';
 			}
 			return 'sap-icon://'+(keys[eventKey]||'employee');
-		},	
-		
-		formatBattleIconColor:function(hp,name,me,mob){
-			var color='Default';
-			if (name!=me) color='Positive';
-			if (mob) color='Negative';
-			if (hp==0) color='Neutral';
-			return color;
 		}
 	});
 });
