@@ -24,7 +24,7 @@ sap.ui.define([
 				return prev;
 			},{});
 			this.modifiers={6:'common',7:'rare',8:'epic'};
-			this.refreshKnownRecipes();
+			this.refreshKnownRecipes(["mana"]);
 			this.resetForge();
 			var equip=JSON.parse(window.localStorage.getItem("myEquipment")||"[]");
 			mdl.setProperty('/equip',equip);
@@ -72,7 +72,12 @@ sap.ui.define([
 				prev[eft]=rec;
 				return prev;
 			},{});
-			var recipesMaxDigit=gems.reduce(function(prev,cur){ prev[cur.eft]=cur.rarity+3; return prev; },{});
+			
+			var recipesMaxDigit=gems.reduce(function(prev,cur){
+				if (cur.rarity==0) prev[cur.eft]=5; // buff/debuff gems
+				else prev[cur.eft]=cur.rarity+3;
+				return prev;
+			},{});
 			
 			var uniq={};
 			function genRecipe(eft,index){
