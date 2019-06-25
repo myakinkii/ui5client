@@ -85,8 +85,17 @@ sap.ui.define([
 					uniq[seededHash[eft]]=seededHash[eft];
 					return seededHash[eft];
 				}
-				var recipe='';
-				for (var i=0;i<8;i++) recipe+=(Math.floor(Math.random()*recipesMaxDigit[eft])+1);
+				var recipe='', nextDigit, haveMaxDigit=false, maxDigitCount=0;
+				for (var i=0;i<8;i++) {
+					nextDigit=Math.floor(Math.random()*recipesMaxDigit[eft])+1;
+					if (nextDigit==recipesMaxDigit[eft]) {
+						maxDigitCount++;
+						if (!haveMaxDigit) haveMaxDigit=true;
+						if (maxDigitCount>2) nextDigit--; // to have not more than two max digits
+					}
+					if (i==7 && !haveMaxDigit) recipe+=recipesMaxDigit[eft]; // to have at least one max digit
+					else recipe+=nextDigit;
+				}
 				if (uniq[recipe]) return genRecipe(eft,index);
 				uniq[recipe]=recipe;
 				return recipe;
