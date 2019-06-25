@@ -61,6 +61,9 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 		formatNotBusy:function(state){
 			return ["attack","assist","defend","cast"].indexOf(state)<0;
 		},
+		formatBusyState:function(state){
+			return !this.formatNotBusy(state);
+		},
 		formatCastButton:function(self,name){
 			return self==name;
 		},
