@@ -7,7 +7,7 @@
 		<FlexBox alignItems="Start" justifyContent="SpaceBetween" >
 			<VBox>
 				<ObjectStatus text="[{$this>level}] {$this>name}" class="sapUiSmallMarginBegin sapUiSmallMarginTop" />
-				<ObjectIdentifier class="sapUiSmallMarginBegin"
+				<ObjectIdentifier class="sapUiSmallMarginBegin statsFontLightBigger"
 					text="{i18n>patk}: +{$this>patk} {i18n>pdef}: +{$this>pdef} &#10;&#13; {i18n>maxhp}: +{$this>maxhp} {i18n>speed}: +{$this>speed}" />
 			</VBox>
 			<HBox>
@@ -20,7 +20,7 @@
 						iconSize="12px" maxValue="{$this>maxAP}" value="{$this>curAP}"
 						iconSelected="sap-icon://rhombus-milestone-2" iconUnselected="sap-icon://rhombus-milestone" />
 				</VBox>
-			<ObjectNumber class="sapUiSmallMargin hpFontSizeBig"
+			<ObjectNumber class="sapUiSmallMargin hpFontBig"
 				number="{$this>hp}" unit="{i18n>hp}" state="{ path: '$this>hp', formatter: '.formatHP'}" />
 			</HBox>	
 		</FlexBox>

@@ -65,6 +65,8 @@
 		"resources": {
 			"css": [{
 				"uri": "css/style.css"
+			},{
+				"uri": "controls/comp/style.css"
 			}]
 		},
 		"routing": {
