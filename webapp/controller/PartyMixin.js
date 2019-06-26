@@ -155,6 +155,13 @@ sap.ui.define([
 					arg: arg
 				});
 			};
+			this.localGame.pauseOnBattleLost = function (){
+				this.emitEvent('party', this.id, 'game', 'PauseOnBattleLost',{eventKey:'pauseOnBattleLost'});
+			};
+			this.localGame.resumeGame = function(){
+				this.resetBoard({eventKey:'endBattleLose', floor:this.floor});
+				this.resetFloor(); 
+			};
 			this.localGame.dispatchEvent({
 				user:null,
 				command:"startBoard",

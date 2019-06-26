@@ -107,7 +107,7 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 			return 'sap-icon://'+(keys[state]);
 		},
 		formatBattleEventState:function(state,target,self,eventKey){
-			if (eventKey=='userStateChange_attack' && target==self) return 'Warning';
+			if (eventKey=='userStateChange_attack_me') return 'Warning';
 			return 'None';
 		},
 		_geti18n: function(prop, arr) {

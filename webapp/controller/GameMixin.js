@@ -57,8 +57,8 @@ sap.ui.define([
 				var actions=[];
 				if (e.arg.val==me){
 					actions=[
-						{_icon:"sap-icon://add",action:"~",callback:function(){commander("/evade"); }},
-						{_icon:"sap-icon://add",action:"/",callback:function(){commander("/parry"); }} 
+						{icon:"sap-icon://journey-change",action:"",callback:function(){commander("/parry"); }},
+						{icon:"sap-icon://physical-activity",action:"",callback:function(){commander("/evade"); }},
 					];
 				} else if( e.arg.user!=me) {
 					if (profile.mob) 
@@ -70,6 +70,7 @@ sap.ui.define([
 			}
 			if (e.arg.state!="active") {
 				if (e.arg.state=="cast") e.arg.val=this.geti18n('effect_'+e.arg.val);
+				if (e.arg.state=="attack" && e.arg.val==me) e.arg.state+="_me";
 				e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
 				e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,profile.target||"self"]);
 				profile.event=e.arg.title;
@@ -445,6 +446,22 @@ sap.ui.define([
 			if (resetLostLives) mdl.setProperty('/gameInfo/livesLost',{});
 			if (resetStash) mdl.setProperty('/gameInfo/stash',null);
 			mdl.setProperty('/gameInfo/floor',floor);
+		},
+		
+		onPauseOnBattleLost:function(e){
+			e.arg.title=this.geti18n('game_'+e.arg.eventKey);
+			e.arg.descr=this.geti18n('gameResultLocalResumeGame');
+			e.arg.priority="None";
+			var game=this.localGame, self=this;
+			e.arg.actions=[
+				{icon:"sap-icon://restart", action:"", callback:function(){ game.resumeGame.call(game); }},
+				{icon:"sap-icon://drop-down-list",action:"",callback:function(){ self.renderLog(self.battleLog); }}
+			];
+			this.addLogEntry(e.arg);
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/canSteal',false);
+			mdl.setProperty('/canFlee',false);
+			mdl.setProperty('/canContinue',false);
 		},
 		
 		onStartBattle:function(e){
