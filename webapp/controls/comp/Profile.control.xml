@@ -49,7 +49,7 @@
 					<customData> <core:CustomData key="spell" value="speeddec" /> </customData>
 				</Button>
 			</l:HorizontalLayout>
-			<l:HorizontalLayout visible="{= !${$this>castMode}}">
+			<l:HorizontalLayout visible="{= ${$this>selfHP}>0 &amp;&amp; !${$this>castMode}}">
 				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'}],formatter:'.formatCastButton'}"
 						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfMP'}],formatter:'.formatCanCast'}"
 						press="performAction" icon="sap-icon://activate" type="Accept" >
@@ -81,6 +81,7 @@
 					<customData> <core:CustomData key="action" value="assist" /> </customData>
 				</Button>
 			</l:HorizontalLayout>
+			<l:HorizontalLayout visible="{= ${$this>selfHP}===0 }" class="sapUiSmallMarginTop"/>
 			<ObjectStatus text="{$this>currentEventText}" state="{ parts:[{path:'$this>state'},{path:'$this>target'},{path:'$this>self'},{path:'$this>currentEventKey'}], formatter: '.formatBattleEventState'}" /> 
 		</l:VerticalLayout>
 

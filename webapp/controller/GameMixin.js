@@ -35,7 +35,7 @@ sap.ui.define([
 			var name=e.arg.profiles[e.arg.user]?e.arg.user:'boss';
 			var profile=e.arg.profiles[name];
 			if (name==me) name='me';
-			mdl.setProperty('/battleInfo/'+name+"/curAP",profile.curAP);
+			mdl.setProperty('/battleInfo/'+name+"/curAP",profile.curAP>0?profile.curAP:0);
 		},
 		
 		onChangeState:function(e){
@@ -74,7 +74,8 @@ sap.ui.define([
 				e.arg.title=this.geti18n('game_userStateChange_'+e.arg.state,[e.arg.user,e.arg.val]);
 				e.arg.descr=this.geti18n('game_userStateChange_'+e.arg.state+'_text',[e.arg.user,e.arg.val,profile.target||"self"]);
 				profile.event=e.arg.title;
-				profile.eventKey='userStateChange_'+e.arg.state;
+				e.arg.eventKey='userStateChange_'+e.arg.state;;
+				profile.eventKey=e.arg.eventKey;
 				this.addLogEntry(e.arg);
 			} else {
 				var prevEvent=mdl.getProperty('/battleInfo/'+name+'/event');
@@ -486,6 +487,7 @@ sap.ui.define([
 		onStartBattleCoop:function(e){
 			e.arg.title=this.geti18n('game_startBattleCoop',[e.arg.floor,e.arg.time,e.arg.livesLost]);
 			e.arg.descr=this.geti18n('game_startBattleCoop_text',e.arg.bossName);
+			e.arg.eventKey='startBattleCoop';
 			if (e.arg.knowledgePresence) e.arg.descr+=this.geti18n('game_startBattleCoop_text_knowledge');
 			this.onStartBattle(e);
 			this.addLogEntry(e.arg);
@@ -501,6 +503,7 @@ sap.ui.define([
 			}
 			e.arg.title=this.geti18n('game_startBattleVersus',names.join(" "));
 			e.arg.descr=this.geti18n('game_startBattleVersus_text',stash.join("\n"));
+			e.arg.eventKey='startBattle';
 			this.onStartBattle(e);
 			this.addLogEntry(e.arg);
 		},				
@@ -541,18 +544,30 @@ sap.ui.define([
 				hitDamageCrit:'warning',
 				hitBlocked:'decline',
 				hitPdefDecrease:'trend-down',
-				hitEvaded:'move',
-				hitParried:'move',
+				hitEvaded:'journey-change',
+				hitParried:'physical-activity',
 				startBattle:'scissors',
+				startBattleCoop:'sap-ui5',
 				endBattleLose:'unpaid-leave',
 				endBattleWin:'lead',
-				completeFloorDescend:'thumb-up'
+				pauseOnBattleLost:'media-pause',
+				battleAscend:'navigation-up-arrow',
+				battleDescend:'navigation-down-arrow',
+				completeFloorDescend:'thumb-up',
+				completeFloorAscend:'loan',
+				userStateChange_attack:'scissors',
+				userStateChange_attack_me:'scissors',
+				userStateChange_parry:'journey-change',
+				userStateChange_evade:'physical-activity',
+				userStateChange_assist:'add',
+				userStateChange_defend:'shield',
+				userStateChange_cast:'activate'
 			};
 			if (!keys[eventKey]) {
-				// console.log(eventKey); 
+				// console.log(eventKey);
 				return '';
 			}
-			return 'sap-icon://'+(keys[eventKey]||'employee');
+			return 'sap-icon://'+keys[eventKey];
 		}
 	});
 });

@@ -15,6 +15,7 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 				attackers: { type: "int", defaultValue: 0 },
 				name: { type: "string", defaultValue: "me" },
 				self: { type: "string", defaultValue: "me" },
+				selfHP: { type: "int", defaultValue: 0 },
 				selfAP: { type: "int", defaultValue: 0 },
 				selfMP: { type: "int", defaultValue: 0 },
 				selfState: { type: "string", defaultValue: "active" },
