@@ -1,23 +1,41 @@
 sap.ui.define([
 	"sap/ui/core/ws/WebSocket",
+	"sap/ui/core//routing/HashChanger",
 	"com/minesnf/ui5client/controller/BaseController",
 	"com/minesnf/ui5client/controller/GameMixin",
 	"com/minesnf/ui5client/controller/InventoryMixin",
 	"com/minesnf/ui5client/controller/UserMixin",
 	"com/minesnf/ui5client/controller/PartyMixin",
 	"sap/ui/model/json/JSONModel"
-], function (WebSocket, BaseController, GameMixin, InventoryMixin, UserMixin, PartyMixin, JSONModel) {
+], function (WebSocket, HashChanger, BaseController, GameMixin, InventoryMixin, UserMixin, PartyMixin, JSONModel) {
 	"use strict";
 
 	var ws;
 
 	return BaseController.extend("com.minesnf.ui5client.controller.Main", {
+		
+		knownExternalCommands:{
+			'join':'/join ',
+			'spec':'/spec '
+		},
+		
+		onHashChanged:function(extCmd,arg1){
+			if (this.knownExternalCommands[extCmd]) this.processCommand(this.knownExternalCommands[extCmd]+arg1);
+		},
 
 		onInit:function(){
 			// just patch controller with some stuff I ripped out of it due to lots of badly written code in controller
 			jQuery.extend(this, GameMixin.prototype, InventoryMixin.prototype, UserMixin.prototype, PartyMixin.prototype);
 			
 			var self=this;
+			
+			var hasher=new HashChanger(); // use this guy to process external commands for web client or maybe on mobile as well
+			hasher.attachEvent("hashChanged",function(){
+				setTimeout(function(){ 
+					self.onHashChanged.apply(self,hasher.getHash().split("/"));
+				},100);
+			});
+			hasher.init();
 			
 			var forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
 			var offlineMode=forceOfflineMode; // current state of offline/online mode
