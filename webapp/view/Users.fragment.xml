@@ -2,21 +2,11 @@
 	xmlns="sap.m"
 	xmlns:l="sap.ui.layout"
 	xmlns:core="sap.ui.core">
-	<ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
-		<l:VerticalLayout width="100%"> 
-			<Toolbar>
-				<ToolbarSpacer />
-				<Title text="{i18n>userTitle}" />
-				<ToolbarSpacer />
-			</Toolbar>					
-			<List items="{ path:'/players'}">
-				<ObjectListItem title="{name}">
-					<attributes>
-						<ObjectAttribute text="{i18n>userLevel}: {level}" />
-						<ObjectAttribute text="{i18n>userState}: {state}" />
-						</attributes>
-				</ObjectListItem>
-			</List>
-		</l:VerticalLayout>		
-	</ScrollContainer>	
+	<Popover showHeader="false" class="sapUiContentPadding" placement="Bottom" >
+		<List items="{ path:'/players', sorter:{path:'state',descending: false}}">
+			<InputListItem label="{name}">
+				<Button icon="sap-icon://sys-find" enabled="{= ${state}==='game' }" press="spectateUser" />
+			</InputListItem>
+		</List>
+	</Popover>	
 </core:FragmentDefinition>	

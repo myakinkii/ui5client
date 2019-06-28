@@ -13,8 +13,9 @@
 			<u:ShellHeadItem icon="sap-icon://menu2" visible="{= ${/gameStarted} &amp;&amp; ${/gameInfo/coop} }" toggleEnabled="true" selected="{/showPane}" press="handleShowPane" />			
 			<u:ShellHeadItem visible="{= ${/gameStarted} &amp;&amp; !${/gameInfo/coop} }" icon="sap-icon://decline"  press="handleQuitGame" />
 			<u:ShellHeadItem visible="{= ${device>/system/desktop} &amp;&amp; ${/gameStarted} }" icon="sap-icon://move"  toggleEnabled="true"  selected="{/altKeyMode}"  press="handleAltToggle" />
-		</u:headItems>		
+		</u:headItems>
 		<u:headEndItems>
+			<u:ShellHeadItem icon="sap-icon://employee-lookup" visible="{= !${/offlineMode} }" press="openUsersPopover" />
 			<u:ShellHeadItem toggleEnabled="true" selected="{/forceOfflineMode}" 
 				icon="{parts: [{path:'/offlineMode'}],formatter:'.formatModeIcon'}" visible="{/showOfflineButton}" press="switchMode" />
 			<!--<u:ShellHeadItem icon="sap-icon://log" visible="false" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />-->
@@ -25,7 +26,6 @@
 		<u:paneContent>
 			<core:Fragment fragmentName="com.minesnf.ui5client.view.Stash" type="XML" />
 		</u:paneContent>
-		
 		<NavContainer id="app">
 			<pages>
 				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Main" type="XML" /></Page>
@@ -34,16 +34,5 @@
 				<Page id="inv" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Inventory" type="XML" /></Page>
 			</pages>
 		</NavContainer>
-		
-		<!--< class="sapUiContentPadding" height="100%" id="crsl">-->
-		<!--	<pages>-->
-		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.Main" type="XML" />-->
-		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.Inventory" type="XML" />-->
-		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.Chat" type="XML" />-->
-		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.Parties" type="XML" />-->
-		<!--		<core:Fragment fragmentName="com.minesnf.ui5client.view.Users" type="XML" />-->
-		<!--	</pages>-->
-		<!--</>-->
-		
 	</u:Shell>
 </mvc:View>

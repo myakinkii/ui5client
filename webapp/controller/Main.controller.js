@@ -140,6 +140,22 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			mdl.setProperty('/showPane',!mdl.getProperty('/showPane'));
 		},
+		
+		openUsersPopover:function(e){
+			if (!this._oPopover) {
+				this._oPopover = sap.ui.xmlfragment("com.minesnf.ui5client.view.Users", this);
+				this.getView().addDependent(this._oPopover);
+			}
+			this._oPopover.openBy(e.getSource());
+		},
+		
+		spectateUser:function(e){
+			var user=e.getSource().getBindingContext().getProperty('name');
+			var inGame=this.getView().getModel().getProperty('/gameStarted');
+			if (inGame) this.showToast(this.geti18n('userCannotSpectateInGame'));
+			else this.processCommand('/spec '+user);
+		},
+
 
 		initNow:function(defSrv){
 			var self=this;
