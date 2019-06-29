@@ -173,15 +173,18 @@ sap.ui.define([
 			if (inGame) this.showToast(this.geti18n('userCannotSpectateInGame'));
 			else this.processCommand('/spec '+user);
 		},
-
-
+		
 		initNow:function(defSrv){
 			var self=this;
-			var srv="ws://"+(defSrv||this.getView().getModel().getProperty("/srv"));
-			if (defSrv=="/") srv=defSrv+"be";
 			this.setBusy(this.geti18n("initClient"));
+			var host=(defSrv||this.getView().getModel().getProperty("/srv"));
+			var srv;
+			if (defSrv!="/"){
+				srv="ws://"+host;
+				$.ajax({ type: "GET", url: 'http://'+host, async: false }); // to try to reinit session for mobile
+			} else srv=defSrv+"be";
 			ws = new WebSocket(srv);
-			ws.attachMessage(function(e) { 
+			ws.attachMessage(function(e) {
 				var json=JSON.parse(e.getParameter("data"));
 				// console.log(json);
 				self.processEvent.call(self,json);
