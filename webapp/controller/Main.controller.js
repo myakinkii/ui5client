@@ -51,18 +51,12 @@ sap.ui.define([
 			}
 			
 			var srvs={};
-			if (!onlineOnlyClient && !offlineMode) {
-				var syncRequest=$.ajax({url:"http://minesnf.com/srv.json",async:false});
-				if (syncRequest.readyState==4 && syncRequest.status==200){
-					srvs=JSON.parse(syncRequest.responseText).reduce(function(prev,cur){prev[cur.url]=cur; return prev;},{});
-				}
-			}
 			var srv=window.localStorage.getItem("srv")||'global.minesnf.com';
 			if (initData && initData.localSrv) srv="/";
 			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
 			
-			this.getView().setModel(new JSONModel({
+			var mdl=new JSONModel({
 				quickMode:"solo",
 				evts:{},
 				msg:'',
@@ -77,7 +71,16 @@ sap.ui.define([
 				offlineMode:offlineMode,
 				forceOfflineMode:forceOfflineMode,
 				showOfflineButton:!onlineOnlyClient&&onlineModeAvailble
-			}));
+			});
+			this.getView().setModel(mdl);
+			
+			if (!onlineOnlyClient && !offlineMode) {
+				$.getJSON("http://minesnf.com/srv.json").then(function(re){
+					srvs=re.reduce(function(prev,cur){prev[cur.url]=cur; return prev;},{});
+					if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
+					mdl.setProperty("/srvs",srvs);
+				});
+			}
 			
 			// this.getView().byId("input").attachBrowserEvent('keypress', function(e){
 			// 	if(e.which == 13) self.sendMsg.call(self);
@@ -254,6 +257,7 @@ sap.ui.define([
 		handleAuthUser:function(){ this.authUser(); },
 		handleLogOff:function(){ this.logOff(); },
 		handleImportProfile:function(e){ this.importProfile(e); },
+		handleClearProfile:function(e){ this.clearProfile(e); },
 		handleExportProfile:function(e){ this.exportProfile(e); },
 		handlePressParty:function(e){ this.pressParty(e); },
 		handleStartParty:function(e){ this.showCreatePartyDlg(e); },

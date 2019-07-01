@@ -1,4 +1,9 @@
-sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/minesnf/ui5client/lib/qrcode"], function (Controller,JSONModel){
+sap.ui.define([
+	"sap/ui/core/mvc/Controller",
+	"sap/ui/model/json/JSONModel",
+	"sap/m/MessageBox",
+	"com/minesnf/ui5client/lib/qrcode"
+], function (Controller,JSONModel,MessageBox){
 	"use strict";
 	
 	return Controller.extend("UserMixin",{
@@ -48,6 +53,20 @@ sap.ui.define(["sap/ui/core/mvc/Controller","sap/ui/model/json/JSONModel","com/m
 
 		logOff:function(){
 			this.processCommand('/logoff');
+		},
+		
+		clearProfile:function(){
+			var self=this;
+			MessageBox.confirm(this.geti18n('authClearProfile'), function(action) {
+				if (action == MessageBox.Action.OK) {
+					window.localStorage.removeItem("importUsed");
+					window.localStorage.removeItem("knownRecipes");
+					window.localStorage.removeItem('myInventory');
+					window.localStorage.removeItem('myEquipment');
+					self.initInventory.call(self);
+					self.exportProfile.call(self,{},[]);
+				}
+			});
 		},
 		
 		exportProfile: function(mdlInv,mdlEquip) {

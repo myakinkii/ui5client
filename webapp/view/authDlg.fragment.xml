@@ -30,6 +30,7 @@
 					<Toolbar>
 						<Title text="{i18n>authProfile}: {/auth/user}" />
 						<ToolbarSpacer/>
+						<Button icon="sap-icon://delete" press="handleClearProfile"/>
 						<Button visible="{/showOfflineButton}" icon="sap-icon://download" press="handleImportProfile"/>
 						<!--<Button icon="sap-icon://upload" press="handleExportProfile"/>-->
 					</Toolbar>
