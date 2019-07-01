@@ -26,19 +26,10 @@
 				number="{$this>hp}" unit="{i18n>hp}" state="{ path: '$this>hp', formatter: '.formatHP'}" />
 			</HBox>	
 		</FlexBox>
-
-		<l:VerticalLayout class="sapUiSmallMarginBegin">
-			<l:HorizontalLayout visible="{$this>castMode}" class="sapUiSizeCompact">
-				<Button text="+{i18n>patk}" press=".performCast" type="Accept">
-					<customData> <core:CustomData key="spell" value="patkinc" /> </customData>
-				</Button>
-				<Button text="+{i18n>pdef}" press=".performCast" type="Accept">
-					<customData> <core:CustomData key="spell" value="pdefinc" /> </customData>
-				</Button>
-				<Button text="+{i18n>speed}" press=".performCast" type="Accept">
-					<customData> <core:CustomData key="spell" value="speedinc" /> </customData>
-				</Button>
-				
+		
+		<FlexBox alignItems="Start" justifyContent="End" >
+		<VBox class="sapUiSmallMarginBegin">
+			<HBox justifyContent="End" visible="{$this>castMode}" class="sapUiSizeCompact">
 				<Button text="-{i18n>patk}" press=".performCast" type="Reject">
 					<customData> <core:CustomData key="spell" value="patkdec" /> </customData>
 				</Button>
@@ -48,18 +39,18 @@
 				<Button text="-{i18n>speed}" press=".performCast" type="Reject">
 					<customData> <core:CustomData key="spell" value="speeddec" /> </customData>
 				</Button>
-			</l:HorizontalLayout>
-			<l:HorizontalLayout visible="{= ${$this>selfHP}>0 &amp;&amp; !${$this>castMode}}">
-				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'}],formatter:'.formatCastButton'}"
-						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfMP'}],formatter:'.formatCanCast'}"
-						press="performAction" icon="sap-icon://activate" type="Accept" >
-					<customData> <core:CustomData key="action" value="cast" /> </customData>
+				
+				<Button text="+{i18n>patk}" press=".performCast" type="Accept">
+					<customData> <core:CustomData key="spell" value="patkinc" /> </customData>
 				</Button>
-				<Button visible="{parts:[{path:'$this>coopFlag'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatHitButton'}"
-						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanHit'}"
-						press="performAction" icon="sap-icon://scissors" type="Reject" >
-					<customData> <core:CustomData key="action" value="hit" /> </customData>
+				<Button text="+{i18n>pdef}" press=".performCast" type="Accept">
+					<customData> <core:CustomData key="spell" value="pdefinc" /> </customData>
 				</Button>
+				<Button text="+{i18n>speed}" press=".performCast" type="Accept">
+					<customData> <core:CustomData key="spell" value="speedinc" /> </customData>
+				</Button>				
+			</HBox>
+			<HBox justifyContent="End" visible="{= ${$this>selfHP}>0 &amp;&amp; !${$this>castMode}}">
 				<Button visible="{parts:[{path:'$this>attackers'},{path:'$this>self'},{path:'$this>name'}],formatter:'.formatParryEvadeButton'}"
 						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanParryEvade'}"
 						press="performAction" icon="sap-icon://journey-change" type="Emphasized" >
@@ -70,20 +61,31 @@
 						press="performAction" icon="sap-icon://physical-activity" type="Emphasized" >
 					<customData> <core:CustomData key="action" value="evade" /> </customData>
 				</Button>
-				<Button visible="{parts:[{path:'$this>attackers'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'},{path:'$this>selfTarget'}],formatter:'.formatDefendButton'}"
-						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanDefend'}"
+				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatDefendButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'},{path:'$this>attackers'},{path:'$this>selfTarget'},{path:'$this>name'}],formatter:'.formatCanDefend'}"
 						press="performAction" icon="sap-icon://shield" type="Default" > 
 					<customData> <core:CustomData key="action" value="defend" /> </customData>
 				</Button>
-				<Button visible="{parts:[{path:'$this>state'},{path:'$this>target'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatAssistButton'}"
-						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanAssist'}"
+				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatAssistButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'},{path:'$this>state'},{path:'$this>target'},{path:'$this>self'}],formatter:'.formatCanAssist'}"
 						press="performAction" icon="sap-icon://add" type="Default" >
 					<customData> <core:CustomData key="action" value="assist" /> </customData>
 				</Button>
-			</l:HorizontalLayout>
-			<l:HorizontalLayout visible="{= ${$this>selfHP}===0 }" class="sapUiSmallMarginTop"/>
+				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'}],formatter:'.formatCastButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfMP'}],formatter:'.formatCanCast'}"
+						press="performAction" icon="sap-icon://activate" type="Accept" >
+					<customData> <core:CustomData key="action" value="cast" /> </customData>
+				</Button>
+				<Button visible="{parts:[{path:'$this>coopFlag'},{path:'$this>self'},{path:'$this>name'},{path:'$this>mobFlag'}],formatter:'.formatHitButton'}"
+						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfAP'}],formatter:'.formatCanHit'}"
+						press="performAction" icon="sap-icon://scissors" type="Reject" >
+					<customData> <core:CustomData key="action" value="hit" /> </customData>
+				</Button>				
+			</HBox>
+			<HBox visible="{= ${$this>selfHP}===0 }" class="sapUiSmallMarginTop"/>
 			<ObjectStatus text="{$this>currentEventText}" state="{ parts:[{path:'$this>state'},{path:'$this>target'},{path:'$this>self'},{path:'$this>currentEventKey'}], formatter: '.formatBattleEventState'}" /> 
-		</l:VerticalLayout>
+		</VBox>
+		</FlexBox>
 
 	</l:Grid>
 </core:FragmentDefinition>	

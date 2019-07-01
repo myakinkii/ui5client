@@ -53,11 +53,11 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 		formatCanParryEvade:function(selfState,selfAP){
 			return this.formatNotBusy(selfState) && selfAP>=LocalGame.RPGMechanics.actionCostAP.parry;
 		},
-		formatCanDefend:function(selfState,selfAP){
-			return this.formatNotBusy(selfState) && selfAP>=LocalGame.RPGMechanics.actionCostAP.defend;
+		formatCanDefend:function(selfState,selfAP,attackers,selfTarget,name){
+			return this.formatNotBusy(selfState) && attackers>0 && selfTarget!=name && selfAP>=LocalGame.RPGMechanics.actionCostAP.defend;
 		},
-		formatCanAssist:function(selfState,selfAP){
-			return this.formatNotBusy(selfState) && selfAP>=LocalGame.RPGMechanics.actionCostAP.assist;
+		formatCanAssist:function(selfState,selfAP,state,target,self){
+			return this.formatNotBusy(selfState) && selfAP>=LocalGame.RPGMechanics.actionCostAP.assist && state=='attack' && target!=self;
 		},
 		formatNotBusy:function(state){
 			return ["attack","assist","defend","cast"].indexOf(state)<0;
@@ -74,12 +74,14 @@ sap.ui.define(["sap/ui/core/XMLComposite","com/minesnf/ui5client/model/localGame
 		formatParryEvadeButton:function(attackers,self,name){
 			return self==name && attackers>0;
 		},
-		formatDefendButton:function(attackers,self,name,mobFlag,selfTarget){
+		formatDefendButton:function(self,name,mobFlag){
+			return self!=name && !mobFlag;
 			return attackers>0 && self!=name && !mobFlag && selfTarget!=name;
 		},
-		formatAssistButton:function(state,target,self,name,mobFlag){
+		formatAssistButton:function(self,name,mobFlag){
+			return self!=name && !mobFlag;
 			return state=='attack' && !mobFlag && self!=name && target!=self;
-		},		
+		},
 		formatHP:function(hp){ return hp>3?'Success':hp>0?'Warning':'None'; },
 		formatBattleStateText:function(state){ return this._geti18n('state_'+state); },
 		formatBattleState:function(state){
