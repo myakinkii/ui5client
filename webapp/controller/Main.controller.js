@@ -184,15 +184,20 @@ sap.ui.define([
 			var srv;
 			if (defSrv!="/"){
 				srv="ws://"+host;
-				$.ajax({ type: "GET", url: 'http://'+host, async: false }); // to try to reinit session for mobile
-			} else srv=defSrv+"be";
-			ws = new WebSocket(srv);
-			ws.attachMessage(function(e) {
-				var json=JSON.parse(e.getParameter("data"));
-				// console.log(json);
-				self.processEvent.call(self,json);
-			});
-			self.clearBusy();
+				$.ajax({ type: "GET", url: 'http://'+host}).then(createWS);
+			} else {
+				srv=defSrv+"be";
+				createWS();
+			}
+			function createWS(){
+				ws = new WebSocket(srv);
+				ws.attachMessage(function(e) {
+					var json=JSON.parse(e.getParameter("data"));
+					// console.log(json);
+					self.processEvent.call(self,json);
+				});
+				self.clearBusy();
+			}
 		},
 		
 		changeSrv:function(e){
