@@ -1,6 +1,6 @@
 sap.ui.define([
 	"sap/ui/core/ws/WebSocket",
-	"sap/ui/core//routing/HashChanger",
+	"sap/ui/core/routing/HashChanger",
 	"com/minesnf/ui5client/controller/BaseController",
 	"com/minesnf/ui5client/controller/GameMixin",
 	"com/minesnf/ui5client/controller/InventoryMixin",
