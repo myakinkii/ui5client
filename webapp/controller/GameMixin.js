@@ -552,6 +552,7 @@ sap.ui.define([
 				hitDamage:'accept',
 				hitDamageCrit:'warning',
 				hitBlocked:'decline',
+				hitPierced:'target-group',
 				hitPdefDecrease:'trend-down',
 				hitEvaded:'journey-change',
 				hitParried:'physical-activity',
