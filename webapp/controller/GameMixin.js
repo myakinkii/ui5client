@@ -28,6 +28,22 @@ sap.ui.define([
 			if (p1.name!=me && p2.name < p1.name) return -1;
 			return 0;
 		},
+				
+		onUserLostLife:function(e){
+			var mdl=this.getView().getModel();
+			var ll=mdl.getProperty('/gameInfo/livesLost/'+e.arg.user)||{user:e.arg.user,livesLost:0};
+			if (!ll.orbs) ll.orbs={};
+			ll.livesLost=e.arg.livesLost;
+			mdl.setProperty('/gameInfo/livesLost/'+e.arg.user,ll);
+		},
+		
+		onAddOrbs:function(e){
+			var mdl=this.getView().getModel();
+			var ll=mdl.getProperty('/gameInfo/livesLost/'+e.arg.user)||{user:e.arg.user,livesLost:0};
+			if (!ll.orbs) ll.orbs={};
+			for (var i in e.arg.orbs) ll.orbs[i]={orb:i,count:e.arg.orbs[i]};
+			mdl.setProperty('/gameInfo/livesLost/'+e.arg.user,ll);
+		},
 
 		onChangePlayerAP:function(e){
 			var mdl=this.getView().getModel();
@@ -91,14 +107,7 @@ sap.ui.define([
 			var me=this.getView().getModel().getProperty('/auth/user');
 			this.showToast(this.geti18n(e.arg.user==me?'gameResultLocalLose':'gameUserDied',e.arg.user));
 		},
-		
-		onUserLostLife:function(e){
-			var mdl=this.getView().getModel();
-			var livesLost=mdl.getProperty('/gameInfo/livesLost');
-			livesLost[e.arg.user]=e.arg;
-			mdl.setProperty('/gameInfo/livesLost',livesLost);
-		},
-		
+
 		onGameUserVote:function(e){
 			if (this.localGame) return;
 			e.arg.title=this.geti18n('game_userVote_'+e.arg.eventKey);
