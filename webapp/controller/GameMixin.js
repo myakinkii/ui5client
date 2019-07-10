@@ -227,7 +227,9 @@ sap.ui.define([
 		},
 
 		onStealFailed:function(e){
+			e.arg.eventKey="stealFailed";
 			if (e.arg.spotted){
+				e.arg.eventKey="stealSpotted";
 				var mdl=this.getView().getModel();
 				mdl.setProperty('/canSteal',false);
 				mdl.setProperty('/canFlee',false);
@@ -239,6 +241,9 @@ sap.ui.define([
 		},
 		
 		onStealSucceeded:function(e){
+			var mdl=this.getView().getModel();
+			mdl.setProperty('/canSteal',false);
+			e.arg.eventKey="stealSucceeded";
 			e.arg.priority='Medium';
 			e.arg.title=this.geti18n('game_stealSucceeeded',this.formatChance(e.arg.chance));
 			e.arg.descr=this.geti18n('game_stealSucceeeded_text',e.arg.user);
@@ -556,6 +561,9 @@ sap.ui.define([
 				hitPdefDecrease:'trend-down',
 				hitEvaded:'journey-change',
 				hitParried:'physical-activity',
+				stealSucceeded:"burglary",
+				stealFailed:"decline",
+				stealSpotted:"show",
 				startBattle:'scissors',
 				startBattleCoop:'sap-ui5',
 				endBattleLose:'unpaid-leave',
@@ -563,6 +571,7 @@ sap.ui.define([
 				pauseOnBattleLost:'media-pause',
 				battleAscend:'navigation-up-arrow',
 				battleDescend:'navigation-down-arrow',
+				battleFlee:'arrow-left',
 				completeFloorDescend:'thumb-up',
 				completeFloorAscend:'loan',
 				userStateChange_attack:'scissors',
