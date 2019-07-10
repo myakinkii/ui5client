@@ -19,7 +19,7 @@
 			</Button>
 			<List headerText="{i18n>gameInfoLivesLost}{/gameInfo/floor}" width="100%" items="{/gameInfo/livesLost}">
 				<ObjectListItem title="{user}" number="{livesLost}" attributes="{path:'orbs'}" >
-					<attributes> <ObjectAttribute text="{orb} {count}" /> </attributes>
+					<attributes> <ObjectAttribute text="{count}x {orb}" /> </attributes>
 				</ObjectListItem>
 			</List>
 			<List headerText="{i18n>gameInfoStash}" width="100%" items="{ path:'/gameInfo/stash', sorter:{path:'key',descending:true} }">

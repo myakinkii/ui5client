@@ -85,11 +85,6 @@ sap.ui.define([
 			// console.log(partyMdl);
 		},
 		
-		onPartyModeChange:function(e){
-			var mode=e.getParameter("key");
-			if (mode=="versus") this.partyDlg.getModel().setProperty("/rpg",false);
-		},
-		
 		onPartyOnlineChange:function(e){
 			var online=e.getParameter("state");
 			if (!online) this.partyDlg.getModel().setProperty("/mode","solo");

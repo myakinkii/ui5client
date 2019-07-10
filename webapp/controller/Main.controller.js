@@ -270,7 +270,6 @@ sap.ui.define([
 		handleCreateParty:function(){ this.createParty(); },
 		handleNewPartyOnlineChange:function(e){ this.onPartyOnlineChange(e); },
 		handleNewPartyRPGChange:function(e){ this.onPartyRPGChange(e); },
-		handleNewPartyModeChange:function(e){ this.onPartyModeChange(e); },
 		handleNewPartyBsizeChange:function(e){ this.onPartyBsizeChange(e); },
 		handleDismissParty:function(){ this.dismissParty(); },
 		handleQuitGame:function(){ this.quitGame(); },

@@ -71,6 +71,16 @@
 						press="performAction" icon="sap-icon://add" type="Default" >
 					<customData> <core:CustomData key="action" value="assist" /> </customData>
 				</Button>
+
+				<Button visible="{=  !!${$this>mobFlag} }" enabled="{/canFlee}"
+						press="performAction" icon="sap-icon://arrow-left" type="Default" >
+					<customData> <core:CustomData key="action" value="flee" /> </customData>
+				</Button>
+				<Button visible="{=  !!${$this>mobFlag} }" enabled="{/canSteal}"
+						press="performAction" icon="sap-icon://burglary" type="Default" >
+					<customData> <core:CustomData key="action" value="steal" /> </customData>
+				</Button>
+
 				<Button visible="{parts:[{path:'$this>self'},{path:'$this>name'}],formatter:'.formatCastButton'}"
 						enabled="{parts:[{path:'$this>selfState'},{path:'$this>selfMP'}],formatter:'.formatCanCast'}"
 						press="performAction" icon="sap-icon://activate" type="Accept" >

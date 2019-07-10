@@ -12,7 +12,7 @@
 					<Switch state="{/rpg}" change="handleNewPartyRPGChange" type="AcceptReject"/>
 				</InputListItem>								
 				<InputListItem label="{i18n>partyGameMode}">
-					<SegmentedButton enabled="{/iAmOnline}" select="handleNewPartyModeChange" selectedKey="{/mode}">
+					<SegmentedButton enabled="{/iAmOnline}" selectedKey="{/mode}">
 						<items>
 							<SegmentedButtonItem icon="sap-icon://employee" key="solo" />
 							<SegmentedButtonItem icon="sap-icon://decision" key="coop" enabled="{/online}" />

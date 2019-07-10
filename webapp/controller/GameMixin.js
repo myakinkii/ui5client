@@ -41,7 +41,7 @@ sap.ui.define([
 			var mdl=this.getView().getModel();
 			var ll=mdl.getProperty('/gameInfo/livesLost/'+e.arg.user)||{user:e.arg.user,livesLost:0};
 			if (!ll.orbs) ll.orbs={};
-			for (var i in e.arg.orbs) ll.orbs[i]={orb:i,count:e.arg.orbs[i]};
+			for (var i in e.arg.orbs) ll.orbs[i]={orb:this.geti18n('orb_'+i),count:e.arg.orbs[i]};
 			mdl.setProperty('/gameInfo/livesLost/'+e.arg.user,ll);
 		},
 
