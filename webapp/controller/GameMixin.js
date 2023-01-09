@@ -8,7 +8,7 @@ sap.ui.define([
 ], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem, MessageBox, Button) {
 	"use strict";
 	
-	var CELL_SIZE=parseInt(Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10);
+	var CELL_SIZE=parseInt(window.localStorage.getItem("cellSize") || Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10)
 	
 	return Controller.extend("GameMixin",{
 
@@ -149,6 +149,9 @@ sap.ui.define([
 			var cols=e.arg.c;
 			var rows=e.arg.r;
 			var width=(CELL_SIZE+4)*cols+32+'px'; // panel has 16px margin
+			var height=(CELL_SIZE+4)*rows+32;
+			var realHeight = this.getView().byId("app").$().height();
+			var panelHeight = ( realHeight > height ? realHeight : height ) + 'px';
 			var mdl=this.getView().getModel();
 			var mdlData={};
 			var cells=[],coord;
@@ -158,6 +161,7 @@ sap.ui.define([
 					mdlData[coord]="";
 					if (!this.gameDialog){
 						var cell=new Cell({
+							size:CELL_SIZE+"px",
 							altKeyMode:"{/altKeyMode}",
 							row:r, col:c, 
 							val:"{board>/"+coord+"}",
@@ -173,7 +177,11 @@ sap.ui.define([
 				board.attachMove(function(cellMoved){ self.checkCell.call(self,cellMoved); });
 				var panel=new Panel({ width:width, content:[ board ]});
 				this.gameDialog=new ScrollContainer({height:"100%",width:"100%",horizontal:false,vertical:true,
-					content:[ new FlexBox({ width:"100%", justifyContent:"Center", items:[ panel ] }) ]
+					content:[ new FlexBox({ 
+						width:"100%", 
+						height: panelHeight,
+						justifyContent:"Center", alignItems:"Center", 
+						items:[ panel ] }) ]
 				});
 				boardPage.destroyContent();
 				boardPage.addContent(this.gameDialog);
