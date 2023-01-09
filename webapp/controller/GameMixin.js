@@ -7,9 +7,7 @@ sap.ui.define([
 	"sap/m/NotificationListItem","sap/m/MessageBox","sap/m/Button"
 ], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem, MessageBox, Button) {
 	"use strict";
-	
-	var CELL_SIZE=parseInt(window.localStorage.getItem("cellSize") || Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10)
-	
+		
 	return Controller.extend("GameMixin",{
 
 		sortProfiles:function(n1,n2){
@@ -143,6 +141,8 @@ sap.ui.define([
 		},
 
 		onStartGame: function (e) {
+			var CELL_SIZE=parseInt(window.localStorage.getItem("cellSize") || Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10)
+
 			if (e.arg.mode=="soloRPG" || e.arg.mode=="coopRPG" || e.arg.mode=="versusRPG")
 				this.processCommand('/equip '+this.serializeEquip().join(" ")); // not so good, but will do for now
 			var self = this;

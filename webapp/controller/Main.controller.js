@@ -55,6 +55,8 @@ sap.ui.define([
 			if (initData && initData.localSrv) srv="/";
 			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
+
+			var cellSize = parseInt(window.localStorage.getItem("cellSize")||30);
 			
 			var mdl=new JSONModel({
 				quickMode:"solo",
@@ -67,6 +69,7 @@ sap.ui.define([
 				gameStarted:false,
 				srvs:srvs,
 				srv:srv,
+				cellSize:cellSize,
 				customSrv:customSrv,
 				offlineMode:offlineMode,
 				forceOfflineMode:forceOfflineMode,
@@ -211,7 +214,13 @@ sap.ui.define([
 			window.localStorage.removeItem("srv");
 			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
-		
+			
+		changeCellSize:function(e){
+			var size = e.getParameter("value")
+			window.localStorage.setItem("cellSize",size);
+			this.showToast(this.geti18n('cellSizeChanged',[size]));
+		},
+
 		rpgCmds:{
 			"/hit":'hitTarget',
 			"/cast":'castSpell',

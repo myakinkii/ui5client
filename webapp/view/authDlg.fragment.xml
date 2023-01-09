@@ -2,7 +2,7 @@
 	xmlns="sap.m"
     xmlns:f="sap.ui.layout.form"
 	xmlns:core="sap.ui.core">
-    <Dialog title="{i18n>authDialogTitle}" contentHeight="400px">
+    <Dialog title="{i18n>authDialogTitle}" contentHeight="30rem">
         <content>
 			<Panel headerText="{i18n>authServer}" expandable="false" expanded="true" visible="{/showOfflineButton}">
 				<ComboBox width="100%" items="{ path:'/srvs'}" selectedKey="{/srv}" change="changeSrv">
@@ -49,6 +49,11 @@
                 <!--    </items>-->
                 <!--</List>-->
             </Panel>
+			<Panel headerText="{i18n>cellSize}" expandable="false" expanded="true">
+				<Slider change="changeCellSize" min="24" max="48" step="1" value="{/cellSize}" enableTickmarks="true" >
+                    <ResponsiveScale tickmarksBetweenLabels="4"/>
+                </Slider>
+			</Panel>
         </content>
         <endButton>
             <Button text="{i18n>genericClose}" press="closeDlg" />
