@@ -14,7 +14,7 @@
 								<IconTabFilter text="{i18n>modeVersus}" count="{/partiesCount/versus}" key="versus" enabled="{= !${/offlineMode}}" />
 							</items>
 							<content>
-								<Panel>
+								<Panel width="20rem">
 								<Button width="100%" text="{i18n>sizeSmall}" type="Emphasized" press="handleStartParty">
 									<customData> <core:CustomData key="boardSize" value="s" /> </customData>
 								</Button>

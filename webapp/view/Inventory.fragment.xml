@@ -9,7 +9,7 @@
 					<IconTabBar expandable="false" select="handleInvTabChange">
 						<items>
 							<IconTabFilter text="Fuse" key="fuse" >
-								<List width="100%" items="{ path:'/inv', sorter:{path:'key',descending:true} }">
+								<List width="20rem" items="{ path:'/inv', sorter:{path:'key',descending:true} }">
 									<ObjectListItem type="Active" press="handleFuseDigit" title="{key}" number="{val}" />
 								</List>
 							</IconTabFilter>
@@ -43,12 +43,12 @@
 								</FlexBox>
 								<Button width="100%" type="Emphasized" text="{i18n>inventoryForgeStart}" press="handleForgeStart" />
 								<Button width="100%" type="Reject" text="{i18n>inventoryForgeReset}" press="handleForgeReset" />
-								<List visible="{/recipesKnown}" headerText="{i18n>inventoryKnownRecipes}" width="100%" items="{/recipes}">
+								<List  width="20rem" visible="{/recipesKnown}" headerText="{i18n>inventoryKnownRecipes}" items="{/recipes}">
 									<StandardListItem type="Active" title="{parts:[{path:'effect'}],formatter:'.handleGemEffectFormatter'}" info="{recipe}" press="handleApplyRecipe" />
 								</List>
 							</IconTabFilter>
 							<IconTabFilter text="Equip" key="equip" >
-								<List width="100%" items="{
+								<List width="20rem" items="{
 										path:'/equip', 
 										sorter:[ {path:'rarity', group:true, comparator:'.handleSortEquip'}, {path:'effect'} ], 
 										groupHeaderFactory: '.handleInvGroupHeader'
