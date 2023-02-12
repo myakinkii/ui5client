@@ -4,8 +4,8 @@ sap.ui.define([
 	"com/minesnf/ui5client/controls/Cell",
 	"sap/m/FlexBox","sap/m/ScrollContainer","sap/m/Panel",
 	"sap/ui/model/json/JSONModel",
-	"sap/m/NotificationListItem","sap/m/MessageBox","sap/m/Button"
-], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, NotificationListItem, MessageBox, Button) {
+	"sap/m/FeedListItem","sap/m/MessageBox","sap/m/FeedListItemAction"
+], function (Controller, Board, Cell, FlexBox, ScrollContainer, Panel, JSONModel, ListItem, MessageBox, ListItemAction) {
 	"use strict";
 		
 	return Controller.extend("GameMixin",{
@@ -117,10 +117,10 @@ sap.ui.define([
 			var self=this;
 			var commander=function(cmd){ self.processCommand.call(self,cmd); };
 			e.arg.actions=[
-				{icon:"sap-icon://refresh",action:"1",callback:function(){commander("/ascend"); }},
-				{icon:"sap-icon://navigation-down-arrow",action:e.arg.floor+1,callback:function(){ commander("/descend"); }},
-				{icon:"sap-icon://drop-down-list",action:"",callback:function(){ self.renderLog(self.battleLog); }}
-				];
+				{icon:"sap-icon://refresh", action:this.geti18n("gamePauseAscend"), callback:function(){commander("/ascend"); }},
+				{icon:"sap-icon://navigation-down-arrow", action:this.geti18n("gamePauseDescend",e.arg.floor+1), callback:function(){ commander("/descend"); }},
+				{icon:"sap-icon://drop-down-list", action:this.geti18n("gamePauseRenderLog"), callback:function(){ self.renderLog(self.battleLog); }}
+			];
 			e.arg.title=this.geti18n("game_completeFloor",e.arg.floor);
 			var stash=[],res=8;
 			while (res>0) {
@@ -243,8 +243,9 @@ sap.ui.define([
 				mdl.setProperty('/canFlee',false);
 				mdl.setProperty('/battleInfo/boss',e.arg.profiles.boss);
 			}
+			e.arg.title=this.geti18n('game_stealFailed');
 			e.arg.descr=this.geti18n('game_stealFailed'+(e.arg.spotted?'Spotted':'')+'_text',e.arg.user);
-			e.arg.title=this.geti18n('game_stealFailed',this.formatChance(e.arg.chance));
+			e.arg.chance=this.formatChance(e.arg.chance);
 			this.addLogEntry(e.arg);
 		},
 		
@@ -253,12 +254,13 @@ sap.ui.define([
 			mdl.setProperty('/canSteal',false);
 			e.arg.eventKey="stealSucceeded";
 			e.arg.priority='Medium';
-			e.arg.title=this.geti18n('game_stealSucceeeded',this.formatChance(e.arg.chance));
 			e.arg.descr=this.geti18n('game_stealSucceeeded_text',e.arg.user);
+			e.arg.title=this.geti18n('game_stealSucceeeded');
+			e.arg.chance=this.formatChance(e.arg.chance);
 			this.addLogEntry(e.arg);
 		},	
 		
-		formatChance:function(chance){ return (chance*100).toFixed(2)+"%"; },
+		formatChance:function(chance){ return chance ? (chance*100).toFixed(2)+"%" : null ; },
 		
 		onBattleLogEntry:function(e){
 			// e.arg.priority='None';
@@ -300,7 +302,8 @@ sap.ui.define([
 			if ( e.arg.profiles.boss && e.arg.profiles.boss.wasHit) mdl.setProperty('/canSteal',false);
 			var entry={
 				eventKey:e.arg.eventKey,
-				title: this.geti18n('game_'+e.arg.eventKey,[e.arg[e.arg.dmg?"attack":"defense"],this.formatChance(e.arg.chance)]),
+				title: this.geti18n('game_'+e.arg.eventKey,[ e.arg[e.arg.dmg?"attack":"defense"], '' ]),
+				chance: this.formatChance(e.arg.chance),
 				descr:this.geti18n('game_'+e.arg.eventKey+'_text',[e.arg.attack,e.arg.defense]),
 				attack:e.arg.attack, defense:e.arg.defense, dmg:e.arg.dmg,
 				priority:e.arg.dmg?'Medium':'None',
@@ -477,8 +480,8 @@ sap.ui.define([
 			e.arg.priority="None";
 			var game=this.localGame, self=this;
 			e.arg.actions=[
-				{icon:"sap-icon://restart", action:"", callback:function(){ game.resumeGame.call(game); }},
-				{icon:"sap-icon://drop-down-list",action:"",callback:function(){ self.renderLog(self.battleLog); }}
+				{icon:"sap-icon://restart", action:this.geti18n("gamePauseResume"), callback:function(){ game.resumeGame.call(game); }},
+				{icon:"sap-icon://drop-down-list", action:this.geti18n("gamePauseRenderLog"), callback:function(){ self.renderLog(self.battleLog); }}
 			];
 			this.addLogEntry(e.arg);
 			var mdl=this.getView().getModel();
@@ -533,7 +536,7 @@ sap.ui.define([
 		addLogEntry:function(e){
 			this.battleLog.push(e);
 			e.entryNumber=this.battleLog.length;
-			var N=10;
+			var N=6;
 			var lastN=[];
 			for ( var i=this.battleLog.length-1; i>=0; i--,N--){
 				if (N==0) break;
@@ -549,13 +552,28 @@ sap.ui.define([
 		},
 		
 		createLogItem:function(e){
-			var item=new NotificationListItem({
-				showCloseButton:false, priority:e.priority, type:"Inactive",
-				title:e.title, description:e.descr, authorPicture:this.formatLogIcon(e.eventKey)
+			var item=new ListItem({
+				type: "Inactive",
+				highlight: e.priority=='Medium' ? 'Warning' : 'None',
+				// timestamp: '@',
+				timestamp: e.chance ? e.chance : '',
+				// info : '',
+				sender: e.title,
+				senderActive: false,
+				text: e.descr, 
+				icon: this.formatLogIcon(e.eventKey),
+				iconSize: 'S',
+				iconActive: false
 			});
-			if (e.actions) e.actions.forEach(function(act){
-				item.addButton(new Button({text:act.action,icon:act.icon,press:act.callback}));
-			});
+			if (e.actions && (e.eventKey=='endBattleWin' || e.eventKey=='pauseOnBattleLost') ) {
+				e.actions.forEach(function(act){
+					item.addAction(new ListItemAction({ 
+						text: act.action, 
+						icon: act.icon, 
+						press: act.callback
+					}));
+				});
+			}
 			return item;
 		},
 		
@@ -567,8 +585,8 @@ sap.ui.define([
 				hitBlocked:'decline',
 				hitPierced:'target-group',
 				hitPdefDecrease:'trend-down',
-				hitEvaded:'journey-change',
-				hitParried:'physical-activity',
+				hitParried:'journey-change',
+				hitEvaded:'physical-activity',
 				stealSucceeded:"burglary",
 				stealFailed:"decline",
 				stealSpotted:"show",
