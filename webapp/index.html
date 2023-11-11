@@ -8,7 +8,7 @@
 		<title>minesnf proto</title>
 
 		<script id="sap-ui-bootstrap"
-			src='resources/sap-ui-core.js'
+			src='https://ui5.sap.com/1.84.29/resources/sap-ui-core.js'
 			data-sap-ui-libs="sap.m"
 			data-sap-ui-theme="sap_fiori_3"
 			data-sap-ui-compatVersion="edge"
@@ -26,7 +26,7 @@
 						height:"100%", 
 						component:sap.ui.getCore().createComponent({
 							name: "com.minesnf.ui5client",
-							componentData:{ localSrv:true, offlineMode:true }
+							componentData:{ localSrv:true, offlineMode:false }
 						})
 					})
 				}).placeAt("content");

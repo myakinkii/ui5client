@@ -40,8 +40,8 @@ sap.ui.define([
 			var forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
 			var offlineMode=forceOfflineMode; // current state of offline/online mode
 			var onlineModeAvailble=true; // not inside webide
-			var onlineOnlyClient=typeof Connection == "undefined"; // web ui client
 			var initData=this.getOwnerComponent().getComponentData();
+			var onlineOnlyClient=initData && initData.localSrv; // web ui client
 			if (initData && initData.offlineMode) {
 				offlineMode=true;
 				onlineModeAvailble=false;
@@ -52,7 +52,7 @@ sap.ui.define([
 			
 			var srvs={};
 			var srv=window.localStorage.getItem("srv")||'global.minesnf.com';
-			if (initData && initData.localSrv) srv="/";
+			if (onlineOnlyClient) srv="/";
 			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
 
@@ -187,7 +187,8 @@ sap.ui.define([
 			var srv;
 			if (defSrv!="/"){
 				srv="ws://"+host;
-				$.ajax({ type: "GET", url: 'http://'+host}).then(createWS);
+				createWS()
+				// $.ajax({ type: "GET", url: 'http://'+host}).then(createWS);
 			} else {
 				srv=defSrv+"be";
 				createWS();
