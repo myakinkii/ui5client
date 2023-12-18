@@ -7,6 +7,7 @@
 	xmlns:u="sap.ui.unified"
 	xmlns="sap.m"
 	displayBlock="true">
+	<Shell>
 	<u:Shell showPane="{/showPane}">
 		<u:headItems>
 			<u:ShellHeadItem visible="{= !${/gameStarted} }" icon="{parts: [{path:'/page'}],formatter:'.formatPageIcon'}" press="switchPage" />
@@ -35,4 +36,5 @@
 			</pages>
 		</NavContainer>
 	</u:Shell>
+	</Shell>
 </mvc:View>

@@ -1,40 +1,25 @@
 <!DOCTYPE HTML>
 <html>
-
-	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta charset="UTF-8">
-
-		<title>minesnf proto</title>
-
-		<script id="sap-ui-bootstrap"
-			src='https://ui5.sap.com/1.84.29/resources/sap-ui-core.js'
-			data-sap-ui-libs="sap.m"
-			data-sap-ui-theme="sap_fiori_3"
-			data-sap-ui-compatVersion="edge"
-			data-sap-ui-resourceroots='{"com.minesnf.ui5client": "./"}'>
-		</script>
-		
-		<script src="lib/minesNF.js"></script>
-
-		<link rel="stylesheet" type="text/css" href="css/style.css">
-
-		<script>
-			sap.ui.getCore().attachInit(function() {
-				new sap.m.Shell({
-					app: new sap.ui.core.ComponentContainer({
-						height:"100%", 
-						component:sap.ui.getCore().createComponent({
-							name: "com.minesnf.ui5client",
-							componentData:{ localSrv:true, offlineMode:false }
-						})
-					})
-				}).placeAt("content");
-			});
-		</script>
-	</head>
-
-	<body class="sapUiBody" id="content">
-	</body>
-
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta charset="UTF-8">
+        <title>minesnf proto</title>
+        <script id="sap-ui-bootstrap"
+            src="https://ui5.sap.com/1.84.29/resources/sap-ui-core.js"
+            data-sap-ui-libs="sap.m"
+            data-sap-ui-theme="sap_fiori_3"
+            data-sap-ui-compatVersion="edge"
+            data-sap-ui-async="true"
+            data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
+            data-sap-ui-resourceroots='{"com.minesnf.ui5client": "./"}'>
+        </script>
+        <script src="lib/minesNF.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <body class="sapUiBody" id="content">
+        <div data-sap-ui-component data-height="100%" 
+            data-name="com.minesnf.ui5client" 
+            data-settings='{ "componentData": { "localSrv": true, "offlineMode": true } }'>
+        </div>
+    </body>
 </html>
