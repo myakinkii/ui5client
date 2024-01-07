@@ -1,6 +1,6 @@
 {
-  "appId": "com.minesnf.ui5client",
-  "appName": "ui5client",
+  "appId": "com.minesnf.openui5",
+  "appName": "minesnf",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "ios": { "contentInset": "always", "clipToBounds": true }
