@@ -1,0 +1,53 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core">
+    <Carousel arrowsPlacement="PageIndicator" pageIndicatorPlacement="Top">
+        <pages>
+                <List id="party" headerText="Params">
+                    <InputListItem label="{i18n>partyOnlineMode}"> 
+                        <Switch enabled="{/iAmOnline}" state="{/online}"  change="handleNewPartyOnlineChange" type="AcceptReject"/>
+                    </InputListItem>
+                    <InputListItem label="{i18n>partyRPGMode}"> 
+                        <Switch state="{/rpg}" change="handleNewPartyRPGChange" type="AcceptReject"/>
+                    </InputListItem>								
+                    <InputListItem label="{i18n>partyGameMode}">
+                        <SegmentedButton select="handleNewPartyModeChange" enabled="{/iAmOnline}" selectedKey="{/mode}">
+                            <items>
+                                <SegmentedButtonItem icon="sap-icon://employee" key="solo" />
+                                <SegmentedButtonItem icon="sap-icon://decision" key="coop" enabled="{/online}" />
+                                <SegmentedButtonItem icon="sap-icon://scissors" key="versus" enabled="{/online}" />
+                            </items>
+                        </SegmentedButton>
+                    </InputListItem>
+                    <InputListItem label="{i18n>partyBoardSize}">
+                        <SegmentedButton select="handleNewPartyBsizeChange" selectedKey="{/bSize}">
+                            <items>
+                                <SegmentedButtonItem icon="sap-icon://navigation-up-arrow" key="s" />
+                                <SegmentedButtonItem icon="sap-icon://collapse-group" key="m" />
+                                <SegmentedButtonItem icon="sap-icon://drill-up" key="b" enabled="{= ${device>/system/desktop} || ${device>/system/tablet} }"/>
+                            </items>
+                        </SegmentedButton>
+                    </InputListItem>				
+                    <InputListItem label="{i18n>partyMaxPlayers}" visible="{= ${/mode}!=='solo' }">
+                        <SegmentedButton select="handleNewPartyPlayersChange" enabled="{= ${/mode}!=='solo' }" selectedKey="{/maxPlayers}">
+                            <items>
+                                <SegmentedButtonItem text="2" key="2" />
+                                <SegmentedButtonItem text="3" key="3" enabled="{= ${/bSize}==='m' || ${/bSize}==='b' }"/>
+                                <SegmentedButtonItem text="4" key="4" enabled="{= ${/bSize}==='b' }"/>
+                            </items>
+                        </SegmentedButton>
+                    </InputListItem>
+                </List>
+
+                <List headerText="Parties" items="{ path:'/parties' }">
+                    <StandardListItem
+                        type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
+                        highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
+                        press="handlePressParty"
+                        title="{name}^{leader}"
+                        description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
+                </List>                
+        </pages>
+    </Carousel>
+</core:FragmentDefinition>

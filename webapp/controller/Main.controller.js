@@ -102,6 +102,9 @@ sap.ui.define([
 				this.onAuthorize({});
 				this.onUpdateParties({});
 			} else this.initNow(srv);
+
+			this.partyDlg = this.getView().byId("party");
+			this.partyDlg.setModel(new JSONModel(this.makePartyModel()));
 			
 			document.addEventListener("online", function(){self.deviceOnline.call(self);}, false);
 			document.addEventListener("offline", function(){self.deviceOffline.call(self);}, false);
@@ -281,6 +284,8 @@ sap.ui.define([
 		handleNewPartyOnlineChange:function(e){ this.onPartyOnlineChange(e); },
 		handleNewPartyRPGChange:function(e){ this.onPartyRPGChange(e); },
 		handleNewPartyBsizeChange:function(e){ this.onPartyBsizeChange(e); },
+		handleNewPartyModeChange:function(e){ this.onPartyModeChange(e); },
+		handleNewPartyPlayersChange:function(e){ this.onPartyPlayersChange(e); },
 		handleDismissParty:function(){ this.dismissParty(); },
 		handleQuitGame:function(){ this.quitGame(); },
 		handleConfirmQuitGame:function(){ this.quitGameConfirm(); },

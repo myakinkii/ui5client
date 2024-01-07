@@ -29,7 +29,9 @@
 		</u:paneContent>
 		<NavContainer id="app">
 			<pages>
-				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Main" type="XML" /></Page>
+				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.MainN" type="XML" />
+					<footer><Toolbar><Button width="100%" text="PLAY" press="handleCreateParty" /></Toolbar></footer>
+				</Page>
 				<Page id="board" showHeader="false" />
 				<Page id="battle" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Battle" type="XML" /></Page>
 				<Page id="inv" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Inventory" type="XML" /></Page>
