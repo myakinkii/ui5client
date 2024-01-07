@@ -39,15 +39,20 @@
                         </SegmentedButton>
                     </InputListItem>
                 </List>
-
-                <List headerText="Parties" items="{ path:'/parties' }">
+                
+                <ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
+                <List headerText="Parties" items="{ 
+                        path:'/parties', 
+                        sorter: [{ path: 'mode', group: true }, { path: 'rpg', descending: true }]
+                    }">
                     <StandardListItem
                         type="{= ${leader}===${/auth/user}?'Active':'Navigation' }"
                         highlight="{= ${leader}===${/auth/user}?'Error':${rpg}?'Warning':'Success' }"
                         press="handlePressParty"
                         title="{name}^{leader}"
                         description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
-                </List>                
+                </List>
+                </ScrollContainer>
         </pages>
     </Carousel>
 </core:FragmentDefinition>
