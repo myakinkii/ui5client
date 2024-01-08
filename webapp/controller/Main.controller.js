@@ -46,7 +46,7 @@ sap.ui.define([
 				offlineMode=true;
 				onlineModeAvailble=false;
 				onlineOnlyClient=false;
-			} else if (!onlineOnlyClient && navigator.connection && navigator.connection.type==Connection.NONE) {
+			} else if (!onlineOnlyClient && navigator.connection && typeof Connection != 'undefined' && navigator.connection.type==Connection.NONE) {
 				offlineMode=true;
 			}
 			
