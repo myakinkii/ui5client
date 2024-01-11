@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">ui5client</string>
-    <string name="title_activity_main">ui5client</string>
+    <string name="app_name">minesnf</string>
+    <string name="title_activity_main">minesnf</string>
     <string name="package_name">com.minesnf.ui5client</string>
     <string name="custom_url_scheme">com.minesnf.ui5client</string>
 </resources>
