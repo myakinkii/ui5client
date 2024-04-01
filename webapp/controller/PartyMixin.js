@@ -71,7 +71,7 @@ sap.ui.define([
 			window.localStorage.setItem("party",JSON.stringify(def))
 		},
 
-		makePartyModel: function(){
+		makePartyModel: function(modeDef, bSizeDef){
 			var def = this.getDefaults()
 			var mdl = this.getView().getModel();
 			var iAmOnline = !mdl.getProperty('/offlineMode');
@@ -84,11 +84,11 @@ sap.ui.define([
 
 			var partyMdl={
 				me: mdl.getProperty('/auth/user'),
-				bSize: def.size || "s",
+				bSize: bSizeDef || def.size || "s",
 				rpg: def.rpg || false,
 				maxPlayers: def.players || 2,
-				mode: mode,
-				online: online,
+				mode: modeDef || mode,
+				online: modeDef && modeDef!="solo" ? true : online,
 				iAmOnline: iAmOnline,
 			};
 			return partyMdl
@@ -99,7 +99,12 @@ sap.ui.define([
 				this.partyDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.newPartyDlg", this );
 				this.getView().addDependent(this.partyDlg);
 			}
-			this.partyDlg.setModel(new JSONModel(this.makePartyModel()));
+			var mdl=this.getView().getModel();
+			var iAmOnline=!mdl.getProperty('/offlineMode');
+			var mode=mdl.getProperty('/quickMode');
+			if (!iAmOnline) mode="solo";
+			var bSize = e.getSource().data().boardSize;
+			this.partyDlg.setModel(new JSONModel(this.makePartyModel(mode, bSize)));
 			this.partyDlg.open();
 			// console.log(partyMdl);
 		},
@@ -140,8 +145,10 @@ sap.ui.define([
 			var mode=partyMdl.mode;
 			if (partyMdl.rpg) mode+='RPG';
 			if (mode=="solo") mode="rank";
+			var carousel = this.getView().byId("carousel")
 			if ( partyMdl.online && partyMdl.mode != "solo")
-				this.partyDlg.getParent().next()
+				if (carousel) carousel.next()
+				else this.partyDlg.close();
 			if (partyMdl.online) {
 				this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
 			} else this.createLocalGame(mode,partyMdl.bSize);

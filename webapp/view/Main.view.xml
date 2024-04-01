@@ -22,7 +22,7 @@
 			<!--<u:ShellHeadItem icon="sap-icon://log" visible="false" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />-->
 		</u:headEndItems>
 		<u:user>
-			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
+			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" _press="handleShowAuthDlg" />
 		</u:user>
 		<u:paneContent>
 			<core:Fragment fragmentName="com.minesnf.ui5client.view.Stash" type="XML" />

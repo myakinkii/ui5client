@@ -2,9 +2,10 @@
     xmlns="sap.m"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core">
-    <Carousel arrowsPlacement="PageIndicator" pageIndicatorPlacement="Top">
+    <Carousel id="carousel" arrowsPlacement="PageIndicator" pageIndicatorPlacement="Top">
         <pages>
-                <List id="party" headerText="Params">
+            <Panel expandable="false" expanded="true">
+                <List id="party" headerText="{i18n>gameParams}">
                     <InputListItem label="{i18n>partyOnlineMode}"> 
                         <Switch enabled="{/iAmOnline}" state="{/online}"  change="handleNewPartyOnlineChange" type="AcceptReject"/>
                     </InputListItem>
@@ -39,8 +40,16 @@
                         </SegmentedButton>
                     </InputListItem>
                 </List>
+                <List headerText="{i18n>cellSize}">
+                    <InputListItem>
+                        <Slider change="changeCellSize" min="24" max="48" step="1" value="{/cellSize}" enableTickmarks="true" >
+                            <ResponsiveScale tickmarksBetweenLabels="4"/>
+                        </Slider>
+                    </InputListItem>
+                </List>
+			</Panel>
                 
-                <ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
+            <ScrollContainer height="100%" width="100%" horizontal="false" vertical="true">
                 <List headerText="Parties" items="{ 
                         path:'/parties', 
                         sorter: [{ path: 'mode', group: true }, { path: 'rpg', descending: true }]
@@ -52,7 +61,7 @@
                         title="{name}^{leader}"
                         description="{i18n>partyPlayers}: {curPlayers}/{maxPlayers}, {i18n>partyLevels}: {minLevel}-{maxLevel}" />
                 </List>
-                </ScrollContainer>
+            </ScrollContainer>
         </pages>
     </Carousel>
 </core:FragmentDefinition>

@@ -141,7 +141,9 @@ sap.ui.define([
 		},
 
 		onStartGame: function (e) {
-			var CELL_SIZE=parseInt(window.localStorage.getItem("cellSize") || Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10)
+			var mdl=this.getView().getModel();
+			var CELL_SIZE=mdl.getProperty('/cellSize')
+			// var CELL_SIZE=parseInt(window.localStorage.getItem("cellSize") || Cell.getMetadata().getProperty("size").defaultValue.replace("px",""),10)
 
 			if (e.arg.mode=="soloRPG" || e.arg.mode=="coopRPG" || e.arg.mode=="versusRPG")
 				this.processCommand('/equip '+this.serializeEquip().join(" ")); // not so good, but will do for now
@@ -152,7 +154,7 @@ sap.ui.define([
 			var height=(CELL_SIZE+4)*rows+32;
 			var realHeight = this.getView().byId("app").$().height();
 			var panelHeight = ( realHeight > height ? realHeight : height ) + 'px';
-			var mdl=this.getView().getModel();
+			
 			var mdlData={};
 			var cells=[],coord;
 			for (var r=1;r<=rows;r++) {

@@ -56,7 +56,7 @@ sap.ui.define([
 			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
 
-			var cellSize = parseInt(window.localStorage.getItem("cellSize")||30);
+			var cellSize = parseInt(window.localStorage.getItem("cellSize")||36);
 			
 			var mdl=new JSONModel({
 				quickMode:"solo",
@@ -103,8 +103,11 @@ sap.ui.define([
 				this.onUpdateParties({});
 			} else this.initNow(srv);
 
-			this.partyDlg = this.getView().byId("party");
-			this.partyDlg.setModel(new JSONModel(this.makePartyModel()));
+			var carousel = this.getView().byId("carousel")
+			if (carousel){
+				this.partyDlg = this.getView().byId("party");
+				this.partyDlg.setModel(new JSONModel(this.makePartyModel()));
+			}
 			
 			document.addEventListener("online", function(){self.deviceOnline.call(self);}, false);
 			document.addEventListener("offline", function(){self.deviceOffline.call(self);}, false);
