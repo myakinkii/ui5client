@@ -1,0 +1,7 @@
+{
+  "appId": "com.minesnf.openui5",
+  "appName": "minesnf",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "ios": { "contentInset": "always", "clipToBounds": true }
+}

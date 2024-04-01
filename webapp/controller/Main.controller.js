@@ -40,21 +40,23 @@ sap.ui.define([
 			var forceOfflineMode=window.localStorage.getItem("forceOfflineMode")?true:false; // user wants only local game
 			var offlineMode=forceOfflineMode; // current state of offline/online mode
 			var onlineModeAvailble=true; // not inside webide
-			var onlineOnlyClient=typeof Connection == "undefined"; // web ui client
 			var initData=this.getOwnerComponent().getComponentData();
+			var onlineOnlyClient=initData && initData.localSrv; // web ui client
 			if (initData && initData.offlineMode) {
 				offlineMode=true;
 				onlineModeAvailble=false;
 				onlineOnlyClient=false;
-			} else if (!onlineOnlyClient && navigator.connection && navigator.connection.type==Connection.NONE) {
+			} else if (!onlineOnlyClient && navigator.connection && typeof Connection != 'undefined' && navigator.connection.type==Connection.NONE) {
 				offlineMode=true;
 			}
 			
 			var srvs={};
 			var srv=window.localStorage.getItem("srv")||'global.minesnf.com';
-			if (initData && initData.localSrv) srv="/";
+			if (onlineOnlyClient) srv="/";
 			var customSrv=(srv!='global.minesnf.com');
 			if (!srvs[srv]) srvs[srv]={url:srv,name:srv};
+
+			var cellSize = parseInt(window.localStorage.getItem("cellSize")||36);
 			
 			var mdl=new JSONModel({
 				quickMode:"solo",
@@ -67,6 +69,7 @@ sap.ui.define([
 				gameStarted:false,
 				srvs:srvs,
 				srv:srv,
+				cellSize:cellSize,
 				customSrv:customSrv,
 				offlineMode:offlineMode,
 				forceOfflineMode:forceOfflineMode,
@@ -99,6 +102,12 @@ sap.ui.define([
 				this.onAuthorize({});
 				this.onUpdateParties({});
 			} else this.initNow(srv);
+
+			var carousel = this.getView().byId("carousel")
+			if (carousel){
+				this.partyDlg = this.getView().byId("party");
+				this.partyDlg.setModel(new JSONModel(this.makePartyModel()));
+			}
 			
 			document.addEventListener("online", function(){self.deviceOnline.call(self);}, false);
 			document.addEventListener("offline", function(){self.deviceOffline.call(self);}, false);
@@ -184,7 +193,8 @@ sap.ui.define([
 			var srv;
 			if (defSrv!="/"){
 				srv="ws://"+host;
-				$.ajax({ type: "GET", url: 'http://'+host}).then(createWS);
+				createWS()
+				// $.ajax({ type: "GET", url: 'http://'+host}).then(createWS);
 			} else {
 				srv=defSrv+"be";
 				createWS();
@@ -211,7 +221,13 @@ sap.ui.define([
 			window.localStorage.removeItem("srv");
 			this.showToast(this.geti18n('genericOK')+'\n'+this.geti18n('genericAppRestartRequired'));
 		},
-		
+			
+		changeCellSize:function(e){
+			var size = e.getParameter("value")
+			window.localStorage.setItem("cellSize",size);
+			this.showToast(this.geti18n('cellSizeChanged',[size]));
+		},
+
 		rpgCmds:{
 			"/hit":'hitTarget',
 			"/cast":'castSpell',
@@ -271,6 +287,8 @@ sap.ui.define([
 		handleNewPartyOnlineChange:function(e){ this.onPartyOnlineChange(e); },
 		handleNewPartyRPGChange:function(e){ this.onPartyRPGChange(e); },
 		handleNewPartyBsizeChange:function(e){ this.onPartyBsizeChange(e); },
+		handleNewPartyModeChange:function(e){ this.onPartyModeChange(e); },
+		handleNewPartyPlayersChange:function(e){ this.onPartyPlayersChange(e); },
 		handleDismissParty:function(){ this.dismissParty(); },
 		handleQuitGame:function(){ this.quitGame(); },
 		handleConfirmQuitGame:function(){ this.quitGameConfirm(); },

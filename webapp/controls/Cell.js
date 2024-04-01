@@ -36,7 +36,10 @@ sap.ui.define([
 
 			var val=oControl.getVal();
 			var color=oControl.calcColor(val);
-			oRm.write('<span style="vertical-align:middle;display:inline-block;color:'+color+'">');
+			var ratio = parseInt(oControl.getSize().replace("px",""),10) / CELL_SIZE // slider has values from 24 to 48
+			var fontSize = ratio.toFixed(2) + "rem"
+			var shift = Math.round(-25 * ratio) +'%'
+			oRm.write('<span style="font-size:'+fontSize+';vertical-align:'+shift+';display:inline-block;color:'+color+'">');
 			oRm.writeEscaped(val=='0'?'':val=="-8"?'*':val);
 			oRm.write("</span>");
 

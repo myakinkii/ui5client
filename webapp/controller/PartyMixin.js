@@ -60,27 +60,51 @@ sap.ui.define([
 				});
 			} else this.processCommand('/join '+party.id);
 		},
+
+		getDefaults: function(){
+			return JSON.parse(window.localStorage.getItem("party")||'{}')
+		},
+
+		setDefaults: function(key, val){
+			var def = this.getDefaults()
+			def[key] = val
+			window.localStorage.setItem("party",JSON.stringify(def))
+		},
+
+		makePartyModel: function(modeDef, bSizeDef){
+			var def = this.getDefaults()
+			var mdl = this.getView().getModel();
+			var iAmOnline = !mdl.getProperty('/offlineMode');
+
+			var mode = def.mode || "solo"
+			var online = iAmOnline ? def.online || false : false
+			if (!online) {
+				mode = "solo";
+			}
+
+			var partyMdl={
+				me: mdl.getProperty('/auth/user'),
+				bSize: bSizeDef || def.size || "s",
+				rpg: def.rpg || false,
+				maxPlayers: def.players || 2,
+				mode: modeDef || mode,
+				online: modeDef && modeDef!="solo" ? true : online,
+				iAmOnline: iAmOnline,
+			};
+			return partyMdl
+		},
 		
 		showCreatePartyDlg:function(e){
-			var mdl=this.getView().getModel();
-			var iAmOnline=!mdl.getProperty('/offlineMode');
-			var mode=mdl.getProperty('/quickMode');
-			if (!iAmOnline) mode="solo";
-			var partyMdl={
-				me:mdl.getProperty('/auth/user'),
-				bSize:e.getSource().data().boardSize,
-				mode:mode,
-				iAmOnline:iAmOnline,
-				maxPlayers:2,
-				rpg:true,
-				// rpg:(mode=="versus"?false:true),
-				online:(mode=="solo"?false:iAmOnline)
-			};
 			if (!this.partyDlg) {
 				this.partyDlg=sap.ui.xmlfragment( "com.minesnf.ui5client.view.newPartyDlg", this );
 				this.getView().addDependent(this.partyDlg);
 			}
-			this.partyDlg.setModel(new JSONModel(partyMdl));
+			var mdl=this.getView().getModel();
+			var iAmOnline=!mdl.getProperty('/offlineMode');
+			var mode=mdl.getProperty('/quickMode');
+			if (!iAmOnline) mode="solo";
+			var bSize = e.getSource().data().boardSize;
+			this.partyDlg.setModel(new JSONModel(this.makePartyModel(mode, bSize)));
 			this.partyDlg.open();
 			// console.log(partyMdl);
 		},
@@ -88,12 +112,14 @@ sap.ui.define([
 		onPartyOnlineChange:function(e){
 			var online=e.getParameter("state");
 			if (!online) this.partyDlg.getModel().setProperty("/mode","solo");
+			this.setDefaults("online",online)
 		},
 		
 		onPartyRPGChange:function(e){
 			var rpg=e.getParameter("state");
 			var mode=this.partyDlg.getModel().getProperty("/mode");
 			// if (rpg && mode=="versus") this.partyDlg.getModel().setProperty("/mode","coop");
+			this.setDefaults("rpg",rpg)
 		},		
 		
 		onPartyBsizeChange:function(e){
@@ -101,6 +127,17 @@ sap.ui.define([
 			var players=this.partyDlg.getModel().getProperty("/maxPlayers");
 			var allowedPlayers={s:2,m:3,b:4};
 			if (players>allowedPlayers[bSize]) this.partyDlg.getModel().setProperty("/maxPlayers",2);
+			this.setDefaults("size",bSize)
+		},
+
+		onPartyModeChange:function(e){
+			var mode = e.getParameter("key")
+			this.setDefaults("mode",mode)
+		},
+
+		onPartyPlayersChange:function(e){
+			var players = e.getParameter("key")
+			this.setDefaults("players",parseInt(players))
 		},
 		
 		createParty:function(){
@@ -108,7 +145,10 @@ sap.ui.define([
 			var mode=partyMdl.mode;
 			if (partyMdl.rpg) mode+='RPG';
 			if (mode=="solo") mode="rank";
-			this.partyDlg.close();
+			var carousel = this.getView().byId("carousel")
+			if ( partyMdl.online && partyMdl.mode != "solo")
+				if (carousel) carousel.next()
+				else this.partyDlg.close();
 			if (partyMdl.online) {
 				this.processCommand('/create '+mode+' '+partyMdl.bSize+' '+partyMdl.maxPlayers);
 			} else this.createLocalGame(mode,partyMdl.bSize);

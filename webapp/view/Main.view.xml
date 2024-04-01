@@ -7,6 +7,7 @@
 	xmlns:u="sap.ui.unified"
 	xmlns="sap.m"
 	displayBlock="true">
+	<Shell>
 	<u:Shell showPane="{/showPane}">
 		<u:headItems>
 			<u:ShellHeadItem visible="{= !${/gameStarted} }" icon="{parts: [{path:'/page'}],formatter:'.formatPageIcon'}" press="switchPage" />
@@ -21,18 +22,21 @@
 			<!--<u:ShellHeadItem icon="sap-icon://log" visible="false" visible="{= ${/auth/type}!=='temp' }" press="handleLogOff" />-->
 		</u:headEndItems>
 		<u:user>
-			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" press="handleShowAuthDlg" />
+			<u:ShellHeadUserItem  image="sap-icon://person-placeholder"  username="[{/auth/profile/level}] {/auth/user}"  showPopupIndicator="false" _press="handleShowAuthDlg" />
 		</u:user>
 		<u:paneContent>
 			<core:Fragment fragmentName="com.minesnf.ui5client.view.Stash" type="XML" />
 		</u:paneContent>
 		<NavContainer id="app">
 			<pages>
-				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Main" type="XML" /></Page>
+				<Page id="game" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.MainN" type="XML" />
+					<footer><Toolbar><Button width="100%" text="PLAY" press="handleCreateParty" /></Toolbar></footer>
+				</Page>
 				<Page id="board" showHeader="false" />
 				<Page id="battle" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Battle" type="XML" /></Page>
 				<Page id="inv" showHeader="false" ><core:Fragment fragmentName="com.minesnf.ui5client.view.Inventory" type="XML" /></Page>
 			</pages>
 		</NavContainer>
 	</u:Shell>
+	</Shell>
 </mvc:View>

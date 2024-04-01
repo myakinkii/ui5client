@@ -1,0 +1,11 @@
+specVersion: '2.6'
+metadata:
+  name: ui5client
+type: application
+framework:
+  name: SAPUI5
+  version: "1.84.29"
+  libraries:
+    - name: themelib_sap_fiori_3
+    - name: sap.ui.core
+    - name: sap.m
