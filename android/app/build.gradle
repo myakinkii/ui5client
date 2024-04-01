@@ -7,7 +7,7 @@ android {
         applicationId "com.minesnf.openui5"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10402
+        versionCode 10403
         versionName "1.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
