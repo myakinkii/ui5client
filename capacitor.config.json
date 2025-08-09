@@ -3,5 +3,11 @@
   "appName": "minesnf",
   "webDir": "dist",
   "bundledWebRuntime": false,
-  "ios": { "contentInset": "always", "clipToBounds": true }
+  "android": {
+    "allowMixedContent": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "clipToBounds": true
+  }
 }
